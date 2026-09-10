@@ -708,6 +708,226 @@
                 background: #ddd;
             }
         }
+
+        /* ── Knowledge Summary ── */
+        #knowledge-summary {
+            margin-top: 32px;
+        }
+
+        .knowledge-toggle {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 16px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 15px;
+            font-weight: 600;
+            text-align: left;
+            cursor: pointer;
+            transition: background-color var(--transition), border-color var(--transition);
+        }
+
+        .knowledge-toggle:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--border-hover);
+        }
+
+        .knowledge-toggle:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .knowledge-chevron {
+            color: var(--text-muted);
+            font-size: 12px;
+            transition: transform var(--transition);
+        }
+
+        .knowledge-toggle[aria-expanded="true"] .knowledge-chevron {
+            transform: rotate(180deg);
+        }
+
+        .knowledge-content {
+            display: block;
+            margin-top: 12px;
+            padding: 24px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+        }
+
+        /* Explicit: the rule above would otherwise beat the user-agent
+           [hidden] rule and leave the list open on load. */
+        .knowledge-content[hidden] {
+            display: none;
+        }
+
+        .knowledge-intro {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .knowledge-toc {
+            margin-bottom: 28px;
+            padding: 16px 20px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--bg-input);
+        }
+
+        .knowledge-toc ol {
+            margin: 0;
+            padding-left: 20px;
+            columns: 2;
+            column-gap: 28px;
+        }
+
+        .knowledge-toc li {
+            margin-bottom: 5px;
+            color: var(--text-muted);
+            font-size: 13px;
+            break-inside: avoid;
+        }
+
+        .knowledge-toc a {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .knowledge-toc a:hover {
+            color: var(--accent-light);
+            text-decoration: underline;
+        }
+
+        .knowledge-content h3 {
+            margin: 32px 0 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+            color: var(--accent-light);
+            font-size: 15px;
+            font-weight: 600;
+            /* the quiz has a 52px fixed bar, so anchor jumps need clearance */
+            scroll-margin-top: 70px;
+        }
+
+        .knowledge-content h3:first-of-type {
+            margin-top: 0;
+        }
+
+        .knowledge-content h4 {
+            margin: 22px 0 10px;
+            color: var(--text-primary);
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .knowledge-content ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .knowledge-content li {
+            margin-bottom: 10px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.65;
+        }
+
+        .knowledge-content li strong {
+            color: var(--text-primary);
+        }
+
+        .knowledge-content code {
+            padding: 1px 5px;
+            border-radius: 4px;
+            background: var(--bg-input);
+            color: var(--accent-light);
+            font-size: 13px;
+        }
+
+        li.knowledge-key {
+            list-style: none;
+            margin-left: -20px;
+            padding: 10px 14px;
+            border-left: 3px solid var(--warning);
+            border-radius: var(--radius-sm);
+            background: rgba(245, 158, 11, 0.06);
+        }
+
+        .knowledge-qref {
+            display: inline-block;
+            margin-left: 4px;
+            padding: 1px 7px;
+            border-radius: 999px;
+            background: var(--bg-input);
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .knowledge-table-wrap {
+            overflow-x: auto;
+            margin-bottom: 8px;
+        }
+
+        .knowledge-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13.5px;
+        }
+
+        .knowledge-table th,
+        .knowledge-table td {
+            padding: 9px 12px;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .knowledge-table th {
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .knowledge-table td {
+            color: var(--text-secondary);
+        }
+
+        .knowledge-table tbody tr:last-child td {
+            border-bottom: 0;
+        }
+
+        @media (max-width: 640px) {
+            .knowledge-toc ol {
+                columns: 1;
+            }
+
+            .knowledge-content {
+                padding: 16px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            .knowledge-toggle,
+            .knowledge-chevron {
+                transition: none;
+            }
+        }
+
     </style>
 </head>
 
@@ -728,6 +948,515 @@
         </section>
 
         <section id="quiz-container"></section>
+
+        <section id="knowledge-summary">
+            <button type="button" id="knowledge-toggle" class="knowledge-toggle" aria-expanded="false"
+                aria-controls="knowledge-content">
+                <span><span aria-hidden="true">📚</span> Kiến thức cần nhớ, giải thích &amp; mẹo làm bài (tổng hợp từ 65
+                    câu)</span>
+                <span class="knowledge-chevron" aria-hidden="true">▼</span>
+            </button>
+
+            <div id="knowledge-content" class="knowledge-content" role="region"
+                aria-labelledby="knowledge-toggle" hidden>
+
+                <p class="knowledge-intro">
+                    Tổng hợp từ toàn bộ 65 câu của Quiz 2, kèm giải thích vì sao đáp án đúng và những mẹo nhận diện.
+                    Thẻ <span class="knowledge-qref">Q1</span> là số câu gốc để bạn tra ngược lại. Quiz 2 lệch chủ đề
+                    khá nhiều so với Quiz 1 — nhiều dịch vụ ở đây lần đầu xuất hiện, xem mục 14.
+                </p>
+
+                <nav class="knowledge-toc" aria-label="Mục lục">
+                    <ol>
+                        <li><a href="#ks-1">HPC &amp; placement group</a></li>
+                        <li><a href="#ks-2">Lưu trữ dùng chung &amp; Windows</a></li>
+                        <li><a href="#ks-3">Mạng &amp; kết nối riêng</a></li>
+                        <li><a href="#ks-4">Bảo mật, IAM &amp; mã hóa</a></li>
+                        <li><a href="#ks-5">Cơ sở dữ liệu</a></li>
+                        <li><a href="#ks-6">Điện toán &amp; auto scaling</a></li>
+                        <li><a href="#ks-7">Serverless &amp; xử lý dữ liệu</a></li>
+                        <li><a href="#ks-8">S3: vòng đời &amp; chi phí</a></li>
+                        <li><a href="#ks-9">Bảng so sánh dịch vụ dễ nhầm</a></li>
+                        <li><a href="#ks-10">Con số cần thuộc</a></li>
+                        <li><a href="#ks-11">Từ khóa nhận diện nhanh</a></li>
+                        <li><a href="#ks-12">Mẹo làm bài thi</a></li>
+                        <li><a href="#ks-13">Bẫy thường gặp</a></li>
+                        <li><a href="#ks-14">Hỏi lặp lại &amp; dịch vụ mới</a></li>
+                    </ol>
+                </nav>
+
+                <h3 id="ks-1">1. HPC &amp; placement group</h3>
+                <ul>
+                    <li><strong>Cluster placement group</strong> gom các instance lại thật gần nhau trong
+                        <em>cùng một AZ</em>, cho độ trễ giữa các node thấp nhất và băng thông cao nhất. Đề nói
+                        <em>HPC</em>, <em>inter-node performance</em>, <em>single AZ</em> là chỉ điểm thẳng vào nó.
+                        Nhớ thêm hai loại kia để loại trừ: <em>spread</em> tách máy ra để giảm rủi ro hỏng chung,
+                        <em>partition</em> chia thành nhóm cho hệ phân tán lớn. <span class="knowledge-qref">Q1</span>
+                    </li>
+                    <li class="knowledge-key"><strong>EC2 instance store</strong> là đáp án khi đề đòi
+                        <em>block storage, độ trễ thấp, hàng triệu giao dịch mỗi giây</em> — và điểm mấu chốt cho phép
+                        chọn nó là câu <em>"dữ liệu đã được nhân bản sang các instance khác nên mất một máy không mất
+                            dữ liệu"</em>. Chính câu đó gỡ bỏ nhược điểm duy nhất của instance store là dữ liệu bay khi
+                        stop. <span class="knowledge-qref">Q2</span></li>
+                    <li><strong>FSx for Lustre</strong> là hệ thống file song song hiệu năng cao dành cho HPC và
+                        machine learning, và nó <em>tích hợp thẳng với S3</em>: dữ liệu nóng nằm trên Lustre lúc chạy,
+                        dữ liệu nguội đẩy về S3 cho rẻ. Đề nhắc <em>Lustre client</em>, <em>parallel storage</em>, hoặc
+                        cặp nóng–nguội thì chọn cặp FSx for Lustre + S3.
+                        <span class="knowledge-qref">Q5, Q10, Q34</span></li>
+                </ul>
+
+                <h3 id="ks-2">2. Lưu trữ dùng chung &amp; Windows</h3>
+                <ul>
+                    <li class="knowledge-key">Đây là bẫy lặp lại nhiều nhất Quiz 2: <strong>EBS chỉ gắn được vào một
+                            instance</strong>. Khi ứng dụng được đưa lên Auto Scaling group nhiều máy, mỗi máy có EBS
+                        riêng nên người dùng <em>chỉ thấy được một phần tài liệu</em>. Cách chữa là chuyển sang
+                        <strong>EFS</strong> để mọi instance cùng đọc ghi một nơi.
+                        <span class="knowledge-qref">Q6, Q46</span></li>
+                    <li><strong>FSx for Windows File Server</strong> xuất hiện dày đặc, nhận diện qua ba dấu hiệu:
+                        thay thế <em>NAS/file share của Windows</em> <span class="knowledge-qref">Q4</span>, cần
+                        <em>Active Directory</em> để xác thực như cũ <span class="knowledge-qref">Q18</span>, và cần
+                        <em>shared storage cho Windows failover cluster</em> chạy Multi-AZ
+                        <span class="knowledge-qref">Q48</span>.</li>
+                    <li><strong>Storage Gateway</strong> có ba kiểu và Quiz 2 hỏi cả ba, phải phân biệt được:
+                        <ul>
+                            <li><strong>File Gateway</strong> khi nguồn là <em>file share NFS/SMB</em>, mục tiêu là
+                                giảm chỗ chứa tại chỗ hoặc sao lưu lên S3.
+                                <span class="knowledge-qref">Q17, Q19</span></li>
+                            <li><strong>Volume Gateway chế độ cached</strong> khi nguồn là <em>block storage qua
+                                    iSCSI</em>: dữ liệu chính nằm trên AWS, chỉ phần hay dùng được giữ lại tại chỗ để
+                                truy cập nhanh. Đề Q44 mô tả đúng cảnh này — hết dung lượng local nhưng vẫn cần độ trễ
+                                thấp cho ảnh hay xem. <span class="knowledge-qref">Q44</span></li>
+                            <li>Chế độ <em>stored</em> thì ngược lại: toàn bộ dữ liệu giữ tại chỗ, chỉ sao lưu lên AWS.
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h3 id="ks-3">3. Mạng &amp; kết nối riêng</h3>
+                <ul>
+                    <li class="knowledge-key"><strong>Transit Gateway</strong> là đáp án mỗi khi đề nói
+                        <em>"thêm nhiều account mới cũng cần nối về on-premises"</em> với <em>ít công vận hành
+                            nhất</em>. Lý do: nối từng VPC bằng peering hoặc dựng riêng Direct Connect cho mỗi account
+                        sẽ bùng nổ số kết nối, còn Transit Gateway gom tất cả về một trung tâm rồi gắn một Direct
+                        Connect gateway vào đó. Đề hỏi dạng này <strong>2 lần</strong>.
+                        <span class="knowledge-qref">Q11, Q45</span></li>
+                    <li>Về độ bền của Direct Connect, thứ tự tăng dần là: một kết nối → nhiều kết nối cùng một địa điểm
+                        → <strong>nhiều kết nối ở nhiều địa điểm DX khác nhau</strong>. Mức cao nhất phải là
+                        <em>khác địa điểm</em>, vì cùng một địa điểm vẫn chung rủi ro vật lý.
+                        <span class="knowledge-qref">Q12</span></li>
+                    <li><strong>PrivateLink + Network Load Balancer</strong> là mô hình chuẩn để một VPC gọi dịch vụ
+                        nằm ở VPC khác mà không ra internet: bên cung cấp đặt NLB, bên tiêu thụ đặt endpoint.
+                        <span class="knowledge-qref">Q20</span></li>
+                    <li>Muốn EC2 gọi S3 hoàn toàn riêng tư <em>và</em> bucket chỉ nhận từ trong VPC thì cần
+                        <strong>hai việc</strong>: tạo <strong>VPC endpoint cho S3</strong>, rồi thêm
+                        <strong>bucket policy</strong> giới hạn đúng endpoint đó. Thiếu bucket policy thì bucket vẫn mở
+                        cho đường khác. <span class="knowledge-qref">Q24</span></li>
+                    <li class="knowledge-key"><strong>AWS Network Firewall</strong> với <em>domain list rule
+                            group</em> là thứ duy nhất cho phép <em>"chỉ mở đúng vài URL, chặn sạch phần còn
+                            lại"</em>. Security group và NACL làm việc theo IP và cổng, <em>không hiểu tên miền</em>,
+                        nên không giải được yêu cầu này. <span class="knowledge-qref">Q31</span></li>
+                    <li>Cấu hình security group cho hai tầng: tầng web mở <strong>443 từ 0.0.0.0/0</strong>; tầng
+                        database mở <strong>1433 nhưng nguồn là security group của tầng web</strong>, không phải dải
+                        IP. Tham chiếu theo security group là cách làm chuẩn vì IP của instance thay đổi liên tục.
+                        <span class="knowledge-qref">Q7</span></li>
+                    <li><strong>Global Accelerator</strong> với ALB làm target khi cần định tuyến tới region gần nhất,
+                        tự failover, và đi trên mạng xương sống của AWS.
+                        <span class="knowledge-qref">Q65</span></li>
+                </ul>
+
+                <h3 id="ks-4">4. Bảo mật, IAM &amp; mã hóa</h3>
+                <ul>
+                    <li class="knowledge-key"><strong>Permissions boundary</strong> là câu trả lời cho bài toán
+                        <em>"cho lập trình viên tự gắn policy nhưng không được gắn quyền admin"</em>. Nó đặt
+                        <strong>trần quyền</strong> cho một user hoặc role: dù có gắn thêm policy mạnh tới đâu, quyền
+                        thực tế cũng không vượt qua trần. Đề hỏi <strong>gần như nguyên văn 2 lần</strong>.
+                        <span class="knowledge-qref">Q8, Q30</span></li>
+                    <li class="knowledge-key">Đề yêu cầu <em>"mã hóa TRƯỚC KHI upload"</em> thì bắt buộc là
+                        <strong>client-side encryption</strong>. Mọi phương án SSE (SSE-S3, SSE-KMS) đều mã hóa
+                        <em>sau khi</em> dữ liệu đã tới S3, nên không thỏa. Đọc kỹ chữ "before it is uploaded".
+                        <span class="knowledge-qref">Q14</span></li>
+                    <li>Ứng dụng chạy trên ECS cần quyền gọi API: gắn IAM role vào
+                        <strong><code>taskRoleArn</code></strong> trong task definition. Phân biệt với
+                        <em>executionRoleArn</em> — cái đó dành cho ECS agent kéo image và ghi log, không phải cho code
+                        của bạn. <span class="knowledge-qref">Q15</span></li>
+                    <li><strong>Presigned URL</strong> để chia sẻ an toàn một file S3 cho người ngoài: có hạn dùng, cấp
+                        đúng một object, không phải mở public hay tạo IAM user cho họ.
+                        <span class="knowledge-qref">Q16</span></li>
+                    <li><strong>IAM Identity Center + AD Connector</strong> khi công ty đã có Active Directory
+                        on-premises và muốn dùng chính danh tính đó cho nhiều AWS account. AD Connector chỉ làm cầu
+                        nối, không nhân bản thư mục, nên nhẹ công nhất.
+                        <span class="knowledge-qref">Q37</span></li>
+                    <li><strong>Secrets Manager</strong> khi đề nêu rõ <em>xoay vòng mật khẩu theo chu kỳ</em>
+                        (30 ngày). Đây là điểm khác biệt so với Parameter Store — chỉ Secrets Manager có xoay vòng tự
+                        động. <span class="knowledge-qref">Q42</span></li>
+                    <li><strong>Amazon Security Lake</strong> gom, chuẩn hóa và lưu dữ liệu bảo mật từ nhiều account và
+                        nhiều Region vào S3. Đề nói <em>"consolidate security data, least development effort"</em> là
+                        nó. <span class="knowledge-qref">Q59</span></li>
+                    <li>Mã hóa at rest cho EBS và RDS đều làm bằng <strong>KMS key</strong>, bật khi tạo.
+                        <span class="knowledge-qref">Q22</span></li>
+                </ul>
+
+                <h3 id="ks-5">5. Cơ sở dữ liệu</h3>
+                <ul>
+                    <li>Truy vấn <em>chỉ đọc</em> làm database chậm thì thêm <strong>read replica</strong> và trỏ nhóm
+                        phân tích sang đó. Với Aurora thì gọi là <strong>Aurora Replica</strong> và dùng
+                        <em>reader endpoint</em>. <span class="knowledge-qref">Q13, Q23</span></li>
+                    <li class="knowledge-key"><strong>Custom endpoint</strong> của Aurora là thứ cần khi đề nói muốn
+                        truy vấn báo cáo chỉ chạy trên <em>ba replica mạnh</em> trong số tám replica. Reader endpoint
+                        thường chia đều cho <em>tất cả</em> replica nên không đáp ứng được.
+                        <span class="knowledge-qref">Q52</span></li>
+                    <li class="knowledge-key"><strong>RDS Proxy</strong> chữa đúng bệnh <em>hết kết nối / connection
+                            timeout</em> khi Lambda bùng số lượng lúc cao điểm. Nó gộp và tái dùng connection pool, và
+                        quan trọng là <em>gần như không phải sửa code</em> — đúng yêu cầu "least amount of code
+                        changes". <span class="knowledge-qref">Q27</span></li>
+                    <li><strong>ElastiCache</strong> khi vấn đề là <em>đọc lặp lại</em> làm chậm trải nghiệm và không
+                        muốn đổi kiến trúc. <span class="knowledge-qref">Q28</span></li>
+                    <li><strong>DynamoDB global tables</strong> cho người dùng toàn cầu, tự nhân bản đa Region và chịu
+                        được sự cố vùng; ghép <strong>on-demand capacity</strong> khi tải không đoán trước được.
+                        <span class="knowledge-qref">Q38</span></li>
+                    <li><strong>Aurora Serverless v2</strong> khi tải <em>biến động</em>, muốn tối ưu chi phí và ít
+                        vận hành, mà vẫn cần quan hệ và giao dịch.
+                        <span class="knowledge-qref">Q43, Q49</span></li>
+                    <li>Giữ backup 30 ngày: đặt retention 30 ngày cho <em>automated backup</em>, nhưng
+                        <strong>manual snapshot không tự hết hạn</strong> nên phải có script tự dọn. Đây là chỗ đề gài.
+                        <span class="knowledge-qref">Q47</span></li>
+                    <li class="knowledge-key">Kế hoạch <strong>disaster recovery với RTO 30 phút</strong> mà
+                        <em>hạ tầng dự phòng không cần chạy sẵn</em> chính là mô hình <em>pilot light</em>: dựng sẵn
+                        ALB và Auto Scaling group ở Region hai với <strong>desired và maximum bằng 0</strong>, chuyển
+                        Aurora thành global database, rồi Route 53 active-passive.
+                        <span class="knowledge-qref">Q60</span></li>
+                </ul>
+
+                <h3 id="ks-6">6. Điện toán &amp; auto scaling</h3>
+                <ul>
+                    <li>Công thức high availability lại xuất hiện: tám máy trong một AZ không phải HA, phải chia thành
+                        <strong>bốn máy trên mỗi AZ, hai AZ</strong>. <span class="knowledge-qref">Q3</span></li>
+                    <li><strong>Target tracking</strong> là chính sách scaling nên chọn mặc định: bạn nêu chỉ số mục
+                        tiêu, AWS tự thêm bớt máy. Áp cho ECS <span class="knowledge-qref">Q9</span> và cho EC2 theo
+                        <code>ApproximateNumberOfMessages</code> của SQS <span class="knowledge-qref">Q35</span>.</li>
+                    <li class="knowledge-key">Tải tăng <em>đúng giờ, đoán trước được</em> — ví dụ chậm vào đầu giờ làm
+                        việc — thì dùng <strong>scheduled action</strong> để nâng desired capacity <em>trước</em> giờ
+                        cao điểm. Scaling phản ứng theo chỉ số luôn chậm một nhịp vì phải chờ máy khởi động, nên không
+                        chữa được cơn chậm đầu ngày. <span class="knowledge-qref">Q62</span></li>
+                    <li>Không muốn quản lý instance hay cluster: <strong>Fargate</strong> cho tầng ứng dụng và
+                        <strong>RDS</strong> cho database. <span class="knowledge-qref">Q25</span></li>
+                    <li>Nhiều tác vụ viết bằng <em>ngôn ngữ khác nhau</em>, không có mẫu số chung: đóng gói nguyên máy
+                        thành <strong>AMI</strong> rồi cho chạy nhiều bản bằng Auto Scaling group là cách ít công nhất.
+                        Viết lại thành Lambda hay container sẽ tốn công hơn hẳn.
+                        <span class="knowledge-qref">Q26</span></li>
+                    <li>Câu chọn hai đáp án về hiệu năng: <strong>Compute Optimizer</strong> để mở rộng
+                        <em>theo chiều dọc</em> (đổi loại máy cho đúng), cộng <strong>Auto Scaling group + ALB</strong>
+                        để mở rộng <em>theo chiều ngang</em>. Hai hướng bổ trợ nhau chứ không thay thế nhau.
+                        <span class="knowledge-qref">Q54</span></li>
+                    <li>Ứng dụng <em>stateless</em> gặp lỗi 5xx lúc cao điểm: AMI + Auto Scaling group theo CPU + ALB.
+                        <span class="knowledge-qref">Q40</span></li>
+                </ul>
+                <h3 id="ks-7">7. Serverless &amp; xử lý dữ liệu</h3>
+                <ul>
+                    <li class="knowledge-key"><strong>DynamoDB Streams</strong> là cách bắt sự kiện <em>"mỗi khi có bản
+                            ghi mới"</em> mà <em>không đụng gì tới ứng dụng hiện tại</em> — đúng yêu cầu "không ảnh
+                        hưởng hiệu năng app đang chạy". Ghép với <strong>một SNS topic</strong> để báo cho cả bốn
+                        nhóm cùng lúc; đừng tạo bốn topic riêng. <span class="knowledge-qref">Q33</span></li>
+                    <li><strong>SQS</strong> là đáp án khi đề nói <em>mất dữ liệu và không có cách phát lại</em> lúc
+                        tải tăng. Hàng đợi giữ message lại cho tới khi xử lý xong, nên không mất.
+                        <span class="knowledge-qref">Q41</span></li>
+                    <li>Hai phần xử lý có tốc độ <em>lệch nhau</em> thì tách thành hai ECS task riêng và đặt
+                        <strong>SQS</strong> ở giữa. <span class="knowledge-qref">Q64</span></li>
+                    <li>Chuỗi phân tích cảm xúc phản hồi: <strong>API Gateway → Kinesis Data Firehose → S3 → Lambda →
+                            Comprehend → DynamoDB</strong>, và dùng <strong>TTL</strong> của DynamoDB để tự xóa sau 12
+                        tháng. <strong>Comprehend</strong> là dịch vụ phân tích ngôn ngữ tự nhiên, dùng ngay không phải
+                        huấn luyện gì. <span class="knowledge-qref">Q39</span></li>
+                    <li>Nền tảng phân tích luồng gần thời gian thực dựng thuần AWS:
+                        <strong>Kinesis Data Streams → Lambda → OpenSearch → Managed Grafana</strong>. Nhớ vai trò:
+                        OpenSearch lo tìm kiếm và phân tích, Grafana lo biểu đồ.
+                        <span class="knowledge-qref">Q50</span></li>
+                    <li>Chạy SQL thẳng trên dữ liệu nằm ở S3 mà không dựng server nào:
+                        <strong>Athena</strong>. Ghép <strong>SSE-KMS multi-Region key</strong> với
+                        <strong>Cross-Region Replication</strong> khi vừa cần mã hóa vừa cần nhân bản sang Region khác
+                        — khóa multi-Region tránh việc bản sao không giải mã được.
+                        <span class="knowledge-qref">Q51</span></li>
+                    <li>Ứng dụng Python xử lý JSON chạy hàng nghìn lần mỗi ngày: <strong>S3 kích hoạt Lambda</strong>,
+                        kết quả ghi vào Aurora. <span class="knowledge-qref">Q32</span></li>
+                </ul>
+
+                <h3 id="ks-8">8. S3: vòng đời &amp; chi phí</h3>
+                <ul>
+                    <li>Đọc kỹ <em>mốc thời gian</em> trong đề rồi ánh xạ thẳng thành lifecycle rule. Ba câu mẫu:
+                        nóng 30 ngày rồi thỉnh thoảng mới đọc → <strong>Standard-IA sau 30 ngày</strong>
+                        <span class="knowledge-qref">Q21</span>; dùng một năm rồi lưu 7 năm →
+                        <strong>Standard-IA rồi Deep Archive sau 1 năm</strong>
+                        <span class="knowledge-qref">Q55</span>; 30 ngày nóng, 90 ngày nguội, sau đó bỏ hẳn →
+                        <strong>ONEZONE_IA sau 30 ngày rồi expire sau 90 ngày</strong>
+                        <span class="knowledge-qref">Q63</span>.</li>
+                    <li class="knowledge-key">Cặp <strong>CloudFront cho tải xuống, S3 Transfer Acceleration cho tải
+                            lên</strong> là điểm rất hay bị nhầm. CloudFront cache nội dung ở edge nên tăng tốc
+                        <em>download</em>; còn <em>upload</em> thì phải là Transfer Acceleration, nó đẩy dữ liệu vào
+                        edge rồi chuyển tiếp qua mạng nội bộ AWS. Đề Q36 hỏi cả hai chiều nên phải chọn cả hai.
+                        <span class="knowledge-qref">Q36</span></li>
+                    <li><strong>S3 Multi-Region Access Points</strong> cho một <em>endpoint toàn cầu duy nhất</em>, tự
+                        định tuyến người dùng tới bucket gần nhất và đi trên mạng AWS. Ghép với Cross-Region
+                        Replication để chạy active-active. <span class="knowledge-qref">Q57</span></li>
+                    <li>Chuyển <strong>750 TB</strong> qua đường truyền yếu mà <em>không được làm nghẽn</em> mạng đang
+                        dùng: đặt <strong>Snowball</strong> (nhiều thiết bị), đổ vào S3 rồi lifecycle sang Glacier.
+                        Mọi phương án truyền qua mạng đều phạm điều kiện "không ảnh hưởng traffic bình thường".
+                        <span class="knowledge-qref">Q29</span></li>
+                    <li>Web tĩnh chạy trên EC2 sau ALB là lãng phí: chuyển sang <strong>S3 + CloudFront</strong> vừa rẻ
+                        hơn nhiều vừa nhanh hơn. <span class="knowledge-qref">Q58</span></li>
+                    <li><strong>CloudFront custom error page</strong> với origin là ALB để hiện trang lỗi tĩnh khi web
+                        chết, ít công hơn hẳn so với tự dựng cơ chế failover.
+                        <span class="knowledge-qref">Q61</span></li>
+                    <li class="knowledge-key"><strong>Recycle Bin</strong> cho EBS snapshot là đáp án cho tình huống
+                        <em>lỡ tay xóa sạch snapshot</em>: snapshot bị xóa sẽ nằm trong thùng rác một số ngày rồi mới
+                        mất hẳn, nên vừa chống xóa nhầm vừa không giữ vô hạn.
+                        <span class="knowledge-qref">Q56</span></li>
+                </ul>
+
+                <h3 id="ks-9">9. Bảng so sánh dịch vụ dễ nhầm</h3>
+
+                <h4>Ba loại placement group</h4>
+                <div class="knowledge-table-wrap">
+                    <table class="knowledge-table">
+                        <thead>
+                            <tr><th>Loại</th><th>Cách xếp máy</th><th>Chọn khi</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Cluster</td><td>Sát nhau, một AZ</td><td>HPC, cần độ trễ thấp nhất giữa node</td></tr>
+                            <tr><td>Spread</td><td>Tách ra phần cứng khác nhau</td><td>Vài máy quan trọng, tránh hỏng chung</td></tr>
+                            <tr><td>Partition</td><td>Chia nhóm, mỗi nhóm riêng rack</td><td>Hệ phân tán lớn như HDFS, Cassandra</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h4>Chọn kho lưu trữ dùng chung</h4>
+                <div class="knowledge-table-wrap">
+                    <table class="knowledge-table">
+                        <thead>
+                            <tr><th>Dịch vụ</th><th>Dấu hiệu trong đề</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>EBS</td><td>Ổ cho <em>một</em> máy — thấy "nhiều instance cùng dùng" là loại</td></tr>
+                            <tr><td>Instance store</td><td>Nhanh nhất, dữ liệu tạm, hoặc đã nhân bản nơi khác</td></tr>
+                            <tr><td>EFS</td><td>Nhiều EC2 Linux dùng chung, NFS</td></tr>
+                            <tr><td>FSx for Windows</td><td>Windows, SMB, Active Directory, failover cluster</td></tr>
+                            <tr><td>FSx for Lustre</td><td>HPC, Lustre client, tích hợp S3</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h4>Ba chế độ Storage Gateway</h4>
+                <div class="knowledge-table-wrap">
+                    <table class="knowledge-table">
+                        <thead>
+                            <tr><th>Kiểu</th><th>Dữ liệu chính nằm ở</th><th>Dấu hiệu</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>File Gateway</td><td>AWS (S3)</td><td>File share NFS/SMB</td></tr>
+                            <tr><td>Volume Gateway — cached</td><td>AWS, cache nóng tại chỗ</td><td>iSCSI, hết dung lượng local</td></tr>
+                            <tr><td>Volume Gateway — stored</td><td>Tại chỗ, sao lưu lên AWS</td><td>iSCSI, cần toàn bộ dữ liệu ở local</td></tr>
+                            <tr><td>Tape Gateway</td><td>AWS</td><td>Thay băng từ vật lý</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h4>Nối nhiều mạng lại với nhau</h4>
+                <div class="knowledge-table-wrap">
+                    <table class="knowledge-table">
+                        <thead>
+                            <tr><th>Cách</th><th>Chọn khi</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>VPC peering</td><td>Chỉ 2 VPC, không bắc cầu</td></tr>
+                            <tr><td>Transit Gateway</td><td>Nhiều VPC / nhiều account + on-premises, ít vận hành</td></tr>
+                            <tr><td>PrivateLink + NLB</td><td>Chỉ mở đúng một dịch vụ sang VPC khác</td></tr>
+                            <tr><td>VPC endpoint (gateway)</td><td>Riêng S3 và DynamoDB, nhớ thêm route</td></tr>
+                            <tr><td>Network Firewall</td><td>Lọc theo <em>tên miền</em>, thứ SG và NACL không làm được</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h4>Tăng tốc S3: lên hay xuống?</h4>
+                <div class="knowledge-table-wrap">
+                    <table class="knowledge-table">
+                        <thead>
+                            <tr><th>Nhu cầu</th><th>Dịch vụ</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Tải xuống nhanh hơn</td><td>CloudFront</td></tr>
+                            <tr><td>Tải lên nhanh hơn</td><td>S3 Transfer Acceleration</td></tr>
+                            <tr><td>Một endpoint toàn cầu, tự chọn bucket gần nhất</td><td>S3 Multi-Region Access Points</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h4>Ba kiểu scaling policy</h4>
+                <div class="knowledge-table-wrap">
+                    <table class="knowledge-table">
+                        <thead>
+                            <tr><th>Kiểu</th><th>Chọn khi</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Target tracking</td><td>Mặc định nên chọn — giữ một chỉ số ở mức mục tiêu</td></tr>
+                            <tr><td>Scheduled action</td><td>Biết trước giờ cao điểm, ví dụ đầu giờ làm việc</td></tr>
+                            <tr><td>Step scaling</td><td>Cần phản ứng theo nhiều nấc khác nhau</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3 id="ks-10">10. Con số cần thuộc</h3>
+                <div class="knowledge-table-wrap">
+                    <table class="knowledge-table">
+                        <thead>
+                            <tr><th>Con số</th><th>Ý nghĩa</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>443</td><td>Cổng HTTPS cho tầng web <span class="knowledge-qref">Q7</span></td></tr>
+                            <tr><td>1433</td><td>Cổng Microsoft SQL Server <span class="knowledge-qref">Q7</span></td></tr>
+                            <tr><td>3306 / 5432</td><td>Cổng MySQL và PostgreSQL</td></tr>
+                            <tr><td>35 ngày</td><td>Trần automated backup của RDS <span class="knowledge-qref">Q47</span></td></tr>
+                            <tr><td>30 ngày</td><td>Thời gian lưu tối thiểu của S3 Standard-IA và One Zone-IA</td></tr>
+                            <tr><td>90 ngày</td><td>Thời gian lưu tối thiểu của Glacier Flexible</td></tr>
+                            <tr><td>180 ngày</td><td>Thời gian lưu tối thiểu của Glacier Deep Archive</td></tr>
+                            <tr><td>1 AZ</td><td>Phạm vi của cluster placement group <span class="knowledge-qref">Q1</span></td></tr>
+                            <tr><td>2 AZ</td><td>Tối thiểu để gọi là high availability <span class="knowledge-qref">Q3</span></td></tr>
+                            <tr><td>RTO / RPO</td><td>RTO là bao lâu thì khôi phục xong, RPO là chấp nhận mất bao nhiêu dữ liệu <span class="knowledge-qref">Q60</span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3 id="ks-11">11. Từ khóa nhận diện nhanh</h3>
+                <div class="knowledge-table-wrap">
+                    <table class="knowledge-table">
+                        <thead>
+                            <tr><th>Từ khóa trong đề</th><th>Hướng đáp án</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>HPC, inter-node latency, single AZ</td><td>Cluster placement group</td></tr>
+                            <tr><td>Lustre client, parallel storage</td><td>FSx for Lustre (+ S3 cho dữ liệu nguội)</td></tr>
+                            <tr><td>Windows, SMB, Active Directory</td><td>FSx for Windows File Server</td></tr>
+                            <tr><td>nhiều instance cùng đọc ghi một chỗ</td><td>EFS — loại EBS ngay</td></tr>
+                            <tr><td>mã hóa <em>trước khi</em> upload</td><td>Client-side encryption</td></tr>
+                            <tr><td>không được gắn quyền admin</td><td>Permissions boundary</td></tr>
+                            <tr><td>chia sẻ file S3 cho người ngoài</td><td>Presigned URL</td></tr>
+                            <tr><td>thêm nhiều account cùng nối on-premises</td><td>Transit Gateway + Direct Connect gateway</td></tr>
+                            <tr><td>chỉ cho phép vài tên miền, chặn hết còn lại</td><td>AWS Network Firewall + domain list</td></tr>
+                            <tr><td>connection timeout khi Lambda bùng nổ</td><td>RDS Proxy</td></tr>
+                            <tr><td>báo cáo chỉ chạy trên vài replica cụ thể</td><td>Aurora custom endpoint</td></tr>
+                            <tr><td>tải chậm đúng đầu giờ làm việc</td><td>Scheduled scaling action</td></tr>
+                            <tr><td>mỗi khi có bản ghi mới, không đụng app cũ</td><td>DynamoDB Streams</td></tr>
+                            <tr><td>tăng tốc <em>upload</em> lên S3</td><td>S3 Transfer Acceleration</td></tr>
+                            <tr><td>lỡ tay xóa snapshot</td><td>Recycle Bin retention rule</td></tr>
+                            <tr><td>DR nhưng hạ tầng dự phòng không cần chạy</td><td>Pilot light — ASG để capacity 0</td></tr>
+                            <tr><td>SQL thẳng trên dữ liệu ở S3</td><td>Athena</td></tr>
+                            <tr><td>phân tích cảm xúc văn bản</td><td>Amazon Comprehend</td></tr>
+                            <tr><td>gom dữ liệu bảo mật nhiều account</td><td>Security Lake</td></tr>
+                            <tr><td>dữ liệu quá lớn, mạng yếu, không được nghẽn</td><td>Snowball</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3 id="ks-12">12. Mẹo làm bài thi</h3>
+                <ul>
+                    <li><strong>Đọc câu hỏi cuối trước, rồi mới đọc tình huống.</strong> Biết trước đề hỏi
+                        <em>chi phí</em>, <em>hiệu năng</em> hay <em>công vận hành</em> sẽ đọc đoạn mô tả nhanh hơn
+                        nhiều.</li>
+                    <li class="knowledge-key"><strong>Tìm câu chữ tháo gỡ ràng buộc.</strong> Đây là kỹ năng Quiz 2
+                        dạy rõ nhất. Ví dụ Q2 nói <em>"dữ liệu đã nhân bản sang instance khác"</em> — chính câu đó cho
+                        phép chọn instance store vốn dễ mất dữ liệu. Q60 nói <em>"hạ tầng DR không cần hoạt động"</em>
+                        — chính câu đó dẫn tới đặt capacity bằng 0. Câu tưởng như thừa thường là chìa khóa.</li>
+                    <li><strong>Chú ý giới từ chỉ thời điểm.</strong> "Mã hóa <em>before</em> upload" khác hẳn "mã hóa
+                        at rest". Một chữ đổi cả đáp án.</li>
+                    <li><strong>Phân biệt "tăng tốc" theo chiều nào.</strong> Lên hay xuống, đọc hay ghi — mỗi chiều
+                        một dịch vụ khác nhau.</li>
+                    <li><strong>Câu "Select TWO" thường là hai bước bổ trợ.</strong> Endpoint đi với bucket policy
+                        <span class="knowledge-qref">Q24</span>, chiều dọc đi với chiều ngang
+                        <span class="knowledge-qref">Q54</span>, storage nóng đi với storage nguội
+                        <span class="knowledge-qref">Q5</span>. Nếu hai đáp án bạn chọn làm cùng một việc thì gần như
+                        chắc chắn sai một cái.</li>
+                    <li><strong>"Least operational overhead" luôn đẩy về managed.</strong> Thấy đáp án nào bắt tự dựng,
+                        tự vá, tự trông thì loại trước.</li>
+                    <li><strong>"Minimal changes to the application" thì đừng chọn viết lại.</strong> Ưu tiên thứ cắm
+                        thêm được như read replica, ElastiCache, RDS Proxy.</li>
+                    <li><strong>Nhìn nguồn dữ liệu để chọn Storage Gateway.</strong> File share thì File Gateway, iSCSI
+                        thì Volume Gateway, băng từ thì Tape Gateway. Nhận diện qua giao thức, không qua ngành nghề
+                        của công ty trong đề.</li>
+                    <li><strong>Đừng chọn thứ nghe hoành tráng hơn.</strong> Nhiều câu đáp án đúng lại là cái đơn giản
+                        nhất — AMI cộng Auto Scaling group thắng cả việc viết lại thành container.</li>
+                </ul>
+
+                <h3 id="ks-13">13. Bẫy thường gặp</h3>
+                <ul>
+                    <li class="knowledge-key"><strong>EBS không dùng chung được cho nhiều instance.</strong> Đây là bẫy
+                        số một của Quiz 2: đưa app lên Auto Scaling group là mỗi máy một ổ riêng, người dùng chỉ thấy
+                        một phần dữ liệu. <span class="knowledge-qref">Q6, Q46</span></li>
+                    <li class="knowledge-key"><strong>SSE mã hóa sau khi upload, không phải trước.</strong> Đề đòi mã
+                        hóa trước thì chỉ client-side mới đúng. <span class="knowledge-qref">Q14</span></li>
+                    <li class="knowledge-key"><strong>Manual snapshot không tự hết hạn.</strong> Đặt retention chỉ tác
+                        động lên automated backup. <span class="knowledge-qref">Q47</span></li>
+                    <li class="knowledge-key"><strong>Reader endpoint chia đều cho mọi replica.</strong> Muốn nhắm đúng
+                        vài replica thì phải là custom endpoint. <span class="knowledge-qref">Q52</span></li>
+                    <li class="knowledge-key"><strong>Security group và NACL không hiểu tên miền.</strong> Lọc theo URL
+                        phải dùng Network Firewall. <span class="knowledge-qref">Q31</span></li>
+                    <li><strong>Nhiều kết nối Direct Connect cùng một địa điểm chưa phải bền nhất.</strong> Phải khác
+                        địa điểm. <span class="knowledge-qref">Q12</span></li>
+                    <li><strong><code>taskRoleArn</code> khác <code>executionRoleArn</code>.</strong> Quyền cho code là
+                        cái đầu tiên. <span class="knowledge-qref">Q15</span></li>
+                    <li><strong>Scaling theo chỉ số không cứu được cơn chậm đầu ngày</strong>, vì nó chỉ phản ứng sau
+                        khi đã chậm. <span class="knowledge-qref">Q62</span></li>
+                    <li><strong>Tám máy trong một AZ vẫn không phải HA.</strong>
+                        <span class="knowledge-qref">Q3</span></li>
+                    <li><strong>Truyền 750 TB qua mạng sẽ làm nghẽn đường truyền</strong> dù dùng dịch vụ gì, nên đề
+                        cấm ảnh hưởng traffic là phải chuyển bằng thiết bị vật lý.
+                        <span class="knowledge-qref">Q29</span></li>
+                </ul>
+
+                <h3 id="ks-14">14. Hỏi lặp lại &amp; dịch vụ mới so với Quiz 1</h3>
+                <p class="knowledge-intro">Chủ đề được hỏi từ hai lần trở lên trong Quiz 2:</p>
+                <ul>
+                    <li><strong>Permissions boundary</strong> — hỏi 2 lần, gần như nguyên văn
+                        <span class="knowledge-qref">Q8, Q30</span></li>
+                    <li><strong>Transit Gateway nối nhiều account về on-premises</strong> — hỏi 2 lần
+                        <span class="knowledge-qref">Q11, Q45</span></li>
+                    <li><strong>FSx for Lustre cho HPC</strong> — hỏi 3 lần
+                        <span class="knowledge-qref">Q5, Q10, Q34</span></li>
+                    <li><strong>FSx for Windows File Server</strong> — hỏi 3 lần
+                        <span class="knowledge-qref">Q4, Q18, Q48</span></li>
+                    <li><strong>EFS thay EBS khi cần dùng chung</strong> — hỏi 2 lần
+                        <span class="knowledge-qref">Q6, Q46</span></li>
+                    <li><strong>Aurora Serverless v2</strong> — hỏi 2 lần
+                        <span class="knowledge-qref">Q43, Q49</span></li>
+                </ul>
+                <p class="knowledge-intro">Những dịch vụ lần đầu xuất hiện, chưa hề có trong Quiz 1 — đáng ưu tiên ôn:
+                </p>
+                <div class="knowledge-table-wrap">
+                    <table class="knowledge-table">
+                        <thead>
+                            <tr><th>Dịch vụ mới</th><th>Việc nó giải quyết</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Cluster placement group</td><td>Độ trễ thấp nhất giữa các node HPC</td></tr>
+                            <tr><td>FSx for Lustre</td><td>File song song hiệu năng cao, tích hợp S3</td></tr>
+                            <tr><td>Permissions boundary</td><td>Đặt trần quyền cho user hoặc role</td></tr>
+                            <tr><td>Transit Gateway</td><td>Gom nhiều VPC và account về một trung tâm</td></tr>
+                            <tr><td>AWS Network Firewall</td><td>Lọc traffic theo tên miền</td></tr>
+                            <tr><td>RDS Proxy</td><td>Gộp connection pool, chống timeout</td></tr>
+                            <tr><td>Aurora custom endpoint</td><td>Nhắm truy vấn vào nhóm replica cụ thể</td></tr>
+                            <tr><td>Aurora Serverless v2</td><td>Tự co giãn theo tải thật</td></tr>
+                            <tr><td>DynamoDB global tables / Streams</td><td>Đa Region, và bắt sự kiện thay đổi</td></tr>
+                            <tr><td>S3 Transfer Acceleration</td><td>Tăng tốc <em>upload</em></td></tr>
+                            <tr><td>S3 Multi-Region Access Points</td><td>Một endpoint toàn cầu, tự chọn bucket gần</td></tr>
+                            <tr><td>Recycle Bin</td><td>Chống xóa nhầm EBS snapshot</td></tr>
+                            <tr><td>Security Lake</td><td>Gom dữ liệu bảo mật nhiều account</td></tr>
+                            <tr><td>Athena</td><td>SQL thẳng trên S3, không cần server</td></tr>
+                            <tr><td>Comprehend</td><td>Phân tích cảm xúc và ngôn ngữ tự nhiên</td></tr>
+                            <tr><td>OpenSearch + Managed Grafana</td><td>Tìm kiếm, phân tích và vẽ dashboard</td></tr>
+                            <tr><td>IAM Identity Center + AD Connector</td><td>Dùng Active Directory sẵn có cho nhiều account</td></tr>
+                            <tr><td>Scheduled scaling action</td><td>Nâng công suất trước giờ cao điểm đã biết</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </section>
 
         <footer class="site-footer">
             Nguồn: <a href="https://tainguyensieure.com" target="_blank">tainguyensieure.com</a>
@@ -978,6 +1707,16 @@
                 if (event.target === dialog) dialog.close();
             }, { once: true });
         }
+
+        (function () {
+            const toggle = document.getElementById("knowledge-toggle");
+            const content = document.getElementById("knowledge-content");
+            toggle.addEventListener("click", () => {
+                const willOpen = content.hidden;
+                content.hidden = !willOpen;
+                toggle.setAttribute("aria-expanded", String(willOpen));
+            });
+        })();
     </script>
 </body>
 
