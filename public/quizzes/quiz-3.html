@@ -184,6 +184,18 @@
             color: var(--accent-light);
         }
 
+        .question-refcode {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            padding: 1px 6px;
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+
         .question-text {
             font-size: 15px;
             line-height: 1.7;
@@ -579,6 +591,11 @@
 
             .question-number {
                 font-size: 11px;
+            }
+
+            .question-refcode {
+                font-size: 10px;
+                padding: 1px 6px;
             }
 
             .multi-answer-hint {
@@ -1487,6 +1504,10 @@
             document.getElementById("pass-percent").innerHTML = passPercent || "0";
             totalNumberOfQuestions = questionData.length;
 
+            // Tag with stable original order BEFORE shuffling, so on-screen questions
+            // can be cross-referenced against the Q<n> labels in the study summary panels below.
+            questionData.forEach((q, idx) => { q.__refNum = idx + 1; });
+
             // Shuffle questions
             for (let i = questionData.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -1500,7 +1521,7 @@
         }
 
         function formatSingleQuestionData(singleQuizData) {
-            const { prompt, correct_response, id } = singleQuizData;
+            const { prompt, correct_response, id, __refNum } = singleQuizData;
             const answers = (prompt && prompt.answers) || [];
             const feedbacks = (prompt && prompt.feedbacks) || [];
             // Guard: correct_response might be empty or missing
@@ -1525,6 +1546,7 @@
 
             return {
                 id,
+                refNum: __refNum,
                 question,
                 answers,
                 feedbacks,
@@ -1536,7 +1558,7 @@
         }
 
         const renderSingleQuestion = (data, num) => {
-            const { id, answers, feedbacks, correctAnswerIndex, correctAnswerIndices, isMultiAnswer, question } = data;
+            const { id, refNum, answers, feedbacks, correctAnswerIndex, correctAnswerIndices, isMultiAnswer, question } = data;
             let { explanation } = data;
             // Skip questions with no answer options (unsupported types like fill-in-the-blank)
             if (!answers || answers.length === 0) {
@@ -1594,7 +1616,7 @@
             container.innerHTML = `
                     <form data-correct-answer="${shuffledCorrectIndex}" data-correct-answers="${shuffledCorrectIndices.join(',')}" data-is-multi="${isMultiAnswer}" data-question-id="${id}" class="single-question-container" onsubmit="submitButtonListener(event)">
                         <div class="question-header">
-                            <span class="question-number">Question ${num} ${multiHint}</span>
+                            <span class="question-number">Question ${num}${refNum ? ` <span class="question-refcode" title="Mã tham chiếu cố định — dùng để tra trong bảng tổng hợp bên dưới">Q${refNum}</span>` : ''} ${multiHint}</span>
                             ${explanation ? `<button type="button" onclick="renderExplanation('${id}')" class="explanation-btn">💡 Explanation</button>` : ''}
                         </div>
                         <div class="question-text">${question}</div>
