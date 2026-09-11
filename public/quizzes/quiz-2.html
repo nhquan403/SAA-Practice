@@ -982,6 +982,7 @@
                         <li><a href="#ks-12">Mẹo làm bài thi</a></li>
                         <li><a href="#ks-13">Bẫy thường gặp</a></li>
                         <li><a href="#ks-14">Hỏi lặp lại &amp; dịch vụ mới so với Quiz 1</a></li>
+                        <li><a href="#ks-15">Danh sách viết tắt &amp; giải thích thuật ngữ</a></li>
                     </ol>
                 </nav>
 
@@ -1452,6 +1453,186 @@
                             <tr><td>OpenSearch + Managed Grafana</td><td>Tìm kiếm, phân tích và vẽ dashboard</td></tr>
                             <tr><td>IAM Identity Center + AD Connector</td><td>Dùng Active Directory sẵn có cho nhiều account</td></tr>
                             <tr><td>Scheduled scaling action</td><td>Nâng công suất trước giờ cao điểm đã biết</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <h3 id="ks-15">15. Danh sách viết tắt &amp; giải thích thuật ngữ</h3>
+                <p class="knowledge-intro">
+                    Tổng hợp các chữ viết tắt và thuật ngữ thường gặp trong câu hỏi, đáp án và phần giải thích của cả Quiz
+                    1 lẫn Quiz 2, gom theo nhóm để tra nhanh khi gặp trong đề.
+                </p>
+
+                <h4>Điện toán &amp; container</h4>
+                <div class="knowledge-table-wrap">
+                    <table class="knowledge-table">
+                        <thead><tr><th>Viết tắt</th><th>Tên đầy đủ</th><th>Giải thích</th></tr></thead>
+                        <tbody>
+                            <tr><td>EC2</td><td>Elastic Compute Cloud</td><td>Máy chủ ảo, đơn vị điện toán cơ bản nhất của AWS</td></tr>
+                            <tr><td>AMI</td><td>Amazon Machine Image</td><td>"Bản chụp" một máy EC2 để tạo lại nhiều bản giống hệt</td></tr>
+                            <tr><td>ASG</td><td>Auto Scaling Group</td><td>Nhóm EC2 tự thêm/bớt máy theo tải</td></tr>
+                            <tr><td>ECS</td><td>Elastic Container Service</td><td>Dịch vụ chạy container riêng của AWS</td></tr>
+                            <tr><td>EKS</td><td>Elastic Kubernetes Service</td><td>Kubernetes được AWS quản lý</td></tr>
+                            <tr><td>CNI</td><td>Container Network Interface</td><td>Plugin mạng cho Kubernetes, cho Pod dùng IP thật của VPC</td></tr>
+                            <tr><td>IRSA</td><td>IAM Roles for Service Accounts</td><td>Gắn IAM role riêng cho từng service account trong EKS</td></tr>
+                            <tr><td>HPC</td><td>High Performance Computing</td><td>Tính toán hiệu năng cao, cần độ trễ thấp giữa các node</td></tr>
+                            <tr><td>EFA</td><td>Elastic Fabric Adapter</td><td>Card mạng ảo tốc độ cực cao cho HPC/machine learning</td></tr>
+                            <tr><td>VM</td><td>Virtual Machine</td><td>Máy ảo</td></tr>
+                            <tr><td>SaaS</td><td>Software as a Service</td><td>Phần mềm dùng ngay dưới dạng dịch vụ, không phải tự cài đặt hay vận hành</td></tr>
+                            <tr><td>MGN</td><td>—</td><td>Mã dịch vụ của AWS Application Migration Service, di trú máy chủ lên AWS theo kiểu lift-and-shift</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h4>Lưu trữ</h4>
+                <div class="knowledge-table-wrap">
+                    <table class="knowledge-table">
+                        <thead><tr><th>Viết tắt</th><th>Tên đầy đủ</th><th>Giải thích</th></tr></thead>
+                        <tbody>
+                            <tr><td>S3</td><td>Simple Storage Service</td><td>Kho lưu trữ object, nền tảng của rất nhiều dịch vụ khác</td></tr>
+                            <tr><td>EBS</td><td>Elastic Block Store</td><td>Ổ đĩa ảo gắn vào một EC2</td></tr>
+                            <tr><td>EFS</td><td>Elastic File System</td><td>Hệ thống file dùng chung, nhiều EC2 mount cùng lúc</td></tr>
+                            <tr><td>FSx</td><td>(tên thương hiệu, không tách chữ)</td><td>Họ dịch vụ hệ thống file quản lý: FSx for Windows File Server (SMB) và FSx for Lustre (HPC)</td></tr>
+                            <tr><td>NFS</td><td>Network File System</td><td>Giao thức chia sẻ file qua mạng, chuẩn Linux/Unix</td></tr>
+                            <tr><td>SMB</td><td>Server Message Block</td><td>Giao thức chia sẻ file của Windows; FSx for Windows dùng cái này</td></tr>
+                            <tr><td>CIFS</td><td>Common Internet File System</td><td>Phiên bản cũ/mở rộng của SMB</td></tr>
+                            <tr><td>DFS / DFSR</td><td>Distributed File System (Replication)</td><td>Cơ chế nhân bản file share của Windows Server</td></tr>
+                            <tr><td>NAS</td><td>Network Attached Storage</td><td>Thiết bị lưu trữ file chia sẻ qua mạng, thường on-premises</td></tr>
+                            <tr><td>HDD / SSD</td><td>Hard Disk Drive / Solid State Drive</td><td>Ổ cứng cơ và ổ cứng thể rắn — quyết định loại EBS</td></tr>
+                            <tr><td>IOPS</td><td>Input/Output Operations Per Second</td><td>Số thao tác đọc/ghi mỗi giây, thước đo hiệu năng ổ đĩa</td></tr>
+                            <tr><td>VTL</td><td>Virtual Tape Library</td><td>Thư viện băng từ ảo; Storage Gateway giả lập băng từ vật lý</td></tr>
+                            <tr><td>POSIX</td><td>Portable Operating System Interface</td><td>Chuẩn giao diện hệ điều hành Unix mà EFS tuân theo</td></tr>
+                            <tr><td>HDFS</td><td>Hadoop Distributed File System</td><td>Hệ thống file phân tán của Hadoop</td></tr>
+                            <tr><td>DLM</td><td>Data Lifecycle Manager</td><td>Tự động tạo/xóa EBS snapshot theo lịch</td></tr>
+                            <tr><td>BLOB</td><td>Binary Large Object</td><td>Dữ liệu nhị phân lớn lưu trong một cột database</td></tr>
+                            <tr><td>WORM</td><td>Write Once, Read Many</td><td>Ghi một lần, đọc nhiều lần — đặc tính S3 Object Lock</td></tr>
+                            <tr><td>SATA</td><td>Serial ATA</td><td>Chuẩn kết nối ổ đĩa vật lý</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h4>Mạng</h4>
+                <div class="knowledge-table-wrap">
+                    <table class="knowledge-table">
+                        <thead><tr><th>Viết tắt</th><th>Tên đầy đủ</th><th>Giải thích</th></tr></thead>
+                        <tbody>
+                            <tr><td>VPC</td><td>Virtual Private Cloud</td><td>Mạng riêng ảo, nơi dựng hạ tầng AWS</td></tr>
+                            <tr><td>AZ</td><td>Availability Zone</td><td>Một trung tâm dữ liệu vật lý riêng biệt trong một Region</td></tr>
+                            <tr><td>IP</td><td>Internet Protocol</td><td>Địa chỉ định danh thiết bị trên mạng</td></tr>
+                            <tr><td>NAT</td><td>Network Address Translation</td><td>Cho subnet riêng tư ra internet mà không lộ IP thật</td></tr>
+                            <tr><td>DNS</td><td>Domain Name System</td><td>Hệ thống phân giải tên miền thành IP</td></tr>
+                            <tr><td>CIDR</td><td>Classless Inter-Domain Routing</td><td>Cách viết dải IP, ví dụ 10.0.0.0/16</td></tr>
+                            <tr><td>ENI</td><td>Elastic Network Interface</td><td>Card mạng ảo gắn vào EC2</td></tr>
+                            <tr><td>NACL</td><td>Network Access Control List</td><td>Tường lửa cấp subnet, stateless</td></tr>
+                            <tr><td>ACL</td><td>Access Control List</td><td>Danh sách kiểm soát quyền truy cập</td></tr>
+                            <tr><td>SG</td><td>Security Group</td><td>Tường lửa cấp instance, stateful</td></tr>
+                            <tr><td>ALB</td><td>Application Load Balancer</td><td>Cân bằng tải tầng 7 (HTTP/HTTPS)</td></tr>
+                            <tr><td>NLB</td><td>Network Load Balancer</td><td>Cân bằng tải tầng 4, IP tĩnh, độ trễ cực thấp</td></tr>
+                            <tr><td>GWLB</td><td>Gateway Load Balancer</td><td>Cân bằng tải tầng 3, chèn thiết bị bảo mật vào luồng traffic</td></tr>
+                            <tr><td>ELB</td><td>Elastic Load Balancing</td><td>Tên chung của cả họ load balancer</td></tr>
+                            <tr><td>VPN</td><td>Virtual Private Network</td><td>Đường hầm mã hóa nối hai mạng qua internet công cộng</td></tr>
+                            <tr><td>DX</td><td>Direct Connect</td><td>Đường truyền vật lý riêng nối on-premises với AWS</td></tr>
+                            <tr><td>VIF</td><td>Virtual Interface</td><td>Giao diện ảo trên một kết nối Direct Connect</td></tr>
+                            <tr><td>BGP</td><td>Border Gateway Protocol</td><td>Giao thức định tuyến dùng với Direct Connect/VPN</td></tr>
+                            <tr><td>CDN</td><td>Content Delivery Network</td><td>Mạng phân phối nội dung ở nhiều điểm gần người dùng</td></tr>
+                            <tr><td>TCP / UDP</td><td>Transmission Control / User Datagram Protocol</td><td>Hai giao thức truyền dữ liệu tầng vận chuyển</td></tr>
+                            <tr><td>HTTP / HTTPS</td><td>HyperText Transfer Protocol (Secure)</td><td>Giao thức web; bản có "S" được mã hóa TLS</td></tr>
+                            <tr><td>SSL / TLS</td><td>Secure Sockets Layer / Transport Layer Security</td><td>Giao thức mã hóa đường truyền, TLS kế thừa SSL</td></tr>
+                            <tr><td>URL</td><td>Uniform Resource Locator</td><td>Địa chỉ web</td></tr>
+                            <tr><td>WAF</td><td>Web Application Firewall</td><td>Tường lửa lọc traffic web theo luật</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h4>Bảo mật &amp; danh tính</h4>
+                <div class="knowledge-table-wrap">
+                    <table class="knowledge-table">
+                        <thead><tr><th>Viết tắt</th><th>Tên đầy đủ</th><th>Giải thích</th></tr></thead>
+                        <tbody>
+                            <tr><td>IAM</td><td>Identity and Access Management</td><td>Hệ thống quản lý user, role, quyền hạn của AWS</td></tr>
+                            <tr><td>KMS</td><td>Key Management Service</td><td>Dịch vụ quản lý khóa mã hóa</td></tr>
+                            <tr><td>CMK</td><td>Customer Master Key</td><td>Tên cũ của khóa chính trong KMS, nay gọi là KMS key</td></tr>
+                            <tr><td>SSE</td><td>Server-Side Encryption</td><td>Mã hóa phía server, tự động khi ghi vào S3</td></tr>
+                            <tr><td>SSE-S3 / SSE-KMS / SSE-C</td><td>—</td><td>Ba biến thể SSE: khóa do S3 quản lý / do KMS quản lý / do khách tự cấp</td></tr>
+                            <tr><td>CSE</td><td>Client-Side Encryption</td><td>Mã hóa ngay tại máy khách trước khi gửi đi — khác SSE vốn mã hóa ở phía server</td></tr>
+                            <tr><td>AD</td><td>Active Directory</td><td>Dịch vụ thư mục xác thực của Microsoft</td></tr>
+                            <tr><td>RBAC</td><td>Role-Based Access Control</td><td>Phân quyền theo vai trò, dùng nhiều trong Kubernetes</td></tr>
+                            <tr><td>STS</td><td>Security Token Service</td><td>Dịch vụ cấp credential AWS tạm thời</td></tr>
+                            <tr><td>OIDC</td><td>OpenID Connect</td><td>Giao thức xác thực dựa trên OAuth 2.0</td></tr>
+                            <tr><td>SCP</td><td>Service Control Policy</td><td>Chính sách giới hạn quyền tối đa, áp cho cả AWS Organization</td></tr>
+                            <tr><td>OU</td><td>Organizational Unit</td><td>Đơn vị tổ chức trong AWS Organizations, gom nhiều account</td></tr>
+                            <tr><td>CN</td><td>Common Name</td><td>Trường tên miền trong chứng chỉ SSL, chống giả mạo</td></tr>
+                            <tr><td>OCSF</td><td>Open Cybersecurity Schema Framework</td><td>Chuẩn định dạng dữ liệu bảo mật mà Security Lake dùng</td></tr>
+                            <tr><td>OCSP</td><td>Online Certificate Status Protocol</td><td>Giao thức kiểm tra chứng chỉ SSL còn hiệu lực</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h4>Cơ sở dữ liệu</h4>
+                <div class="knowledge-table-wrap">
+                    <table class="knowledge-table">
+                        <thead><tr><th>Viết tắt</th><th>Tên đầy đủ</th><th>Giải thích</th></tr></thead>
+                        <tbody>
+                            <tr><td>RDS</td><td>Relational Database Service</td><td>Database quan hệ được quản lý (MySQL, PostgreSQL, SQL Server…)</td></tr>
+                            <tr><td>SQL</td><td>Structured Query Language</td><td>Ngôn ngữ truy vấn database quan hệ</td></tr>
+                            <tr><td>DB</td><td>Database</td><td>Viết tắt chung của "cơ sở dữ liệu"</td></tr>
+                            <tr><td>DMS</td><td>Database Migration Service</td><td>Dịch vụ di trú database, downtime tối thiểu</td></tr>
+                            <tr><td>SCT</td><td>Schema Conversion Tool</td><td>Công cụ đi kèm DMS, đổi schema khi chuyển engine</td></tr>
+                            <tr><td>DAX</td><td>DynamoDB Accelerator</td><td>Cache trong bộ nhớ đặt trước DynamoDB</td></tr>
+                            <tr><td>PITR</td><td>Point-In-Time Recovery</td><td>Khôi phục database về một thời điểm bất kỳ trong quá khứ</td></tr>
+                            <tr><td>RAID</td><td>Redundant Array of Independent Disks</td><td>Kỹ thuật ghép nhiều ổ đĩa để tăng tốc độ hoặc độ bền</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h4>Serverless, nhắn tin &amp; xử lý dữ liệu</h4>
+                <div class="knowledge-table-wrap">
+                    <table class="knowledge-table">
+                        <thead><tr><th>Viết tắt</th><th>Tên đầy đủ</th><th>Giải thích</th></tr></thead>
+                        <tbody>
+                            <tr><td>SQS</td><td>Simple Queue Service</td><td>Hàng đợi message, tách rời các thành phần hệ thống</td></tr>
+                            <tr><td>SNS</td><td>Simple Notification Service</td><td>Dịch vụ pub/sub, gửi thông báo tới nhiều nơi cùng lúc</td></tr>
+                            <tr><td>FIFO</td><td>First In, First Out</td><td>Loại hàng đợi giữ đúng thứ tự message</td></tr>
+                            <tr><td>DLQ</td><td>Dead-Letter Queue</td><td>Hàng đợi hứng message xử lý lỗi nhiều lần</td></tr>
+                            <tr><td>MQ</td><td>Message Queue</td><td>Message broker được quản lý (Amazon MQ), hỗ trợ các giao thức chuẩn như JMS, AMQP</td></tr>
+                            <tr><td>MSK</td><td>Managed Streaming for Kafka</td><td>Apache Kafka được AWS quản lý</td></tr>
+                            <tr><td>KCL</td><td>Kinesis Client Library</td><td>Thư viện giúp ứng dụng đọc dữ liệu từ Kinesis Data Streams</td></tr>
+                            <tr><td>ETL</td><td>Extract, Transform, Load</td><td>Quy trình trích xuất, biến đổi, nạp dữ liệu; AWS Glue làm việc này</td></tr>
+                            <tr><td>EDA</td><td>Electronic Design Automation</td><td>Thiết kế mạch điện tử tự động, một dạng workload HPC</td></tr>
+                            <tr><td>ML</td><td>Machine Learning</td><td>Học máy</td></tr>
+                            <tr><td>JSON</td><td>JavaScript Object Notation</td><td>Định dạng dữ liệu dạng văn bản, phổ biến cho API</td></tr>
+                            <tr><td>API</td><td>Application Programming Interface</td><td>Giao diện lập trình ứng dụng, cách các chương trình gọi nhau</td></tr>
+                            <tr><td>EMR</td><td>Elastic MapReduce</td><td>Dịch vụ Hadoop/Spark được quản lý, xử lý dữ liệu lớn theo cluster</td></tr>
+                            <tr><td>REST</td><td>Representational State Transfer</td><td>Kiểu kiến trúc API phổ biến nhất hiện nay</td></tr>
+                            <tr><td>JMS</td><td>Java Message Service</td><td>Chuẩn API nhắn tin của Java</td></tr>
+                            <tr><td>AMQP</td><td>Advanced Message Queuing Protocol</td><td>Giao thức nhắn tin chuẩn mở mà Amazon MQ hỗ trợ</td></tr>
+                            <tr><td>CRON</td><td>từ gốc "chronos"</td><td>Định dạng lịch chạy theo thời gian, dùng trong EventBridge Scheduler</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h4>Vận hành, chi phí &amp; khác</h4>
+                <div class="knowledge-table-wrap">
+                    <table class="knowledge-table">
+                        <thead><tr><th>Viết tắt</th><th>Tên đầy đủ</th><th>Giải thích</th></tr></thead>
+                        <tbody>
+                            <tr><td>CPU</td><td>Central Processing Unit</td><td>Bộ xử lý trung tâm</td></tr>
+                            <tr><td>RAM (phần cứng)</td><td>Random Access Memory</td><td>Bộ nhớ tạm của máy tính</td></tr>
+                            <tr><td>RAM (AWS)</td><td>Resource Access Manager</td><td>Chia sẻ subnet, Transit Gateway... giữa các account trong Organizations — xuất hiện trong đề với nghĩa này, không phải bộ nhớ</td></tr>
+                            <tr><td>OS</td><td>Operating System</td><td>Hệ điều hành</td></tr>
+                            <tr><td>IT</td><td>Information Technology</td><td>Công nghệ thông tin</td></tr>
+                            <tr><td>GPS</td><td>Global Positioning System</td><td>Hệ thống định vị toàn cầu — bối cảnh câu hỏi về xe tải</td></tr>
+                            <tr><td>SMS</td><td>Short Message Service</td><td>Tin nhắn văn bản, một kênh gửi của SNS</td></tr>
+                            <tr><td>KB / MB / GB / TB</td><td>Kilobyte / Megabyte / Gigabyte / Terabyte</td><td>Đơn vị dung lượng dữ liệu, thập phân (10⁹, 10¹²…)</td></tr>
+                            <tr><td>GiB / TiB</td><td>Gibibyte / Tebibyte</td><td>Đơn vị dung lượng nhị phân (2³⁰, 2⁴⁰…) — AWS hay dùng cho kích thước ổ đĩa, khác GB/TB thập phân</td></tr>
+                            <tr><td>TTL</td><td>Time To Live</td><td>Thời gian một bản ghi còn hiệu lực — cache DNS ở Route 53, hoặc tự xóa item ở DynamoDB</td></tr>
+                            <tr><td>IA</td><td>Infrequent Access</td><td>Tầng lưu trữ S3 cho dữ liệu ít truy cập</td></tr>
+                            <tr><td>CRR</td><td>Cross-Region Replication</td><td>Nhân bản dữ liệu S3 sang Region khác</td></tr>
+                            <tr><td>DR</td><td>Disaster Recovery</td><td>Khôi phục sau thảm họa</td></tr>
+                            <tr><td>RTO</td><td>Recovery Time Objective</td><td>Thời gian tối đa chấp nhận để khôi phục hệ thống</td></tr>
+                            <tr><td>RPO</td><td>Recovery Point Objective</td><td>Lượng dữ liệu tối đa chấp nhận mất khi khôi phục</td></tr>
+                            <tr><td>HA</td><td>High Availability</td><td>Tính sẵn sàng cao</td></tr>
+                            <tr><td>IMDS</td><td>Instance Metadata Service</td><td>Dịch vụ nội bộ cho EC2 tự truy vấn thông tin về chính nó</td></tr>
+                            <tr><td>SAA</td><td>Solutions Architect Associate</td><td>Tên chứng chỉ AWS mà bộ quiz này ôn luyện</td></tr>
                         </tbody>
                     </table>
                 </div>
