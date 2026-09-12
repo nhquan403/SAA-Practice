@@ -1,7 +1,7 @@
 ---
 title: "Chế độ thi thử (Mock Exam Mode) + lịch sử vào IndexedDB"
 description: "Thêm chế độ thi thử cho cả 6 quiz: trả lời hết 65 câu rồi mới nộp, xem điểm và các câu sai, lưu lịch sử mỗi lần thi vào IndexedDB kèm màn hình xem lại."
-status: in-progress
+status: completed
 priority: P1
 effort: "~3 phases"
 tags: [frontend, feature]
@@ -105,22 +105,22 @@ nhất một câu, tránh mất bài đang làm dở do bấm nhầm.
 
 ## Success Criteria
 
-- [ ] Mỗi quiz có nút chuyển "Luyện tập ⇄ Thi thử", mặc định là Luyện tập.
-- [ ] Ở chế độ Thi thử: chọn được đáp án cho tất cả 65 câu mà không thấy
+- [x] Mỗi quiz có nút chuyển "Luyện tập ⇄ Thi thử", mặc định là Luyện tập.
+- [x] Ở chế độ Thi thử: chọn được đáp án cho tất cả 65 câu mà không thấy
       đúng/sai; có một nút "Nộp bài thi" cố định; nộp được kể cả khi chưa trả
       lời hết (câu bỏ trống tính sai).
-- [ ] Sau khi nộp: hiển thị điểm % và số câu đúng/sai giống hệt cách tính
+- [x] Sau khi nộp: hiển thị điểm % và số câu đúng/sai giống hệt cách tính
       hiện có; hiển thị danh sách câu sai, mỗi câu bấm vào nhảy đúng tới câu
       đó trên trang (dùng mã `Q<n>` ổn định).
-- [ ] Mỗi lần nộp bài thi thử được lưu vào IndexedDB
+- [x] Mỗi lần nộp bài thi thử được lưu vào IndexedDB
       (`saa-practice-history`), không mất khi tải lại trang.
-- [ ] Có bảng "Lịch sử thi thử" (ẩn/hiện như các bảng khác) liệt kê các lần
+- [x] Có bảng "Lịch sử thi thử" (ẩn/hiện như các bảng khác) liệt kê các lần
       thi trước của quiz đó: ngày giờ, điểm, đúng/sai.
-- [ ] Áp dụng đồng nhất cho cả 6 quiz; chế độ Luyện tập hiện tại không đổi
+- [x] Áp dụng đồng nhất cho cả 6 quiz; chế độ Luyện tập hiện tại không đổi
       hành vi.
-- [ ] Giữ CRLF, không có lỗi console, không có regression ở các tính năng đã
+- [x] Giữ CRLF, không có lỗi console, không có regression ở các tính năng đã
       có (mã tham chiếu `Q<n>`, bảng "Kiến thức cần nhớ", bảng "Vì sao đáp án
       sai" ở Quiz 1-2).
-- [ ] Code review sạch (không có phát hiện chặn) trước khi merge vào `main`.
+- [x] Code review sạch (không có phát hiện chặn) trước khi merge vào `main`.
 
 <!-- slug: mock-exam-mode -->

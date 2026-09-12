@@ -14,15 +14,15 @@ hiện thật (nếu có), kiểm thử lại toàn bộ, commit, push, merge `-
 
 ## Requirements
 
-- [ ] Code review (subagent `code-reviewer`, có thể chạy song song theo
+- [x] Code review (subagent `code-reviewer`, có thể chạy song song theo
       từng file hoặc theo cặp) không còn phát hiện chặn nào.
-- [ ] Toàn bộ Playwright (tính năng mới + hồi quy cũ) pass trên nhánh làm
+- [x] Toàn bộ Playwright (tính năng mới + hồi quy cũ) pass trên nhánh làm
       việc, sau đó pass lại trên `main` sau merge.
-- [ ] Diff là additive tối đa có thể; nếu có sửa dòng cũ (ví dụ tách
+- [x] Diff là additive tối đa có thể; nếu có sửa dòng cũ (ví dụ tách
       `gradeQuestion` khỏi `submitButtonListener`) thì phải là thay đổi có
       chủ đích, đã ghi rõ trong Phase 1, không phải hệ quả ngoài ý muốn.
-- [ ] CRLF giữ nguyên trên cả 6 file.
-- [ ] Merge vào `main` không có bất kỳ dòng khác biệt nào so với bản đã
+- [x] CRLF giữ nguyên trên cả 6 file.
+- [x] Merge vào `main` không có bất kỳ dòng khác biệt nào so với bản đã
       test (xác nhận bằng `git diff --stat` giữa `main` sau merge và nhánh
       nguồn phải rỗng).
 
@@ -53,15 +53,15 @@ hiện thật (nếu có), kiểm thử lại toàn bộ, commit, push, merge `-
 
 ## Todo
 
-- [ ] Spawn code review cho 6 file.
-- [ ] Áp phát hiện thật (nếu có), re-test.
-- [ ] Chạy toàn bộ regression suite.
-- [ ] Screenshot gửi người dùng.
-- [ ] Commit + push nhánh.
-- [ ] Dry-run merge, merge `--no-ff` vào `main`.
-- [ ] Build + test lại trên `main`, push `main`.
-- [ ] Dừng server, dọn file scratch tạm nếu có.
-- [ ] Báo cáo hoàn thành: tóm tắt tính năng, kết quả review, bằng chứng
+- [x] Spawn code review cho 6 file.
+- [x] Áp phát hiện thật (nếu có), re-test.
+- [x] Chạy toàn bộ regression suite.
+- [x] Screenshot gửi người dùng.
+- [x] Commit + push nhánh.
+- [x] Dry-run merge, merge `--no-ff` vào `main`.
+- [x] Build + test lại trên `main`, push `main`.
+- [x] Dừng server, dọn file scratch tạm nếu có.
+- [x] Báo cáo hoàn thành: tóm tắt tính năng, kết quả review, bằng chứng
       test, hỏi người dùng có muốn thêm gì (ví dụ: xoá lịch sử, giới hạn
       thời gian làm bài, xuất lịch sử) hay dừng ở đây.
 
