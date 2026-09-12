@@ -19,13 +19,13 @@ Phase 1**, chỉ khác đúng một chỗ: `quizId` trong `saveAttemptToHistory`
 
 ## Requirements
 
-- [ ] Cả 5 file quiz-2..quiz-6 có đầy đủ: nút chuyển chế độ, chế độ Thi thử
+- [x] Cả 5 file quiz-2..quiz-6 có đầy đủ: nút chuyển chế độ, chế độ Thi thử
       hoạt động đúng, bảng kết quả, lưu/đọc lịch sử đúng `quizId` của từng
       quiz, bảng "Lịch sử thi thử".
-- [ ] Vị trí chèn HTML/CSS/JS nhất quán với vị trí đã dùng ở quiz-1.html
+- [x] Vị trí chèn HTML/CSS/JS nhất quán với vị trí đã dùng ở quiz-1.html
       (đối chiếu qua `diff` giữa quiz-1 và từng file sau khi vá, phần mới
       phải khớp ngoại trừ `quizId`).
-- [ ] Giữ CRLF trên cả 5 file, không đụng tới quiz-1.html hay bất kỳ nội
+- [x] Giữ CRLF trên cả 5 file, không đụng tới quiz-1.html hay bất kỳ nội
       dung nào khác của quiz-2..6 (bảng "Kiến thức cần nhớ" đã có, mã tham
       chiếu `Q<n>` đã có, dữ liệu câu hỏi).
 
@@ -53,16 +53,16 @@ Phase 1**, chỉ khác đúng một chỗ: `quizId` trong `saveAttemptToHistory`
 
 ## Todo
 
-- [ ] Viết/điều chỉnh script vá cơ học từ nội dung Phase 1.
-- [ ] Chạy vá cho quiz-2, quiz-3, quiz-4, quiz-5, quiz-6.
-- [ ] Kiểm `git diff --stat` + CRLF + duplicate-id cho cả 5 file.
-- [ ] Build lại, chạy Playwright cho cả 5 quiz: chọn 65 câu → nộp → điểm
+- [x] Viết/điều chỉnh script vá cơ học từ nội dung Phase 1.
+- [x] Chạy vá cho quiz-2, quiz-3, quiz-4, quiz-5, quiz-6.
+- [x] Kiểm `git diff --stat` + CRLF + duplicate-id cho cả 5 file.
+- [x] Build lại, chạy Playwright cho cả 5 quiz: chọn 65 câu → nộp → điểm
       đúng → danh sách câu sai nhảy đúng chỗ → lịch sử lưu đúng `quizId` →
       tải lại thấy lịch sử còn → chế độ Luyện tập không đổi.
-- [ ] Chạy lại các bộ test hồi quy đã có từ trước (mã tham chiếu `Q<n>`,
+- [x] Chạy lại các bộ test hồi quy đã có từ trước (mã tham chiếu `Q<n>`,
       "Kiến thức cần nhớ", "Vì sao đáp án sai") để xác nhận không có
       regression trên cả 6 quiz.
-- [ ] Xác nhận `quizId` không bị lẫn giữa các quiz (thi thử ở Quiz 2 không
+- [x] Xác nhận `quizId` không bị lẫn giữa các quiz (thi thử ở Quiz 2 không
       hiện trong lịch sử của Quiz 3, ví dụ) — kiểm bằng cách nộp bài ở 2 quiz
       khác nhau rồi xem lịch sử riêng từng quiz.
 
