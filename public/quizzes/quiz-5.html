@@ -184,6 +184,18 @@
             color: var(--accent-light);
         }
 
+        .question-refcode {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            padding: 1px 6px;
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+
         .question-text {
             font-size: 15px;
             line-height: 1.7;
@@ -581,6 +593,11 @@
                 font-size: 11px;
             }
 
+            .question-refcode {
+                font-size: 10px;
+                padding: 1px 6px;
+            }
+
             .multi-answer-hint {
                 font-size: 10px;
                 padding: 1px 6px;
@@ -708,6 +725,225 @@
                 background: #ddd;
             }
         }
+        /* ── Knowledge Summary ── */
+        #knowledge-summary {
+            margin-top: 32px;
+        }
+
+        .knowledge-toggle {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 16px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 15px;
+            font-weight: 600;
+            text-align: left;
+            cursor: pointer;
+            transition: background-color var(--transition), border-color var(--transition);
+        }
+
+        .knowledge-toggle:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--border-hover);
+        }
+
+        .knowledge-toggle:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .knowledge-chevron {
+            color: var(--text-muted);
+            font-size: 12px;
+            transition: transform var(--transition);
+        }
+
+        .knowledge-toggle[aria-expanded="true"] .knowledge-chevron {
+            transform: rotate(180deg);
+        }
+
+        .knowledge-content {
+            display: block;
+            margin-top: 12px;
+            padding: 24px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+        }
+
+        /* Explicit: the rule above would otherwise beat the user-agent
+           [hidden] rule and leave the list open on load. */
+        .knowledge-content[hidden] {
+            display: none;
+        }
+
+        .knowledge-intro {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .knowledge-toc {
+            margin-bottom: 28px;
+            padding: 16px 20px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--bg-input);
+        }
+
+        .knowledge-toc ol {
+            margin: 0;
+            padding-left: 20px;
+            columns: 2;
+            column-gap: 28px;
+        }
+
+        .knowledge-content .knowledge-toc li {
+            margin-bottom: 5px;
+            color: var(--text-muted);
+            font-size: 13px;
+            break-inside: avoid;
+        }
+
+        .knowledge-toc a {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .knowledge-toc a:hover {
+            color: var(--accent-light);
+            text-decoration: underline;
+        }
+
+        .knowledge-content h3 {
+            margin: 32px 0 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+            color: var(--accent-light);
+            font-size: 15px;
+            font-weight: 600;
+            /* the quiz has a 52px fixed bar, so anchor jumps need clearance */
+            scroll-margin-top: 70px;
+        }
+
+        .knowledge-content h3:first-of-type {
+            margin-top: 0;
+        }
+
+        .knowledge-content h4 {
+            margin: 22px 0 10px;
+            color: var(--text-primary);
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .knowledge-content ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .knowledge-content li {
+            margin-bottom: 10px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.65;
+        }
+
+        .knowledge-content li strong {
+            color: var(--text-primary);
+        }
+
+        .knowledge-content code {
+            padding: 1px 5px;
+            border-radius: 4px;
+            background: var(--bg-input);
+            color: var(--accent-light);
+            font-size: 13px;
+        }
+
+        li.knowledge-key {
+            list-style: none;
+            margin-left: -20px;
+            padding: 10px 14px;
+            border-left: 3px solid var(--warning);
+            border-radius: var(--radius-sm);
+            background: rgba(245, 158, 11, 0.06);
+        }
+
+        .knowledge-qref {
+            display: inline-block;
+            margin-left: 4px;
+            padding: 1px 7px;
+            border-radius: 999px;
+            background: var(--bg-input);
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .knowledge-table-wrap {
+            overflow-x: auto;
+            margin-bottom: 8px;
+        }
+
+        .knowledge-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13.5px;
+        }
+
+        .knowledge-table th,
+        .knowledge-table td {
+            padding: 9px 12px;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .knowledge-table th {
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .knowledge-table td {
+            color: var(--text-secondary);
+        }
+
+        .knowledge-table tbody tr:last-child td {
+            border-bottom: 0;
+        }
+
+        @media (max-width: 640px) {
+            .knowledge-toc ol {
+                columns: 1;
+            }
+
+            .knowledge-content {
+                padding: 16px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            .knowledge-toggle,
+            .knowledge-chevron {
+                transition: none;
+            }
+        }
+
     </style>
 </head>
 
@@ -728,6 +964,580 @@
         </section>
 
         <section id="quiz-container"></section>
+
+        <section id="knowledge-summary">
+            <button type="button" id="knowledge-toggle" class="knowledge-toggle" aria-expanded="false"
+                aria-controls="knowledge-content">
+                <span><span aria-hidden="true">📚</span> Kiến thức cần nhớ, giải thích &amp; mẹo làm bài (tổng hợp từ 65
+                    câu)</span>
+                <span class="knowledge-chevron" aria-hidden="true">▼</span>
+            </button>
+
+            <div id="knowledge-content" class="knowledge-content" role="region"
+                aria-labelledby="knowledge-toggle" hidden>
+
+                <p class="knowledge-intro">
+                    Tổng hợp từ toàn bộ 65 câu của Quiz 5, kèm giải thích vì sao đáp án đúng và những mẹo nhận diện.
+                    Thẻ <span class="knowledge-qref">Q1</span> là số câu gốc để bạn tra ngược lại. Quiz 5 nghiêng nhiều
+                    về lưu trữ dùng chung (EBS/EFS/FSx) và các bài so sánh dịch vụ dễ nhầm (Aurora, ElastiCache,
+                    CloudFront) — đọc kỹ mục 3 và mục 6.
+                </p>
+
+                <nav class="knowledge-toc" aria-label="Mục lục">
+                    <ol>
+                        <li><a href="#ks-1">IAM, kiểm soát truy cập &amp; nhiều tài khoản</a></li>
+                        <li><a href="#ks-2">Mạng VPC &amp; kết nối</a></li>
+                        <li><a href="#ks-3">Lưu trữ: khối, file dùng chung &amp; object</a></li>
+                        <li><a href="#ks-4">Serverless &amp; tích hợp ứng dụng</a></li>
+                        <li><a href="#ks-5">Container &amp; Kubernetes</a></li>
+                        <li><a href="#ks-6">Cơ sở dữ liệu, cache &amp; Aurora</a></li>
+                        <li><a href="#ks-7">Disaster recovery</a></li>
+                        <li><a href="#ks-8">Giám sát, ghi log &amp; dữ liệu nhạy cảm</a></li>
+                        <li><a href="#ks-9">WAF, Shield &amp; Firewall Manager</a></li>
+                        <li><a href="#ks-10">CloudFront: bảo mật &amp; tăng tốc nội dung</a></li>
+                        <li><a href="#ks-11">Dữ liệu lớn, streaming &amp; truy vấn</a></li>
+                        <li><a href="#ks-12">Di trú dữ liệu lớn: Snow Family &amp; Glue</a></li>
+                        <li><a href="#ks-13">Tối ưu vận hành &amp; chi phí compute</a></li>
+                        <li><a href="#ks-14">Case study: nền tảng game serverless</a></li>
+                        <li><a href="#ks-15">Con số cần thuộc</a></li>
+                        <li><a href="#ks-16">Từ khóa nhận diện nhanh</a></li>
+                        <li><a href="#ks-17">Mẹo làm bài thi</a></li>
+                        <li><a href="#ks-18">Bẫy thường gặp</a></li>
+                    </ol>
+                </nav>
+
+                <h3 id="ks-1">1. IAM, kiểm soát truy cập &amp; nhiều tài khoản</h3>
+                <ul>
+                    <li class="knowledge-key">Cần <em>short-lived credentials</em> để đăng nhập MySQL trên RDS: tạo
+                        MySQL user với <code>IDENTIFIED WITH AWSAuthenticationPlugin AS 'RDS'</code> — tên account
+                        CSDL phải trùng tên IAM user/role. Không thể cấu hình MySQL dùng thẳng AWS STS, và lệnh
+                        <code>AUTH</code> là của Redis chứ không phải RDS. <span class="knowledge-qref">Q1</span></li>
+                    <li>Cấp quyền cho EC2 truy cập S3 an toàn nhất: <strong>IAM role gắn vào instance profile</strong>
+                        với least privilege — không lưu access key trên instance, không tạo IAM user riêng cho ứng
+                        dụng, và bucket ACL không nhận EC2 instance ID làm grantee.
+                        <span class="knowledge-qref">Q29</span></li>
+                    <li class="knowledge-key">Giới hạn bucket S3 chỉ cho account trong AWS Organizations, ít effort
+                        nhất: thêm điều kiện <strong><code>aws:PrincipalOrgID</code></strong> vào bucket policy — tự
+                        cập nhật khi tổ chức thêm/bớt account, không cần liệt kê từng account ID.
+                        <code>aws:PrincipalOrgPaths</code> chỉ dùng khi cần giới hạn theo OU cụ thể chứ không phải
+                        toàn bộ Organization; SCP chỉ áp dụng được cho account đã ở trong Organizations nên không
+                        chặn được account ngoài org. <span class="knowledge-qref">Q14, Q34</span></li>
+                    <li>Xác thực nhiều AWS account bằng corporate directory tập trung: (2 đáp án) tạo
+                        <strong>AWS Organizations</strong> (bật mọi tính năng) rồi tạo account thành viên, <em>và</em>
+                        deploy <strong>AWS Directory Service</strong> tích hợp Active Directory công ty rồi dùng
+                        <strong>AWS Identity Center</strong> để SSO. Amazon Cognito Identity Pool sai vì nó cấp quyền
+                        truy cập tài nguyên AWS chứ không xác thực người dùng doanh nghiệp.
+                        <span class="knowledge-qref">Q42</span></li>
+                    <li>Chia sẻ lợi ích một Reserved Instance chưa dùng hết sang account khác: (2 đáp án) bật
+                        <strong>RI sharing</strong> trong billing preferences của <em>chính account đã mua RI</em>
+                        (không phải management account), <em>và</em> lập AWS Organizations rồi mời các account khác
+                        tham gia. AWS RAM không áp dụng cho Reserved Instances (chỉ dùng cho subnet, transit
+                        gateway...). <span class="knowledge-qref">Q45</span></li>
+                </ul>
+
+                <h3 id="ks-2">2. Mạng VPC &amp; kết nối</h3>
+                <ul>
+                    <li>Outbound-only internet cho instance ở private subnet: <strong>NAT gateway</strong> đặt ở
+                        public subnet, route table private subnet trỏ qua NAT, và <strong>Internet Gateway</strong>
+                        phải gắn vào VPC (không gắn IGW vào subnet). Không có cách nào kết nối inbound trực tiếp vào
+                        private subnet từ internet. <span class="knowledge-qref">Q2</span></li>
+                    <li class="knowledge-key">Routing <em>transitive</em> giữa nhiều VPC/account, kiến trúc đơn giản:
+                        <strong>AWS Transit Gateway</strong> + chia sẻ qua <strong>AWS Resource Access Manager
+                            (RAM)</strong>. VPC peering không hỗ trợ transitive routing dù có bao nhiêu connection.
+                        <span class="knowledge-qref">Q5</span></li>
+                    <li>Giới hạn DB chỉ nhận traffic từ application layer: Security Group của DB thêm inbound rule
+                        <em>reference tới Security Group của app layer</em> — SG luôn stateful và chỉ có rule allow,
+                        <strong>không có deny rule</strong> (muốn deny theo CIDR phải dùng NACL). Route table hay VPC
+                        peering không phải công cụ đúng cho việc lọc theo layer này.
+                        <span class="knowledge-qref">Q25</span></li>
+                    <li class="knowledge-key">Inspect toàn bộ traffic bằng virtual firewall appliance của bên thứ ba
+                        trước khi tới web server, ít operational overhead nhất: <strong>Gateway Load Balancer</strong>
+                        trong VPC kiểm tra, cộng <strong>GWLB endpoint</strong> ở inspection VPC để nhận và chuyển
+                        gói tin cho appliance. NLB/ALB không dùng cho packet inspection (chỉ hoạt động Layer 4/7 định
+                        tuyến thường); Transit Gateway chỉ định tuyến, không inspect gói tin.
+                        <span class="knowledge-qref">Q26</span></li>
+                    <li>Cần kết nối private IP nhanh tới on-premises ngay sau khi migrate ứng dụng: cấu hình
+                        <strong>Virtual Private Gateway</strong> để dựng site-to-site VPN — nhanh hơn nhiều so với
+                        Direct Connect (mất nhiều thời gian provision). CloudFront là CDN, không liên quan; Transit
+                        Gateway dùng khi cần hub trung tâm cho nhiều VPC/mạng, không phải yêu cầu ở đây.
+                        <span class="knowledge-qref">Q28</span></li>
+                    <li>Hai VPC ở hai <em>Region khác nhau</em> (us-west-2 và eu-central-1) cần liên lạc riêng tư:
+                        <strong>VPC peering</strong> + cập nhật route table, và inbound rule trong Security Group
+                        của DB (ở Region nhận) phải cho phép theo <em>IP address</em> của app server —
+                        <strong>không thể reference Security Group ID khác Region</strong>, kể cả khi dùng Transit
+                        Gateway peering. <span class="knowledge-qref">Q40</span></li>
+                </ul>
+
+                <h3 id="ks-3">3. Lưu trữ: khối, file dùng chung &amp; object</h3>
+                <ul>
+                    <li>Block storage cho EC2, cần mã hóa at-rest + backup volume-level tự động: dùng
+                        <strong>Amazon EBS</strong> đã mã hóa (instance store bị loại vì non-persistent; EFS/S3
+                        không phải block storage) kết hợp <strong>Data Lifecycle Manager</strong> để tự động hóa
+                        snapshot. <span class="knowledge-qref">Q4</span></li>
+                    <li>Clone dữ liệu production sang test cùng Region, hiệu năng I/O cao <em>ngay lập tức</em>:
+                        snapshot EBS rồi bật <strong>EBS fast snapshot restore (FSR)</strong> trước khi restore
+                        thành volume mới — loại bỏ độ trễ "first touch" khi đọc block lần đầu nên volume mới có ngay
+                        full provisioned performance. EBS Multi-Attach chỉ share volume trong <em>cùng một AZ</em>
+                        nên không giúp tạo bản sao độc lập ở môi trường test.
+                        <span class="knowledge-qref">Q32</span></li>
+                    <li>Ứng dụng lưu blob 6 MB/document trong Oracle RDS làm database phình to, giảm hiệu năng và
+                        tăng chi phí lưu trữ: chuyển các blob ra <strong>Amazon S3</strong>, chỉ giữ metadata trong
+                        DB (mẫu bài toán Write-Once-Read-Many kinh điển). Tăng size instance/storage RDS chỉ tốn
+                        thêm tiền chứ không giải quyết gốc vấn đề; DynamoDB đắt hơn S3 cho use case lưu blob.
+                        <span class="knowledge-qref">Q58</span></li>
+                </ul>
+
+                <h4>Bốn kịch bản FSx &amp; khi nào dùng EFS thay vì FSx</h4>
+                <ul>
+                    <li><strong>FSx for Windows File Server</strong> (SMB): dùng khi workload là .NET/SQL Server cần
+                        shared filesystem <em>Multi-AZ, throughput/IOPS cao</em> <span class="knowledge-qref">Q16</span>;
+                        hỗ trợ SMB client on-premises mount cùng filesystem với EC2 trong VPC qua Direct Connect có
+                        sẵn <span class="knowledge-qref">Q36</span>; hỗ trợ Distributed File System Namespaces
+                        (DFSN) khi migrate shared Microsoft filesystem, với AWS DataSync tự động hóa việc copy dữ
+                        liệu sang FSx <span class="knowledge-qref">Q11, Q8</span>.</li>
+                    <li class="knowledge-key"><strong>Amazon EFS</strong>: NFS, chỉ cho Linux — cần mount target ở
+                        <em>mỗi Availability Zone</em> khi muốn shared storage strong-consistency cho Auto Scaling
+                        group đa AZ <span class="knowledge-qref">Q56, Q59</span>; hỗ trợ replication cross-region qua
+                        <strong>AWS Backup</strong> với RPO khoảng <strong>15 phút</strong> cho hầu hết filesystem,
+                        toàn bộ traffic đi trên AWS global backbone — nếu đề đòi resilient shared filesystem có thể
+                        restore sang Region khác thì EFS Standard là lựa chọn đúng, không phải FSx for Windows hay
+                        FSx for NetApp ONTAP (những dịch vụ này không hỗ trợ cross-region replication kiểu này).
+                        <span class="knowledge-qref">Q43</span></li>
+                </ul>
+
+                <h3 id="ks-4">4. Serverless &amp; tích hợp ứng dụng</h3>
+                <ul>
+                    <li>Migrate API on-premises, cần highly available + scalable + cost-effective: <strong>Amazon
+                            API Gateway</strong> làm frontend cộng <strong>AWS Lambda</strong> làm backend — EC2 với
+                        Auto Scaling/ALB kém cost-effective hơn và khó load balance API; CloudFront chỉ đứng trước
+                        API Gateway chứ không phải nơi để migrate API tới.
+                        <span class="knowledge-qref">Q3</span></li>
+                    <li>Xử lý log file tới 1 GB, ~40 giây/file, tần suất biến động, cần cách <em>cost-effective
+                            nhất</em>: <strong>S3 event notification</strong> gọi trực tiếp <strong>AWS
+                            Lambda</strong>. Đưa qua SQS trước là thừa vì SQS giới hạn message 256 KB nên vẫn phải
+                        lưu file thật trong S3 — dùng event notification thẳng từ S3 đơn giản hơn; không dùng event
+                        notification để trigger Amazon ECS task. <span class="knowledge-qref">Q10</span></li>
+                    <li class="knowledge-key">Ứng dụng Aurora + API Gateway + Lambda chậm khi traffic tăng đột biến,
+                        cần cải thiện scalability với ít cấu hình nhất: tách 2 Lambda function (nhận dữ liệu / ghi
+                        vào DB) qua <strong>Amazon SQS queue</strong> ở giữa — queue giúp decouple, giảm khả năng mất
+                        dữ liệu hoặc outage khi lượng request tăng vọt. Amazon SNS sai vì SNS dùng cho fan-out
+                        broadcast, không phải hàng đợi xử lý tuần tự; không thể chạy code Lambda trên EC2 Tomcat.
+                        <span class="knowledge-qref">Q22</span></li>
+                    <li>Rollout thay đổi lớn cho API mà giảm rủi ro cho user hiện tại, có theo dõi trước khi full
+                        rollout: <strong>API Gateway canary release deployment</strong> — đưa % nhỏ traffic sang
+                        version mới, xác nhận ổn định rồi mới promote canary stage lên production stage. Dùng Route
+                        53 để dịch chuyển DNS dần chậm và phức tạp hơn, DNS propagation cũng không đảm bảo tức thời.
+                        <span class="knowledge-qref">Q44</span></li>
+                    <li>Cấp URL riêng và bảo mật cho từng travel agent dưới cùng một domain, ít operational
+                        complexity nhất: (3 đáp án) đăng ký domain, tạo <strong>wildcard custom domain</strong> trong
+                        Route 53 hosted zone trỏ về API Gateway; request <strong>wildcard ACM certificate cùng
+                            Region</strong> với API Gateway REST API (regional endpoint bắt buộc cert cùng Region);
+                        và tạo <strong>custom domain name trong API Gateway</strong>, import chính certificate đó.
+                        Request certificate ở Region khác chỉ tăng độ phức tạp không cần thiết; tạo hosted zone
+                        hoặc API endpoint riêng cho từng agent làm tăng effort quản lý đáng kể.
+                        <span class="knowledge-qref">Q54</span></li>
+                    <li>Expose một Lambda function cho bên thứ ba gọi vào qua webhook, ít complexity nhất:
+                        <strong>API Gateway endpoint</strong> trỏ thẳng vào Lambda. SNS topic ARN hay SQS queue ARN
+                        không thể được bên ngoài internet invoke trực tiếp; Network Load Balancer không trigger được
+                        Lambda (chỉ Application Load Balancer mới trigger được, và vẫn thêm phức tạp không cần
+                        thiết). <span class="knowledge-qref">Q55</span></li>
+                </ul>
+
+                <h3 id="ks-5">5. Container &amp; Kubernetes</h3>
+                <ul>
+                    <li class="knowledge-key">Ứng dụng containerized trên EC2 kết nối PostgreSQL trên EC2 riêng, cần
+                        tối ưu operational efficiency <em>và</em> performance: (2 đáp án) migrate PostgreSQL sang
+                        <strong>Amazon Aurora</strong> (tương thích PostgreSQL, có thể đạt throughput tới gấp 3 lần
+                        PostgreSQL gốc mà không cần đổi code) <em>và</em> migrate web app sang <strong>AWS
+                            Fargate</strong> với Amazon ECS (serverless, giảm mạnh operational overhead so với tự
+                        quản lý container platform). Gộp app và DB vào chung instance chỉ giảm chi phí chứ không cải
+                        thiện gì khác; CloudFront/ElastiCache không giải quyết bài toán operational overhead ở đây.
+                        <span class="knowledge-qref">Q15</span></li>
+                    <li>Batch job cuối ngày, stateless, có thể re-trigger khi lỗi, cần giảm chi phí và operational
+                        overhead: <strong>Spot Instances</strong> (rẻ hơn On-Demand 70-90%) trong <strong>Amazon EKS
+                            managed node group</strong> (EKS managed node group giảm ops so với tự quản Auto Scaling
+                        group EC2 thuần). <span class="knowledge-qref">Q30</span></li>
+                    <li>EKS control plane bật private access, tắt public access, node ở private subnet nhưng
+                        <em>không join được cluster</em>: tạo <strong>VPC endpoint cho Amazon EKS và Amazon
+                            ECR</strong> để node giao tiếp control plane và pull container image mà không cần ra
+                        internet. Sửa IAM role không giải quyết vấn đề kết nối mạng; VPC peering hay chuyển node
+                        sang public subnet đều sai hướng (và vi phạm chính yêu cầu bảo mật ban đầu).
+                        <span class="knowledge-qref">Q38</span></li>
+                    <li>Mã hóa Kubernetes ConfigMaps &amp; Secrets tại rest trong EKS: tạo <strong>AWS KMS key</strong>
+                        mới rồi bật <strong>EKS KMS secrets encryption</strong> trên cluster (envelope encryption
+                        cho Secrets lưu trong etcd). AWS Secrets Manager không trực tiếp mã hóa dữ liệu trong etcd;
+                        EFS CSI driver chỉ để mount filesystem, không liên quan tới mã hóa secrets.
+                        <span class="knowledge-qref">Q52</span></li>
+                </ul>
+
+                <h3 id="ks-6">6. Cơ sở dữ liệu, cache &amp; Aurora</h3>
+                <ul>
+                    <li class="knowledge-key">Thay thế in-memory caching layer <em>multi-threaded</em> cho database
+                        on-premises: <strong>Amazon ElastiCache Memcached</strong> — engine Memcached hỗ trợ nhiều
+                        core/thread và node lớn, trong khi <strong>Redis không hỗ trợ multiple CPU cores hay
+                            threads</strong>. DynamoDB DAX chỉ dùng riêng cho DynamoDB, không phải cache đứng trước
+                        database khác. <span class="knowledge-qref">Q9</span></li>
+                    <li>Migrate MySQL on-premises lên AWS, cần HA + cải thiện hiệu năng + offload reporting workload,
+                        ít operationally efficient nhất phải cao: <strong>Amazon Aurora MySQL-compatible</strong> +
+                        hướng reporting sang <strong>Aurora Replica</strong> (Aurora hỗ trợ tới
+                        <strong>15 Aurora Replicas</strong> chia sẻ cùng storage volume với primary instance). RDS
+                        MySQL Single-AZ với read replica cùng AZ không đạt HA; tự quản MySQL trên EC2 tốn ops cao
+                        nhất trong các lựa chọn. <span class="knowledge-qref">Q48</span></li>
+                    <li>Multi-tier app chạy 3 Availability Zone, cần scale cho traffic tăng đột biến và giữ HA cho DB
+                        lẫn session/cache: <strong>Amazon RDS PostgreSQL Multi-AZ</strong> + <strong>ElastiCache for
+                            Redis</strong> (replication group quản lý session data và cache reads — Redis có
+                        durability/atomicity mà Memcached không có) + Auto Scaling group trải 3 AZ cho app server.
+                        Aurora single-AZ hay giữ DB tự quản trên EC2 đều không đạt yêu cầu HA đa AZ của đề.
+                        <span class="knowledge-qref">Q51</span></li>
+                    <li>Tự quản MySQL trên EC2, cần co giãn compute lên/xuống theo nhu cầu và cải thiện hiệu
+                        năng/scaling/durability với ít effort vận hành nhất: <strong>Amazon Aurora Serverless (Aurora
+                            MySQL)</strong> — tự động scale compute, có sẵn built-in security, continuous backup, up
+                        to 15 read replicas, automated multi-Region replication. Đổi sang Aurora PostgreSQL đòi thay
+                        đổi schema tương thích; tự dựng EC2 Auto Scaling group cho DB tier vẫn cần quản lý nặng.
+                        <span class="knowledge-qref">Q62</span></li>
+                    <li class="knowledge-key">Mã hóa một RDS database <em>đang chạy và chưa mã hóa</em>, áp dụng cho
+                        cả dữ liệu cũ lẫn mới: không thể bật encryption trực tiếp trên instance đang tồn tại, và
+                        không thể tạo encrypted read replica từ instance chưa mã hóa — phải <strong>snapshot ->
+                            tạo bản copy snapshot đã mã hóa -> restore instance mới từ snapshot mã hóa đó</strong>,
+                        rồi chuyển kết nối ứng dụng sang instance mới. <span class="knowledge-qref">Q64</span></li>
+                </ul>
+
+                <h3 id="ks-7">7. Disaster recovery</h3>
+                <ul>
+                    <li>DR chạy một bản <em>scaled-down nhưng luôn hoạt động</em>, cần giảm recovery time: chiến
+                        lược <strong>Warm standby</strong> — mở rộng từ pilot light bằng cách luôn chạy sẵn hệ
+                        thống thu nhỏ của các thành phần business-critical. Backup and restore rẻ nhất nhưng RTO
+                        dài nhất; Multi-site chạy song song active-active cả on-premises lẫn AWS, tốn kém hơn nhiều
+                        so với yêu cầu đề bài. <span class="knowledge-qref">Q6</span></li>
+                    <li>DR cross-region cho ứng dụng EC2 với <strong>RTO ≤ 4 giờ</strong>, dùng ít resource nhất khi
+                        vận hành bình thường, cost-effective nhất: copy AMI sang secondary Region, dùng
+                        <strong>AWS CloudFormation</strong> để tự động dựng lại hạ tầng khi cần recovery (chỉ site
+                        active mới có instance chạy thật nên rẻ nhất). Tự viết Lambda + custom script khó bảo trì
+                        hơn CloudFormation cho việc deploy hạ tầng; giữ instance chạy sẵn liên tục ở region/AZ phụ
+                        không cost-effective. <span class="knowledge-qref">Q12</span></li>
+                    <li class="knowledge-key">VM PostgreSQL on-premises cần DR với <strong>RPO &lt; 1 phút</strong>
+                        và <strong>RTO ≤ 2 giờ</strong>, chi phí thấp nhất: <strong>warm standby Amazon RDS for
+                            PostgreSQL</strong> + <strong>AWS DMS dùng change data capture (CDC)</strong> để
+                        replicate gần real-time từ on-premises, promote standby thành primary khi có sự cố.
+                        Active-active multi-site với third-party HA solution đắt và phức tạp hơn hẳn; AWS Elastic
+                        Disaster Recovery làm pilot light phù hợp cho server/app chung hơn là chuyên biệt cho
+                        database; backup hàng ngày bằng third-party software qua S3 không đạt RPO dưới 1 phút (có
+                        thể mất dữ liệu tới 24 giờ). <span class="knowledge-qref">Q49</span></li>
+                </ul>
+
+                <h3 id="ks-8">8. Giám sát, ghi log &amp; dữ liệu nhạy cảm</h3>
+                <ul>
+                    <li class="knowledge-key">Cần track configuration changes <em>và</em> lịch sử API call chi tiết
+                        (ai đăng nhập, gọi API gì, request/response nào): <strong>AWS Config</strong> theo dõi
+                        configuration changes (gửi configuration history file mỗi <strong>6 giờ</strong> cho mỗi
+                        loại resource nó record), còn <strong>AWS CloudTrail</strong> ghi lại API call kèm identity,
+                        thời gian, source IP, request parameters và response elements. Amazon CloudWatch không theo
+                        dõi configuration changes hay API call (nó theo dõi performance metrics); Amazon
+                        EventBridge/Amazon Macie không phù hợp cho việc tracking song song này.
+                        <span class="knowledge-qref">Q13, Q33</span></li>
+                    <li>Stream CloudWatch Logs sang Amazon OpenSearch Service gần real-time với LEAST operational
+                        overhead: <strong>CloudWatch Logs subscription</strong> trỏ thẳng tới OpenSearch — thêm
+                        Kinesis Data Firehose hay tự viết Lambda function đều tốn operational overhead hơn vì phải
+                        quản lý thêm một service hoặc tự viết/maintain code. <span class="knowledge-qref">Q18</span>
+                    </li>
+                    <li>So sánh chi phí EC2 hai tháng gần nhất theo instance type, phân tích sâu nguyên nhân vertical
+                        scaling, ít overhead nhất: <strong>Cost Explorer</strong> với granular filtering — dễ truy
+                        cập, có sẵn filter và graph theo khoảng thời gian. AWS Budgets chỉ dùng để cảnh báo khi vượt
+                        ngưỡng; billing dashboard mặc định không đủ granularity; Cost and Usage Report + QuickSight
+                        cho ra kết quả tương tự nhưng operational overhead cao hơn nhiều.
+                        <span class="knowledge-qref">Q20</span></li>
+                    <li>Cần alert ngay khi có API call <code>CreateImage</code> cụ thể được gọi, ít operational
+                        overhead nhất: <strong>Amazon EventBridge rule</strong> bắt sự kiện dựa trên CloudTrail API
+                        call, target là <strong>Amazon SNS topic</strong> gửi alert. Viết Lambda tự query CloudTrail
+                        logs, dùng Athena, hay đẩy CloudTrail logs vào SQS FIFO queue (vốn không hỗ trợ trực tiếp)
+                        đều tốn effort hơn nhiều. <span class="knowledge-qref">Q27</span></li>
+                    <li>Chia sẻ dashboard CloudWatch cho người không có quyền admin trên account (theo nguyên tắc
+                        least privilege): dùng tính năng <strong>Share Dashboard</strong> ngay trong CloudWatch
+                        console, nhập email người nhận, gửi link — không cần tạo IAM user/credentials riêng cho mỗi
+                        người xem, càng không cần dựng bastion server để mở trình duyệt hộ họ.
+                        <span class="knowledge-qref">Q31</span></li>
+                    <li>Tự động phát hiện PHI (protected health information) trong S3 và báo compliance team:
+                        <strong>Amazon Macie</strong> (machine learning phát hiện dữ liệu nhạy cảm) kết hợp
+                        <strong>Amazon EventBridge rule</strong> lọc theo loại Macie finding rồi kích hoạt thông báo
+                        (ví dụ qua Amazon SES) tới compliance team. AWS Security Hub không phát hiện được loại dữ
+                        liệu cụ thể (PHI) nằm trong S3 object nên không đáp ứng yêu cầu đề bài.
+                        <span class="knowledge-qref">Q53</span></li>
+                    <li>Phân tích lỗi <code>Access Denied</code>/<code>Unauthorized</code> từ CloudTrail logs với
+                        LEAST effort: <strong>Amazon QuickSight</strong> kết nối trực tiếp tới S3 bucket nơi
+                        CloudTrail lưu log rồi dựng dashboard trực quan. Viết custom script chạy trên AWS Batch hoặc
+                        AWS Glue, hay dùng Amazon RedShift, đều tốn effort thiết lập và duy trì hơn nhiều.
+                        <span class="knowledge-qref">Q60</span></li>
+                </ul>
+
+                <h3 id="ks-9">9. WAF, Shield &amp; Firewall Manager</h3>
+                <ul>
+                    <li class="knowledge-key">Bảo vệ serverless API (API Gateway) ở <em>2 Region</em> khỏi SQL
+                        injection và cross-site scripting, ít administrative effort nhất: <strong>AWS Firewall
+                            Manager</strong> cấu hình tập trung <strong>AWS WAF rules</strong> áp dụng cho cả hai
+                        Region cùng lúc, tự động áp dụng khi thêm account/resource mới về sau. Tự set WAF riêng lẻ
+                        từng Region tốn effort quản lý rule hơn hẳn; AWS Shield chỉ chống DDoS ở Layer 3/4 của mô
+                        hình OSI, không chống được SQL injection/XSS ở Layer 7.
+                        <span class="knowledge-qref">Q21</span></li>
+                    <li>Web layer có nguy cơ bị tấn công cross-site scripting (XSS): dựng <strong>Application Load
+                            Balancer</strong> rồi bật <strong>AWS WAF</strong> trên đó — AWS WAF chỉ gắn được vào
+                        ALB, <strong>không gắn được vào Classic Load Balancer hay Network Load Balancer</strong>.
+                        AWS Shield Standard chỉ chống DDoS, không chống được XSS.
+                        <span class="knowledge-qref">Q57</span></li>
+                </ul>
+
+                <h3 id="ks-10">10. CloudFront: bảo mật &amp; tăng tốc nội dung</h3>
+                <ul>
+                    <li class="knowledge-key">Ứng dụng 3 tầng (EC2 + ALB + DynamoDB) chậm khi tải cao, cần cải
+                        thiện <em>mà không rearchitect</em>: (2 đáp án) đặt <strong>Amazon CloudFront</strong> trước
+                        ALB để cache content ở edge location toàn cầu, <em>và</em> thêm <strong>DynamoDB Accelerator
+                            (DAX)</strong> làm cache trước DynamoDB table. Chuyển DynamoDB sang Aurora hay chuyển
+                        web app sang AWS Fargate đều là rearchitect thật sự — vi phạm đúng ràng buộc "không
+                        rearchitect" của đề bài. <span class="knowledge-qref">Q35</span></li>
+                    <li>Chỉ học viên đã đăng ký mới xem được tài liệu khóa học trên CloudFront/S3, kèm việc thỉnh
+                        thoảng cấp quyền cho nhiều file/thư mục cùng lúc cho một số học viên nhất định:
+                        <strong>CloudFront signed cookies</strong> — một cookie áp dụng được cho nhiều file trong
+                        một hoặc nhiều thư mục, khác S3 pre-signed URL vốn chỉ cấp quyền cho <em>từng object riêng
+                            lẻ</em> (kém hiệu quả hơn khi cần cấp quyền hàng loạt). S3 object-level encryption chỉ
+                        bảo vệ dữ liệu at-rest chứ không kiểm soát ai được truy cập; CloudFront Field-Level
+                        Encryption dùng để bảo vệ dữ liệu nhạy cảm trong HTTP POST request, không phải để chặn truy
+                        cập nội dung. <span class="knowledge-qref">Q46</span></li>
+                    <li>Phát hành nội dung dần theo từng khu vực, phải <em>chặn hẳn</em> người dùng ở khu vực chưa
+                        được release: <strong>CloudFront geographic restriction</strong> dùng <em>deny list</em> kèm
+                        custom error message. Signed URL/cookie hay mã hóa dữ liệu đều không quan tâm tới vị trí địa
+                        lý người xem nên không đáp ứng đúng yêu cầu. <span class="knowledge-qref">Q50</span></li>
+                </ul>
+
+                <h3 id="ks-11">11. Dữ liệu lớn, streaming &amp; truy vấn</h3>
+                <ul>
+                    <li>Ảnh upload lên S3 -> phân tích demographic -> lưu .CSV ở bucket khác, cần mã hóa at-rest và
+                        query bằng SQL, giải pháp fully serverless: <strong>S3 với AWS KMS encryption</strong> +
+                        <strong>Amazon Athena</strong> để query (Athena serverless, hỗ trợ dữ liệu và kết quả query
+                        đã mã hóa qua KMS). Amazon RedShift Spectrum cần cluster RedShift chạy nền EC2 nên không
+                        serverless; Amazon Managed Service for Apache Flink dùng cho streaming data trong Kinesis
+                        chứ không phải file tĩnh trên S3; QuickSight là dashboard trực quan, không phải công cụ
+                        chạy truy vấn. <span class="knowledge-qref">Q7</span></li>
+                    <li>Reporting/visualize dữ liệu từ cả Amazon S3 lẫn Amazon RDS PostgreSQL trong cùng data lake,
+                        chỉ management team được full access, số còn lại hạn chế: <strong>Amazon QuickSight</strong>
+                        kết nối cả hai nguồn, publish dashboard, rồi <strong>share theo users và groups</strong>
+                        (chi tiết và phù hợp hơn IAM role cho việc phân quyền xem dashboard). AWS Glue + Athena
+                        Federated Query ra được số liệu tổng hợp nhưng thiếu khả năng visualization/dashboard theo
+                        yêu cầu đề bài. <span class="knowledge-qref">Q19</span></li>
+                    <li>Call center cần nhận diện <em>nhiều speaker</em> trong cùng cuộc gọi, sinh transcript, rồi
+                        query transcript bằng SQL để phân tích pattern: <strong>Amazon Transcribe</strong> (chuyển
+                        audio sang text, hỗ trợ multiple speaker recognition) + <strong>Amazon Athena</strong> (SQL
+                        trực tiếp trên S3, serverless). Amazon Rekognition dùng cho ảnh/video (object, scene, face),
+                        không xử lý audio; Amazon Translate chỉ dùng để dịch ngôn ngữ.
+                        <span class="knowledge-qref">Q23</span></li>
+                    <li class="knowledge-key">Thiết bị edge sinh ~1 TB alert/ngày, mỗi entry ~2 KB, cần highly
+                        available, không muốn quản thêm infrastructure, giữ 14 ngày để phân tích rồi archive phần
+                        cũ hơn: <strong>Amazon Kinesis Data Firehose</strong> ingest rồi deliver thẳng vào
+                        <strong>Amazon S3 bucket</strong>, cộng <strong>S3 Lifecycle configuration</strong> chuyển
+                        data sang S3 Glacier sau 14 ngày (Firehose tự load thẳng tới đích, không cần hạ tầng trung
+                        gian). Thêm fleet EC2 + ALB nghĩa là phải provision thêm infrastructure — trái yêu cầu; đẩy
+                        vào OpenSearch rồi manual snapshot + xóa dữ liệu cũ hơn 14 ngày là <em>xóa</em> chứ không
+                        phải <em>archive</em>; dùng SQS standard queue buộc phải tự viết consumer poll và kiểm tra
+                        tuổi message, tức vẫn phải quản thêm hạ tầng xử lý.
+                        <span class="knowledge-qref">Q24</span></li>
+                    <li>Dữ liệu shipment cập nhật mỗi vài giây, cần real-time analysis để dự đoán delay rồi đổ vào
+                        S3-based data lake, ưu tiên operational efficiency nhất: <strong>Amazon Kinesis Data
+                            Firehose</strong> ingest tốc độ cao (capture/transform/load thẳng vào S3) kết hợp
+                        <strong>Amazon Managed Service for Apache Flink</strong> để phân tích streaming real-time.
+                        Kinesis Data Streams + Lambda vẫn phải tự quản lý và scale stream consumer; AWS Direct
+                        Connect không phải công cụ ingest dữ liệu tốc độ cao; Amazon SQS + Amazon EMR không phù hợp
+                        cho phân tích real-time. <span class="knowledge-qref">Q41</span></li>
+                </ul>
+
+                <h3 id="ks-12">12. Di trú dữ liệu lớn: Snow Family &amp; AWS Glue</h3>
+                <ul>
+                    <li>45 TB dữ liệu cần chuyển vào cloud, đường truyền internet đã saturated, công ty chấp nhận
+                        pause ứng dụng transform hàng tuần và muốn bắt đầu transfer càng sớm càng tốt, transform
+                        job phải tiếp tục chạy được trên cloud, ít operational overhead nhất: order
+                        <strong>1 AWS Snowball Edge Storage Optimized device</strong> để copy dữ liệu vật lý (mạng
+                        đã saturated nên AWS DataSync — vốn là dịch vụ transfer online — không khả thi), rồi tạo
+                        transformation job bằng <strong>AWS Glue</strong> (managed service, ít vận hành hơn tự chạy
+                        job trên EC2 instance như phương án Snowball Edge kèm compute).
+                        <span class="knowledge-qref">Q61</span></li>
+                    <li class="knowledge-key">500 TB dữ liệu, băng thông internet thấp, phải hoàn tất trong vài
+                        tuần, cần giải pháp <em>MOST cost-effective</em>: <strong>7 AWS Snowball appliances</strong>
+                        (mỗi Snowball Edge chứa được tới <strong>80 TB</strong>, nên 500 TB ÷ 80 TB ≈ 7 thiết bị)
+                        chọn <strong>Amazon S3 bucket</strong> làm đích (Snowball <em>không thể</em> chọn thẳng một
+                        S3 Glacier vault làm đích), sau đó dùng <strong>S3 Lifecycle policy</strong> để chuyển các
+                        object sang S3 Glacier. AWS Direct Connect mất nhiều thời gian setup và không cost-effective
+                        bằng; AWS Global Accelerator không tăng tốc upload từ mạng on-premises băng thông thấp.
+                        <span class="knowledge-qref">Q65</span></li>
+                </ul>
+
+                <h3 id="ks-13">13. Tối ưu vận hành &amp; chi phí compute</h3>
+                <ul>
+                    <li>Patch/update phần mềm bên thứ ba khẩn cấp cho hàng nghìn EC2 instance, cần vá <em>càng
+                            nhanh càng tốt</em> để remediate lỗ hổng bảo mật: <strong>AWS Systems Manager Patch
+                            Manager</strong> — được thiết kế sẵn để scan/patch instance theo tag hàng loạt, nhanh và
+                        có sẵn (không cần custom code). Maintenance Windows chỉ phù hợp khi cần patch trong <em>một
+                            khung giờ cố định</em>, không phải "ngay lập tức"; tự viết Lambda function để config và
+                        validate lại patch tốn effort code hơn hẳn. <span class="knowledge-qref">Q17</span></li>
+                    <li>Cần cài đặt một công cụ tùy ý (không phải patch định kỳ) trên <strong>500 EC2
+                            instance</strong> nhanh và hiệu quả nhất, việc này còn lặp lại về sau và phải scale khi
+                        thêm instance mới: <strong>AWS Systems Manager Run Command</strong> — chạy cùng một command
+                        trên nhóm lớn instance mà không cần SSH riêng lẻ vào từng máy hay quản access key.
+                        <span class="knowledge-qref">Q37</span></li>
+                    <li>Đảm bảo mọi AWS resource — kể cả resource <em>chưa được gắn tag</em> — đều được backup đầy
+                        đủ, ít operational overhead nhất: <strong>AWS Config</strong> tự động phát hiện resource
+                        thiếu tag và gắn tag theo chương trình, kết hợp <strong>AWS Backup</strong> tự động backup
+                        theo tag (trung tâm hóa qua policy, quản lý qua một dashboard). Tự tìm thủ công hoặc để từng
+                        account owner tự lo đều thiếu nhất quán và tốn effort hơn nhiều; tự viết Lambda quét định kỳ
+                        vẫn phải code và maintain script riêng thay vì dùng sẵn AWS Config.
+                        <span class="knowledge-qref">Q39</span></li>
+                    <li class="knowledge-key">Auto Scaling group co giãn từ 2 lên tới 20 instance theo giờ hành
+                        chính, nhưng ứng dụng <em>chậm hẳn vào đầu giờ sáng</em> dù chạy tốt vào giữa buổi — cần vừa
+                        khắc phục hiệu năng vừa giữ chi phí thấp nhất: <strong>target tracking scaling policy</strong>
+                        với ngưỡng CPU <em>thấp hơn</em> hiện tại, cộng <strong>giảm cooldown period</strong> —
+                        scale ra trước khi CPU chạm ngưỡng ảnh hưởng hiệu năng, đồng thời terminate instance thừa
+                        nhanh hơn để tiết kiệm chi phí. Scheduled action đặt desired/min-max = 20 trước giờ mở cửa
+                        vẫn giữ nguyên 20 instance chạy suốt cả ngày dù nhu cầu thực tế thấp hơn — không
+                        cost-effective; AWS khuyến nghị dùng target tracking thay vì step scaling cho hầu hết
+                        trường hợp. <span class="knowledge-qref">Q63</span></li>
+                </ul>
+
+                <h3 id="ks-14">14. Case study: nền tảng game serverless</h3>
+                <p class="knowledge-intro">
+                    Câu hỏi 3-đáp-án đúng <span class="knowledge-qref">Q47</span> gói gọn một pattern kiến trúc
+                    serverless đầy đủ cho ứng dụng có traffic khó đoán, đáng nhớ nguyên khối:
+                </p>
+                <ul>
+                    <li><strong>Compute + dữ liệu:</strong> <strong>AWS Lambda</strong> đọc player info từ
+                        <strong>Amazon DynamoDB</strong>, phía trước là <strong>Amazon API Gateway</strong> làm REST
+                        endpoint gọi Lambda — mô hình pay-per-use này hợp với traffic <em>không đoán trước được, có
+                            lúc idle kéo dài</em> hơn hẳn so với chạy Amazon ECS đứng sau Application Load Balancer
+                        (vốn luôn cần capacity sẵn sàng, tốn kém hơn khi idle).</li>
+                    <li><strong>Xác thực người dùng:</strong> <strong>Amazon Cognito User Pools</strong> xử lý
+                        sign-up/sign-in để đảm bảo chỉ người đã mua game mới login được — khác hẳn
+                        <strong>Cognito Identity Pools</strong>, vốn chỉ dùng để <em>cấp quyền truy cập tài nguyên
+                            AWS</em> chứ không xác thực người dùng.</li>
+                    <li><strong>Frontend:</strong> <strong>AWS Amplify</strong> host giao diện HTML/CSS/JS với tích
+                        hợp sẵn cấu hình <strong>Amazon CloudFront</strong> để phân phối toàn cầu — triển khai tự
+                        động hơn so với tự dựng riêng S3 static website hosting rồi tự cấu hình CloudFront.</li>
+                </ul>
+
+                <h3 id="ks-15">15. Con số cần thuộc</h3>
+                <div class="knowledge-table-wrap">
+                    <table class="knowledge-table">
+                        <thead><tr><th>Con số</th><th>Ý nghĩa</th></tr></thead>
+                        <tbody>
+                            <tr><td>6 giờ</td><td>AWS Config gửi configuration history file mỗi 6 giờ cho mỗi loại resource nó record <span class="knowledge-qref">Q13</span></td></tr>
+                            <tr><td>RPO &lt; 1 phút, RTO ≤ 2 giờ</td><td>Ngưỡng đòi warm standby RDS + AWS DMS CDC, không phải backup định kỳ hay pilot light <span class="knowledge-qref">Q49</span></td></tr>
+                            <tr><td>RPO ~15 phút</td><td>Mức RPO điển hình của Amazon EFS cross-region replication qua AWS Backup <span class="knowledge-qref">Q43</span></td></tr>
+                            <tr><td>RTO ≤ 4 giờ</td><td>Đủ để dùng AMI copy cross-region + CloudFormation thay vì instance chạy sẵn 24/7 <span class="knowledge-qref">Q12</span></td></tr>
+                            <tr><td>~1 TB/ngày, entry ~2 KB, giữ 14 ngày</td><td>Ngưỡng điển hình cho Kinesis Data Firehose -> S3 -> Lifecycle sang Glacier <span class="knowledge-qref">Q24</span></td></tr>
+                            <tr><td>45 TB, mạng saturated</td><td>Đủ lớn để dùng 1 Snowball Edge Storage Optimized thay vì DataSync online <span class="knowledge-qref">Q61</span></td></tr>
+                            <tr><td>500 TB / 80 TB mỗi thiết bị ≈ 7 thiết bị</td><td>Cách tính số lượng Snowball Edge cần dùng cho khối lượng cực lớn qua mạng băng thông thấp <span class="knowledge-qref">Q65</span></td></tr>
+                            <tr><td>Tới 15 Aurora Replicas</td><td>Số read replica Aurora hỗ trợ, chia sẻ chung storage volume với primary — dùng để offload reporting <span class="knowledge-qref">Q48, Q62</span></td></tr>
+                            <tr><td>500 EC2 instances</td><td>Quy mô điển hình cần Systems Manager Run Command thay vì SSH thủ công từng máy <span class="knowledge-qref">Q37</span></td></tr>
+                            <tr><td>2 -> 20 instances theo giờ hành chính</td><td>Auto Scaling group co giãn cố định — vấn đề hiệu năng đầu giờ nằm ở ngưỡng CPU/cooldown, không phải scheduled action <span class="knowledge-qref">Q63</span></td></tr>
+                            <tr><td>~6 MB/document, 12 TB EBS storage</td><td>Ngưỡng blob trong RDS Oracle nên tách ra lưu ở S3, chỉ giữ metadata trong DB <span class="knowledge-qref">Q58</span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3 id="ks-16">16. Từ khóa nhận diện nhanh</h3>
+                <div class="knowledge-table-wrap">
+                    <table class="knowledge-table">
+                        <thead><tr><th>Từ khóa trong đề</th><th>Hướng đáp án</th></tr></thead>
+                        <tbody>
+                            <tr><td>short-lived credentials cho RDS</td><td>IAM database authentication (AWSAuthenticationPlugin)</td></tr>
+                            <tr><td>outbound only, không public/inbound</td><td>NAT Gateway + Internet Gateway ở VPC</td></tr>
+                            <tr><td>transitive routing nhiều VPC/account</td><td>AWS Transit Gateway + AWS RAM</td></tr>
+                            <tr><td>inspect traffic trước web server, virtual appliance</td><td>Gateway Load Balancer + GWLB endpoint</td></tr>
+                            <tr><td>chỉ account trong Organizations, ít effort nhất</td><td>aws:PrincipalOrgID trong resource policy</td></tr>
+                            <tr><td>xác thực nhiều account qua corporate directory tập trung</td><td>AWS Directory Service + AWS Identity Center</td></tr>
+                            <tr><td>chia sẻ Reserved Instance chưa dùng hết</td><td>Bật RI sharing ở account đã mua RI, trong AWS Organizations</td></tr>
+                            <tr><td>clone dữ liệu nhanh, hiệu năng I/O đầy đủ ngay</td><td>EBS fast snapshot restore (FSR)</td></tr>
+                            <tr><td>SMB + managed + Windows workload</td><td>Amazon FSx for Windows File Server</td></tr>
+                            <tr><td>NFS + đa AZ + strong consistency</td><td>Amazon EFS (mount target mỗi AZ)</td></tr>
+                            <tr><td>multi-threaded in-memory cache</td><td>Amazon ElastiCache Memcached (không phải Redis)</td></tr>
+                            <tr><td>"least operational overhead", "fully managed"</td><td>Đẩy về dịch vụ serverless/managed nhất (Aurora Serverless &gt; Aurora &gt; RDS &gt; tự quản trên EC2)</td></tr>
+                            <tr><td>gradually roll out API, theo dõi trước khi full rollout</td><td>API Gateway canary release deployment</td></tr>
+                            <tr><td>VPC peering cross-region + Security Group</td><td>Không reference được SG khác Region — phải dùng inbound rule theo IP</td></tr>
+                            <tr><td>PHI/PII trong S3, tự động phát hiện + báo cáo</td><td>Amazon Macie + Amazon EventBridge rule</td></tr>
+                            <tr><td>giảm latency mà không rearchitect</td><td>CloudFront + DynamoDB Accelerator (DAX) đặt trước tài nguyên hiện có</td></tr>
+                            <tr><td>cấp quyền cho nhiều file/thư mục cùng lúc</td><td>CloudFront signed cookies (không phải pre-signed URL từng object)</td></tr>
+                            <tr><td>chặn truy cập theo khu vực địa lý</td><td>CloudFront geographic restriction (deny list)</td></tr>
+                            <tr><td>network saturated, cần di trú dữ liệu rất lớn</td><td>AWS Snowball/Snowball Edge, không phải DataSync</td></tr>
+                            <tr><td>mã hóa một RDS instance đang chạy chưa mã hóa</td><td>snapshot -> copy mã hóa -> restore (không có cách bật trực tiếp)</td></tr>
+                            <tr><td>xác thực người dùng cuối (sign-up/sign-in) cho ứng dụng</td><td>Cognito User Pools (không phải Identity Pools)</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3 id="ks-17">17. Mẹo làm bài thi</h3>
+                <ul>
+                    <li><strong>Đọc câu hỏi cuối trước, rồi mới đọc tình huống.</strong> Xác định ngay đề đang hỏi
+                        "LEAST operational overhead", "MOST cost-effective" hay "LEAST amount of effort" sẽ giúp
+                        loại nhanh các đáp án đúng về mặt kỹ thuật nhưng thừa công sức vận hành.</li>
+                    <li class="knowledge-key"><strong>"Fully managed"/"least operational overhead" luôn đẩy về
+                            dịch vụ càng tự động càng tốt.</strong> Aurora Serverless hơn Aurora, Aurora hơn RDS,
+                        RDS hơn tự quản database trên EC2; Fargate hơn EC2 thuần cho container; managed rule/policy
+                        (Config, Backup, Systems Manager) hơn tự viết Lambda script.</li>
+                    <li><strong>Phân biệt CloudTrail và AWS Config theo đúng chiều.</strong> CloudTrail trả lời "ai
+                        đã gọi API gì, khi nào, từ IP nào"; AWS Config trả lời "resource đang được cấu hình ra
+                        sao, có đổi so với trước không". Nhầm chiều là sai ngay lập tức.
+                        <span class="knowledge-qref">Q13, Q33</span></li>
+                    <li><strong>"Select TWO/THREE" phần lớn là các bước bổ trợ của cùng một giải pháp, không phải
+                            lựa chọn độc lập.</strong> Q15 (Aurora + Fargate), Q35 (CloudFront + DAX), Q42
+                        (Organizations + Directory Service), Q45 (bật RI sharing + tạo Organizations), Q47 (Lambda +
+                        Cognito User Pools + Amplify), Q54 (domain + certificate + custom domain API Gateway) đều là
+                        những mảnh ghép cần <em>cả hai/ba</em> mới trọn vẹn giải pháp.</li>
+                    <li><strong>Custom domain cho API Gateway REST API luôn cần ACM certificate cùng Region.</strong>
+                        Request certificate ở Region khác là sai ngay, dù về mặt kỹ thuật certificate vẫn tồn tại.
+                        <span class="knowledge-qref">Q54</span></li>
+                    <li><strong>Khi đề có DR: định vị RTO/RPO cụ thể trước khi chọn chiến lược.</strong> Số càng
+                        nhỏ (RPO tính bằng phút, RTO vài giờ) thì chiến lược càng gần active-active/warm standby;
+                        số lớn (RPO/RTO tính bằng giờ/ngày) mới cân nhắc backup and restore hay pilot light.
+                        <span class="knowledge-qref">Q6, Q12, Q49</span></li>
+                    <li><strong>"Không rearchitect"/"minimal configuration effort" là ràng buộc cứng, không phải gợi
+                            ý.</strong> Đáp án nghe hay nhưng đổi hẳn loại database hay compute layer (như đổi
+                        DynamoDB sang Aurora, hay EC2 sang Fargate khi đề không yêu cầu) đều bị loại ngay cả khi kỹ
+                        thuật đúng. <span class="knowledge-qref">Q35</span></li>
+                </ul>
+
+                <h3 id="ks-18">18. Bẫy thường gặp</h3>
+                <ul>
+                    <li class="knowledge-key"><strong>CloudTrail và AWS Config bị hoán đổi vai trò.</strong> Đề nào
+                        cho "AWS CloudTrail để tract configuration changes, AWS Config để record API calls" là đã
+                        đảo ngược — đúng phải là chiều ngược lại. <span class="knowledge-qref">Q13, Q33</span></li>
+                    <li class="knowledge-key"><strong>Cognito Identity Pools bị nhầm dùng để xác thực người
+                            dùng.</strong> Identity Pools chỉ cấp quyền truy cập tài nguyên AWS (temporary AWS
+                        credentials); xác thực người dùng cuối (sign-up/sign-in) phải là Cognito User Pools.
+                        <span class="knowledge-qref">Q42, Q47</span></li>
+                    <li><strong>Security Group reference chỉ hoạt động trong cùng một Region.</strong> Muốn cho
+                        phép traffic từ app server ở Region khác vào DB, phải dùng inbound rule theo dải IP address,
+                        không thể reference Security Group ID của Region khác — kể cả khi nối qua Transit Gateway
+                        peering. <span class="knowledge-qref">Q40</span></li>
+                    <li><strong>Amazon FSx for Windows File Server không hỗ trợ cross-region replication.</strong>
+                        Cần shared filesystem có thể khôi phục sang Region khác thì phải chọn Amazon EFS Standard,
+                        không phải các biến thể FSx. <span class="knowledge-qref">Q43</span></li>
+                    <li><strong>Amazon EFS chỉ dùng được cho NFS/Linux.</strong> Nghe "shared file system" chung
+                        chung rất dễ chọn nhầm EFS cho workload Windows/SMB — trường hợp đó luôn phải là FSx for
+                        Windows File Server. <span class="knowledge-qref">Q16, Q36</span></li>
+                    <li><strong>AWS Snowball chỉ chọn được Amazon S3 bucket làm đích, không thể chọn thẳng một S3
+                            Glacier vault.</strong> Muốn dữ liệu vào Glacier vẫn phải đổ vào S3 bucket trước rồi
+                        dùng Lifecycle policy chuyển tiếp. <span class="knowledge-qref">Q65</span></li>
+                    <li><strong>Không có cách bật encryption trực tiếp trên một RDS instance đang chạy, cũng không
+                            tạo được encrypted read replica từ instance chưa mã hóa.</strong> Luôn phải đi qua vòng
+                        snapshot -> copy mã hóa -> restore. <span class="knowledge-qref">Q64</span></li>
+                    <li><strong>AWS WAF chỉ gắn được vào Application Load Balancer.</strong> Đề nào đưa phương án
+                        Classic Load Balancer hay Network Load Balancer kèm "enable AWS WAF" là sai kỹ thuật ngay,
+                        không cần xét tiếp yêu cầu khác của đề. <span class="knowledge-qref">Q57</span></li>
+                    <li><strong>AWS Shield chỉ chống DDoS (Layer 3/4), không chống SQL injection/XSS (Layer 7).</strong>
+                        Vai trò chống tấn công ứng dụng web luôn thuộc về AWS WAF, không phải Shield (kể cả Shield
+                        Advanced). <span class="knowledge-qref">Q21, Q57</span></li>
+                    <li><strong>Amazon Athena và Amazon QuickSight không phải công cụ ETL/transform.</strong> Khi đề
+                        yêu cầu một "custom transformation job" thực thụ chạy trên cloud, dịch vụ đúng là AWS Glue,
+                        không phải chỉ dừng ở việc query hay visualize dữ liệu. <span class="knowledge-qref">Q61</span></li>
+                </ul>
+
+            </div>
+        </section>
+
 
         <footer class="site-footer">
             Nguồn: <a href="https://tainguyensieure.com" target="_blank">tainguyensieure.com</a>
@@ -764,6 +1574,10 @@
             document.getElementById("pass-percent").innerHTML = passPercent || "0";
             totalNumberOfQuestions = questionData.length;
 
+            // Tag with stable original order BEFORE shuffling, so on-screen questions
+            // can be cross-referenced against the Q<n> labels in the study summary panels below.
+            questionData.forEach((q, idx) => { q.__refNum = idx + 1; });
+
             // Shuffle questions
             for (let i = questionData.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -777,7 +1591,7 @@
         }
 
         function formatSingleQuestionData(singleQuizData) {
-            const { prompt, correct_response, id } = singleQuizData;
+            const { prompt, correct_response, id, __refNum } = singleQuizData;
             const answers = (prompt && prompt.answers) || [];
             const feedbacks = (prompt && prompt.feedbacks) || [];
             // Guard: correct_response might be empty or missing
@@ -802,6 +1616,7 @@
 
             return {
                 id,
+                refNum: __refNum,
                 question,
                 answers,
                 feedbacks,
@@ -813,7 +1628,7 @@
         }
 
         const renderSingleQuestion = (data, num) => {
-            const { id, answers, feedbacks, correctAnswerIndex, correctAnswerIndices, isMultiAnswer, question } = data;
+            const { id, refNum, answers, feedbacks, correctAnswerIndex, correctAnswerIndices, isMultiAnswer, question } = data;
             let { explanation } = data;
             // Skip questions with no answer options (unsupported types like fill-in-the-blank)
             if (!answers || answers.length === 0) {
@@ -871,7 +1686,7 @@
             container.innerHTML = `
                     <form data-correct-answer="${shuffledCorrectIndex}" data-correct-answers="${shuffledCorrectIndices.join(',')}" data-is-multi="${isMultiAnswer}" data-question-id="${id}" class="single-question-container" onsubmit="submitButtonListener(event)">
                         <div class="question-header">
-                            <span class="question-number">Question ${num} ${multiHint}</span>
+                            <span class="question-number">Question ${num}${refNum ? ` <span class="question-refcode" title="Mã tham chiếu cố định — dùng để tra trong bảng tổng hợp bên dưới">Q${refNum}</span>` : ''} ${multiHint}</span>
                             ${explanation ? `<button type="button" onclick="renderExplanation('${id}')" class="explanation-btn">💡 Explanation</button>` : ''}
                         </div>
                         <div class="question-text">${question}</div>
@@ -978,6 +1793,16 @@
                 if (event.target === dialog) dialog.close();
             }, { once: true });
         }
+
+        (function () {
+            const toggle = document.getElementById("knowledge-toggle");
+            const content = document.getElementById("knowledge-content");
+            toggle.addEventListener("click", () => {
+                const willOpen = content.hidden;
+                content.hidden = !willOpen;
+                toggle.setAttribute("aria-expanded", String(willOpen));
+            });
+        })();
     </script>
 </body>
 
