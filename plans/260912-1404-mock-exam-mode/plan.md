@@ -1,7 +1,7 @@
 ---
 title: "Chế độ thi thử (Mock Exam Mode) + lịch sử vào IndexedDB"
 description: "Thêm chế độ thi thử cho cả 6 quiz: trả lời hết 65 câu rồi mới nộp, xem điểm và các câu sai, lưu lịch sử mỗi lần thi vào IndexedDB kèm màn hình xem lại."
-status: pending
+status: in-progress
 priority: P1
 effort: "~3 phases"
 tags: [frontend, feature]

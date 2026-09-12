@@ -19,19 +19,19 @@ này không sửa các phần đó, chỉ thêm mới.
 
 ## Requirements
 
-- [ ] Nút chuyển chế độ "Luyện tập ⇄ Thi thử", mặc định Luyện tập.
-- [ ] Ở chế độ Thi thử: ẩn nút submit từng câu, cho chọn đáp án tự do, có nút
+- [x] Nút chuyển chế độ "Luyện tập ⇄ Thi thử", mặc định Luyện tập.
+- [x] Ở chế độ Thi thử: ẩn nút submit từng câu, cho chọn đáp án tự do, có nút
       "Nộp bài thi" cố định (sticky) luôn bật.
-- [ ] Nộp bài chấm toàn bộ 65 câu cùng lúc bằng logic chấm đã có (không viết
+- [x] Nộp bài chấm toàn bộ 65 câu cùng lúc bằng logic chấm đã có (không viết
       lại), kể cả câu chưa chọn đáp án (tính sai).
-- [ ] Sau khi nộp: hiện bảng kết quả (điểm %, đúng/sai) + danh sách câu sai
+- [x] Sau khi nộp: hiện bảng kết quả (điểm %, đúng/sai) + danh sách câu sai
       dạng link nhảy tới đúng câu (theo `Q<n>` ổn định).
-- [ ] Lưu attempt vào IndexedDB (`saa-practice-history` / store `attempts`),
+- [x] Lưu attempt vào IndexedDB (`saa-practice-history` / store `attempts`),
       đọc lại được sau khi tải lại trang.
-- [ ] Bảng "Lịch sử thi thử" ẩn/hiện (giống UI `#knowledge-summary`), liệt kê
+- [x] Bảng "Lịch sử thi thử" ẩn/hiện (giống UI `#knowledge-summary`), liệt kê
       các lần thi trước của Quiz 1, mới nhất trước.
-- [ ] Chuyển chế độ khi đang có lựa chọn dở dang → xác nhận trước khi reset.
-- [ ] Giữ nguyên CRLF, không có lỗi console, chế độ Luyện tập cũ không đổi.
+- [x] Chuyển chế độ khi đang có lựa chọn dở dang → xác nhận trước khi reset.
+- [x] Giữ nguyên CRLF, không có lỗi console, chế độ Luyện tập cũ không đổi.
 
 ## Implementation Steps
 
@@ -189,23 +189,23 @@ lịch sử ở phase này (YAGNI — chỉ xem).
 
 ## Todo
 
-- [ ] Rút `gradeQuestion(form)` từ `submitButtonListener`, xác nhận chế độ
+- [x] Rút `gradeQuestion(form)` từ `submitButtonListener`, xác nhận chế độ
       Luyện tập chấm giống hệt như trước (so kết quả trước/sau refactor).
-- [ ] Thêm `#mode-toggle-container` + CSS `.mode-btn`/`.mode-btn-active` +
+- [x] Thêm `#mode-toggle-container` + CSS `.mode-btn`/`.mode-btn-active` +
       JS chuyển `examMode`, có `confirm()` khi có lựa chọn dở dang.
-- [ ] Thêm `body.exam-mode` CSS ẩn nút submit từng câu, hiện `#exam-submit-bar`.
-- [ ] Thêm guard `if (examMode) return` đầu `submitButtonListener`.
-- [ ] Dựng `refNumByQuestionId` map trong `main()`.
-- [ ] Viết `submitExam()` + `renderExamResults()`, gắn `id="q-refnum-${n}"`
+- [x] Thêm `body.exam-mode` CSS ẩn nút submit từng câu, hiện `#exam-submit-bar`.
+- [x] Thêm guard `if (examMode) return` đầu `submitButtonListener`.
+- [x] Dựng `refNumByQuestionId` map trong `main()`.
+- [x] Viết `submitExam()` + `renderExamResults()`, gắn `id="q-refnum-${n}"`
       lên mỗi question container.
-- [ ] Viết `openHistoryDb`/`saveAttemptToHistory`/`loadHistory` (IndexedDB).
-- [ ] Thêm `#exam-history-summary` (toggle ẩn/hiện + bảng lịch sử).
-- [ ] Build + chạy Playwright: chọn 65 câu ở chế độ thi thử, nộp bài, kiểm
+- [x] Viết `openHistoryDb`/`saveAttemptToHistory`/`loadHistory` (IndexedDB).
+- [x] Thêm `#exam-history-summary` (toggle ẩn/hiện + bảng lịch sử).
+- [x] Build + chạy Playwright: chọn 65 câu ở chế độ thi thử, nộp bài, kiểm
       tra điểm/đúng/sai đúng, danh sách câu sai nhảy đúng chỗ, tải lại trang
       thấy lịch sử vẫn còn (attempt đã lưu), chuyển lại Luyện tập vẫn hoạt
       động như cũ, Quiz 2-6 và các bảng có sẵn (Kiến thức cần nhớ, Vì sao
       đáp án sai) không bị ảnh hưởng, 0 lỗi console.
-- [ ] Screenshot gửi người dùng xác nhận UI trước khi sang Phase 2.
+- [x] Screenshot gửi người dùng xác nhận UI trước khi sang Phase 2.
 
 ## Success Criteria
 
