@@ -1745,7 +1745,7 @@
                     "Thi thử" ở trên và nộp bài để lưu lại lịch sử.</p>
                 <div class="knowledge-table-wrap" id="exam-history-table-wrap" hidden>
                     <table class="knowledge-table exam-history-table">
-                        <thead><tr><th>Thời gian</th><th>Điểm</th><th>Đúng</th><th>Sai</th></tr></thead>
+                        <thead><tr><th>Thời gian</th><th>Điểm</th><th>Đúng</th><th>Sai</th><th>Câu sai</th></tr></thead>
                         <tbody id="exam-history-tbody"></tbody>
                     </table>
                 </div>
@@ -2144,7 +2144,11 @@
                     ? Number((a.correctCount / a.totalQuestions) * 100).toFixed(1)
                     : 0;
                 const dateStr = new Date(a.timestamp).toLocaleString("vi-VN");
-                return `<tr><td>${dateStr}</td><td>${scorePercent}%</td><td>${a.correctCount}</td><td>${a.wrongCount}</td></tr>`;
+                const wrongRefNums = Array.isArray(a.wrongRefNums) ? a.wrongRefNums : [];
+                const wrongLinks = wrongRefNums.length > 0
+                    ? wrongRefNums.map(n => `<a href="#q-refnum-${n}">Q${n}</a>`).join("")
+                    : '<span style="color: var(--text-muted); font-size: 13px;">Không có</span>';
+                return `<tr><td>${dateStr}</td><td>${scorePercent}%</td><td>${a.correctCount}</td><td>${a.wrongCount}</td><td><div class="exam-wrong-list">${wrongLinks}</div></td></tr>`;
             }).join("");
         }
 
