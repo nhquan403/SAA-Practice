@@ -955,6 +955,26 @@
             }
         }
 
+        /* ── Wrong Answer Analysis ── */
+        #wronganswers-summary {
+            margin-top: 32px;
+        }
+
+        .wronganswer-table td ul {
+            margin: 0;
+            padding-left: 16px;
+        }
+
+        .wronganswer-table td li {
+            margin-bottom: 6px;
+            font-size: 13px;
+            line-height: 1.55;
+        }
+
+        .wronganswer-table td li:last-child {
+            margin-bottom: 0;
+        }
+
         /* ── Exam Mode ── */
         #mode-toggle-container {
             display: flex;
@@ -1648,6 +1668,356 @@
             </div>
         </section>
 
+        <section id="wronganswers-summary">
+            <button type="button" id="wronganswers-toggle" class="knowledge-toggle" aria-expanded="false"
+                aria-controls="wronganswers-content">
+                <span><span aria-hidden="true">🧩</span> Vì sao các đáp án sai lại sai (phân tích cả 65 câu)</span>
+                <span class="knowledge-chevron" aria-hidden="true">▼</span>
+            </button>
+
+            <div id="wronganswers-content" class="knowledge-content" role="region"
+                aria-labelledby="wronganswers-toggle" hidden>
+
+                <p class="knowledge-intro">
+                    Học đáp án đúng chỉ giải được đúng câu đó. Hiểu vì sao từng đáp án sai lại sai giúp nhận diện được
+                    cả họ câu hỏi tương tự, kể cả khi đề đổi cách hỏi. Mỗi dòng dưới đây là một câu, liệt kê các đáp
+                    án sai và lý do sai thật sự — đúc kết từ chính phần giải thích của đề, không phải suy đoán.
+                </p>
+                <div class="knowledge-table-wrap">
+                    <table class="knowledge-table wronganswer-table">
+                        <thead><tr><th>Câu</th><th>Đáp án sai &amp; vì sao sai</th></tr></thead>
+                        <tbody>
+                            <tr><td>Q1</td><td><ul>
+                                <li><strong>S3 access logging + data events:</strong> server access logging không có tùy chọn chọn data events hay log file validation</li>
+                                <li><strong>S3 access logging + management events:</strong> server access logging không có tùy chọn chọn management events hay log file validation</li>
+                                <li><strong>CloudTrail + management events:</strong> phải log data events (truy cập object) chứ không phải management events</li>
+                            </ul></td></tr>
+                            <tr><td>Q2</td><td><ul>
+                                <li><strong>Direct Connect giữa hai VPC:</strong> DX dùng để nối on-premises với AWS, không nối VPC với VPC</li>
+                                <li><strong>ClassicLink:</strong> dùng để nối EC2-Classic với VPC, không liên quan việc truyền dữ liệu giữa hai VPC</li>
+                                <li><strong>AWS RAM:</strong> dùng để chia sẻ tài nguyên, API không phải là resource chia sẻ được qua RAM</li>
+                            </ul></td></tr>
+                            <tr><td>Q3</td><td><ul>
+                                <li><strong>Amazon EBS:</strong> không hỗ trợ tốt truy cập đồng thời từ nhiều instance và không rẻ nhất</li>
+                                <li><strong>Amazon EFS:</strong> cho phép truy cập đồng thời nhưng không phải lựa chọn rẻ nhất</li>
+                                <li><strong>EC2 instance store:</strong> là lưu trữ tạm thời (ephemeral), mất dữ liệu khi tắt máy</li>
+                            </ul></td></tr>
+                            <tr><td>Q4</td><td><ul>
+                                <li><strong>Bật read-through caching trên Aurora:</strong> không phải tính năng có sẵn của Amazon Aurora</li>
+                                <li><strong>Tạo read replica và dùng endpoint phù hợp:</strong> Aurora Replica đã tồn tại sẵn từ cấu hình Multi-AZ, chỉ cần trỏ traffic đọc vào đó</li>
+                                <li><strong>Tạo Aurora DB thứ hai làm read replica:</strong> Aurora Replica đã có sẵn nhờ Multi-AZ, không cần tạo thêm database</li>
+                            </ul></td></tr>
+                            <tr><td>Q5</td><td><ul>
+                                <li><strong>Direct Connect ở nhiều Region:</strong> dùng để nối on-premises với AWS, không cải thiện hiệu năng cho người dùng không qua on-premises</li>
+                                <li><strong>Amazon CloudFront:</strong> không thể expose địa chỉ IP tĩnh</li>
+                                <li><strong>Route 53 geoproximity routing:</strong> không giảm độ trễ internet tốt bằng Global Accelerator vì không tận dụng mạng lõi AWS</li>
+                            </ul></td></tr>
+                            <tr><td>Q6</td><td><ul>
+                                <li><strong>ACL cấp quyền:</strong> ACL không dùng để cấp quyền truy cập liên quan tới IAM</li>
+                                <li><strong>Security group:</strong> là tường lửa cấp instance, không giới hạn được các service action</li>
+                                <li><strong>Cross-account role ở từng account:</strong> giải pháp phức tạp và không cung cấp điểm kiểm soát tập trung</li>
+                            </ul></td></tr>
+                            <tr><td>Q7</td><td><ul>
+                                <li><strong>Amazon RDS for MySQL:</strong> không phải là database in-memory</li>
+                                <li><strong>Amazon RDS for PostgreSQL:</strong> không phải là database in-memory</li>
+                                <li><strong>ElastiCache for Memcached:</strong> không hỗ trợ replication hay high availability</li>
+                            </ul></td></tr>
+                            <tr><td>Q8</td><td><ul>
+                                <li><strong>Deny rule inbound trên security group:</strong> security group không hỗ trợ tạo deny rule</li>
+                                <li><strong>Deny rule outbound trên security group:</strong> security group không hỗ trợ tạo deny rule</li>
+                                <li><strong>Deny rule outbound trên NACL:</strong> chỉ chặn traffic đi ra, không chặn được traffic đi vào</li>
+                            </ul></td></tr>
+                            <tr><td>Q9</td><td><ul>
+                                <li><strong>Resource dùng wildcard table/*:</strong> cho phép put/update/delete trên mọi bảng trong account thay vì chỉ bảng Orders</li>
+                                <li><strong>Action dynamodb:* trên bảng Orders:</strong> cho phép mọi hành động trên bảng, vi phạm nguyên tắc least privilege</li>
+                                <li><strong>Effect Deny với dynamodb:*:</strong> chặn toàn bộ hành động trên bảng, không đạt được mục đích cần allow put/update/delete</li>
+                            </ul></td></tr>
+                            <tr><td>Q10</td><td><ul>
+                                <li><strong>Bật ALB health check:</strong> chỉ kiểm tra sức khỏe instance sau ALB, không thể chuyển client sang Region khác</li>
+                                <li><strong>Tạo CNAME trỏ tới ALB:</strong> nên dùng Alias record (đã có sẵn) thay vì CNAME để trỏ tới ALB</li>
+                                <li><strong>Latency-based routing policy:</strong> chỉ định tuyến theo độ trễ, không dùng để failover</li>
+                            </ul></td></tr>
+                            <tr><td>Q11</td><td><ul>
+                                <li><strong>NAT instance trong private subnet:</strong> tốn nhiều công vận hành hơn và NAT instance phải đặt ở public subnet</li>
+                                <li><strong>Internet gateway + route bảng private subnet:</strong> instance ở private subnet không có public IP nên không dùng được internet gateway</li>
+                                <li><strong>Virtual private gateway:</strong> dùng cho kết nối VPN, không phải để đưa instance private ra internet</li>
+                            </ul></td></tr>
+                            <tr><td>Q12</td><td><ul>
+                                <li><strong>Storage Gateway volume gateway (stored) + AWS Backup:</strong> không tăng tốc replication và tạo EBS snapshot chứ không phải object S3</li>
+                                <li><strong>Storage Gateway file gateway với cache local:</strong> không tăng tốc replication, chỉ phù hợp khi cần truy cập NFS/CIFS cục bộ</li>
+                                <li><strong>DataSync qua public endpoint:</strong> dữ liệu sẽ đi qua internet công cộng, không đảm bảo riêng tư như yêu cầu</li>
+                            </ul></td></tr>
+                            <tr><td>Q13</td><td><ul>
+                                <li><strong>Thêm VPC peering connection thứ hai:</strong> peering đã có sẵn tính dự phòng, không cần thêm kết nối</li>
+                                <li><strong>Thêm VPN giữa hai VPC:</strong> không thể tạo kết nối VPN AWS trực tiếp giữa hai VPC</li>
+                                <li><strong>Thêm virtual private gateway thứ hai:</strong> VGW vốn đã là thiết bị dự phòng, không cần thêm cái thứ hai</li>
+                            </ul></td></tr>
+                            <tr><td>Q14</td><td><ul>
+                                <li><strong>Thêm EC2 làm file server + IAM role:</strong> không thể dùng IAM role cấp quyền cho file share tạo trong OS, cũng kém khả năng mở rộng hơn EFS</li>
+                                <li><strong>S3 bucket + Network ACL + NFS:</strong> NACL không kiểm soát truy cập S3 và S3 không hỗ trợ giao thức NFS</li>
+                                <li><strong>EBS volume + resource-based policy:</strong> không thể cấu hình resource-based policy trên EBS volume</li>
+                            </ul></td></tr>
+                            <tr><td>Q15</td><td><ul>
+                                <li><strong>Transfer Acceleration + public access:</strong> chỉ tăng tốc upload lên S3, không phù hợp cho truy cập nội bộ và từ xa như file share</li>
+                                <li><strong>DataSync đồng bộ với S3:</strong> giải pháp on-premises cần được thay thế hẳn, và DataSync chỉ đồng bộ một chiều</li>
+                                <li><strong>Storage Gateway volume gateway:</strong> dùng giao thức block (iSCSI), không hoạt động tốt qua khoảng cách xa cho nhân viên từ xa</li>
+                            </ul></td></tr>
+                            <tr><td>Q16</td><td><ul>
+                                <li><strong>CNAME record trỏ CloudFront:</strong> nên dùng ALIAS record cho CloudFront, không phải CNAME</li>
+                                <li><strong>A record + geolocation + health check:</strong> chỉ có một endpoint (bucket S3) nên chiến lược geolocation không phù hợp</li>
+                                <li><strong>A record + geoproximity + health check:</strong> cũng chỉ có một endpoint nên chiến lược này không hoạt động đúng mục đích</li>
+                            </ul></td></tr>
+                            <tr><td>Q17</td><td><ul>
+                                <li><strong>FSx Windows cho Windows + EFS Max I/O cho Linux:</strong> tạo ra hai hệ thống file riêng biệt, không đáp ứng yêu cầu mount chung một hệ thống</li>
+                                <li><strong>EFS General Purpose cho cả Windows và Linux:</strong> EFS không hỗ trợ Windows instance</li>
+                                <li><strong>FSx Windows + FSx Lustre nối cùng S3 bucket:</strong> FSx for Windows File Server không dùng S3 bucket, vẫn là hai hệ thống file riêng biệt</li>
+                            </ul></td></tr>
+                            <tr><td>Q18</td><td><ul>
+                                <li><strong>SQS standard queue + Lambda xử lý độc lập:</strong> standard queue chỉ đảm bảo thứ tự best-effort, không giữ đúng thứ tự dữ liệu</li>
+                                <li><strong>SNS topic + Lambda subscriber:</strong> SNS chuyển tiếp ngay lập tức để xử lý, không phù hợp khi cần xếp hàng và giữ thứ tự sự kiện</li>
+                                <li><strong>SNS topic + SQS subscriber:</strong> vẫn cần dùng SQS FIFO trực tiếp để giữ thứ tự, không phải qua SNS</li>
+                            </ul></td></tr>
+                            <tr><td>Q19</td><td><ul>
+                                <li><strong>Storage Gateway tape gateway:</strong> chỉ là giải pháp backup, không cung cấp NFS mount point cục bộ</li>
+                                <li><strong>Storage Gateway volume gateway (stored mode):</strong> dùng giao thức block-based, không phải NFS</li>
+                                <li><strong>Storage Gateway volume gateway (cached mode):</strong> dùng giao thức block-based, không phải NFS</li>
+                            </ul></td></tr>
+                            <tr><td>Q20</td><td><ul>
+                                <li><strong>ELB forward tới target group với DynamoDB làm target:</strong> không thể cấu hình DynamoDB làm target trong target group</li>
+                                <li><strong>ELB forward tới EC2 instances đọc DynamoDB:</strong> phải quản lý EC2, không đạt yêu cầu ít vận hành</li>
+                                <li><strong>Route 53 hosted zone route tới Lambda endpoint:</strong> hosted zone không tự định tuyến kiểu này tới Lambda và không có front-end web đi kèm</li>
+                            </ul></td></tr>
+                            <tr><td>Q21</td><td><ul>
+                                <li><strong>Multi-Region Aurora MySQL cluster + Route 53 health check:</strong> không thể tạo một Aurora MySQL cluster trải nhiều Region theo kiểu này</li>
+                                <li><strong>Cross-Region read replica + EventBridge/Lambda promote:</strong> có thể không đạt RTO 10 phút vì promote database lớn thường mất nhiều thời gian hơn</li>
+                                <li><strong>Aurora multi-master cluster xuyên Region:</strong> multi-master chỉ hoạt động trong một Region, không hoạt động xuyên Region</li>
+                            </ul></td></tr>
+                            <tr><td>Q22</td><td><ul>
+                                <li><strong>Simple scaling policy:</strong> dùng để điều chỉnh đơn giản theo ngưỡng, không duy trì một mức mục tiêu</li>
+                                <li><strong>Step scaling policy:</strong> điều chỉnh theo bước tùy mức độ vi phạm alarm, không nhắm tới một giá trị mục tiêu cố định</li>
+                                <li><strong>Scheduled scaling policy:</strong> chỉ lên lịch thay đổi theo thời điểm cố định, không theo mức sử dụng thực tế</li>
+                            </ul></td></tr>
+                            <tr><td>Q23</td><td><ul>
+                                <li><strong>NLB + Reserved Instances trong cluster placement group:</strong> placement group dùng để đặt instance gần nhau trong một AZ nhằm tăng hiệu năng mạng, không phải để tăng khả năng phục hồi</li>
+                                <li><strong>NLB backed bởi server hiện có ở nhiều AZ:</strong> cần Auto Scaling group để duy trì khả năng phục hồi, không chỉ dùng server sẵn có</li>
+                                <li><strong>NLB + ASG với instance ở nhiều Region:</strong> không thể có ASG trải nhiều Region và NLB cũng không phân phối traffic qua nhiều Region</li>
+                            </ul></td></tr>
+                            <tr><td>Q24</td><td><ul>
+                                <li><strong>AWS DataSync:</strong> vẫn dùng internet nên không kịp deadline 20 ngày với băng thông giới hạn</li>
+                                <li><strong>AWS Storage Gateway:</strong> vẫn dùng internet nên không kịp deadline 20 ngày</li>
+                                <li><strong>Site-to-site VPN:</strong> vẫn dùng internet nên không kịp deadline 20 ngày</li>
+                            </ul></td></tr>
+                            <tr><td>Q25</td><td><ul>
+                                <li><strong>Chạy CloudWatch agent trên EKS:</strong> Container Insights là cách tốt nhất để lấy dữ liệu tổng hợp theo namespace/service/pod, agent thường không đủ</li>
+                                <li><strong>Di chuyển sang ECS rồi bật Container Insights:</strong> không cần di chuyển vì EKS đã được hỗ trợ Container Insights sẵn</li>
+                                <li><strong>X-Ray + Elasticsearch:</strong> X-Ray không cung cấp dashboard tập trung theo yêu cầu của bài toán</li>
+                            </ul></td></tr>
+                            <tr><td>Q26</td><td><ul>
+                                <li><strong>NACL giới hạn theo IP CloudFront + WebACL:</strong> S3 là dịch vụ public nên NACL không kiểm soát được việc truy cập trực tiếp bucket</li>
+                                <li><strong>Route 53 Alias trỏ traffic tới AWS WAF:</strong> không thể định tuyến traffic trực tiếp tới WAF bằng Alias record</li>
+                                <li><strong>Bucket policy chỉ cho phép request từ AWS WAF:</strong> không thể thực hiện theo cách này, phải dùng OAI trong bucket policy</li>
+                            </ul></td></tr>
+                            <tr><td>Q27</td><td><ul>
+                                <li><strong>Bật ALB health check:</strong> chỉ kiểm tra sức khỏe instance sau ALB, không tự cập nhật DNS sang Region khác</li>
+                                <li><strong>Dùng EventBridge để cluster các ALB:</strong> không thể "cluster" ALB theo cách này</li>
+                                <li><strong>Cấu hình alarm trên CloudTrail trail:</strong> CloudTrail chỉ ghi log hoạt động API, không hỗ trợ failover DNS</li>
+                            </ul></td></tr>
+                            <tr><td>Q28</td><td><ul>
+                                <li><strong>CloudWatch alarm báo nhân viên vận hành:</strong> cần can thiệp thủ công, không giúp ứng dụng tự co giãn linh hoạt</li>
+                                <li><strong>Trải microservices qua nhiều AZ + Data Lifecycle Manager:</strong> không tự động hóa khả năng co giãn linh hoạt của ứng dụng</li>
+                                <li><strong>ELB phân phối traffic giữa các microservices:</strong> không thể dùng một ELB định tuyến tới nhiều microservices khác nhau, cần target group riêng và Auto Scaling cho từng service</li>
+                            </ul></td></tr>
+                            <tr><td>Q29</td><td><ul>
+                                <li><strong>Multivalue answer routing với mọi EC2 endpoint:</strong> không định tuyến theo hiệu năng tối ưu, chỉ phân phối nhiều bản ghi trả về</li>
+                                <li><strong>ALB + WAF định tuyến theo Region tối ưu:</strong> WAF không dùng để định tuyến traffic tới endpoint theo hiệu năng</li>
+                                <li><strong>CloudFront với custom origin EC2:</strong> CloudFront không hỗ trợ UDP, chỉ hỗ trợ HTTP/HTTPS</li>
+                            </ul></td></tr>
+                            <tr><td>Q30</td><td><ul>
+                                <li><strong>DynamoDB + DynamoDB streams:</strong> không có cách lưu giữ hay loại bỏ request xử lý thất bại, kém hiệu quả hơn SQS</li>
+                                <li><strong>Kinesis data stream + KCL:</strong> kém hiệu quả và tốn kém hơn SQS, không có tùy chọn giữ lại request lỗi</li>
+                                <li><strong>SQS Topic + subscribe SNS Topic:</strong> SNS không lưu trữ request, chuyển tiếp ngay lập tức cho subscriber</li>
+                            </ul></td></tr>
+                            <tr><td>Q31</td><td><ul>
+                                <li><strong>Có thể terminate ở mọi Region trừ us-east-1:</strong> sai, block thứ hai chỉ deny khi Region khác us-east-1 nên us-east-1 vẫn được phép</li>
+                                <li><strong>Terminate instance có IP 10.1.2.5 tại us-east-1:</strong> aws:SourceIp kiểm tra IP của người gọi request, không phải IP của resource cần terminate</li>
+                                <li><strong>Không thể terminate tại us-east-1 với source IP 10.1.2.28:</strong> sai, điều kiện trong policy cho phép hành động này</li>
+                            </ul></td></tr>
+                            <tr><td>Q32</td><td><ul>
+                                <li><strong>ASG với EC2 + ALB, lưu trữ bằng S3:</strong> EC2 không phải giải pháp container hóa và S3 không phải storage layer immutable</li>
+                                <li><strong>ECS trên EC2 + DynamoDB:</strong> ECS chạy trên EC2 có overhead vận hành cao hơn Fargate (serverless)</li>
+                                <li><strong>ECS trên Fargate + lưu trữ S3:</strong> Fargate phù hợp nhưng S3 không immutable mặc định như QLDB</li>
+                            </ul></td></tr>
+                            <tr><td>Q33</td><td><ul>
+                                <li><strong>Amazon S3:</strong> không hỗ trợ trực tiếp lấy dữ liệu từ MySQL trên RDS cho mục đích machine learning</li>
+                                <li><strong>Amazon QLDB:</strong> là ledger database bất biến, không phù hợp lấy dữ liệu từ RDS cho ML</li>
+                                <li><strong>Amazon Neptune:</strong> là graph database, không phù hợp lấy dữ liệu từ RDS cho ML</li>
+                            </ul></td></tr>
+                            <tr><td>Q34</td><td><ul>
+                                <li><strong>Tự động chuyển storage class bằng Trusted Advisor:</strong> Trusted Advisor không tự động chuyển object sang storage class phù hợp</li>
+                                <li><strong>Lambda quét bucket và di chuyển object:</strong> có thể làm được nhưng S3 Lifecycle configuration đơn giản hơn nhiều</li>
+                                <li><strong>Đưa hết object vào Glacier Instant Retrieval:</strong> các object có access pattern khác nhau nên đưa hết vào Glacier không phù hợp</li>
+                            </ul></td></tr>
+                            <tr><td>Q35</td><td><ul>
+                                <li><strong>Amazon FSx for Windows File Server:</strong> tích hợp với Windows file share, không tích hợp trực tiếp với S3</li>
+                                <li><strong>Amazon EFS:</strong> không thể hiển thị object S3 dưới dạng file</li>
+                                <li><strong>Amazon EBS:</strong> không thể hiển thị object S3 dưới dạng file</li>
+                            </ul></td></tr>
+                            <tr><td>Q36</td><td><ul>
+                                <li><strong>AWS Organizations API:</strong> chỉ tạo được account, không cấu hình được VPC/subnet</li>
+                                <li><strong>AWS Management Console:</strong> không phải cách tự động tạo tài nguyên lặp lại được</li>
+                                <li><strong>AWS CLI:</strong> làm được nhưng nên tự động hóa bằng CloudFormation thay vì chạy CLI thủ công</li>
+                            </ul></td></tr>
+                            <tr><td>Q37</td><td><ul>
+                                <li><strong>Bật IPSec trên Direct Connect:</strong> không có tùy chọn bật IPSec trực tiếp trên kết nối Direct Connect</li>
+                                <li><strong>Cấu hình BGP kèm mã hóa:</strong> BGP dùng để định tuyến, không dùng để mã hóa Direct Connect</li>
+                                <li><strong>Direct Connect Gateway:</strong> dùng để kết nối VPC ở nhiều Region, không liên quan tới mã hóa</li>
+                            </ul></td></tr>
+                            <tr><td>Q38</td><td><ul>
+                                <li><strong>SNS topic + scale theo số lượng message SNS:</strong> SNS chỉ gửi thông báo, không lưu trữ ảnh để xử lý như SQS</li>
+                                <li><strong>Target tracking theo CPU 70%:</strong> theo dõi CPU không cho phép co giãn theo số lượng ảnh được tải lên</li>
+                                <li><strong>Scheduled policy theo giờ cao điểm dự kiến:</strong> kém linh hoạt hơn so với co giãn động theo mức sử dụng thực tế</li>
+                            </ul></td></tr>
+                            <tr><td>Q39</td><td><ul>
+                                <li><strong>Spot Instance cho 8 giờ Thứ Hai:</strong> Spot có thể bị thu hồi bất ngờ, không phù hợp workload không chịu được gián đoạn</li>
+                                <li><strong>Convertible RI cho Thứ Ba-Chủ Nhật + Spot cho Thứ Hai:</strong> Convertible RI không tối ưu chi phí bằng Standard RI cho workload liên tục cố định, Spot vẫn không phù hợp yêu cầu không gián đoạn</li>
+                                <li><strong>Standard RI cho Thứ Ba-Chủ Nhật + Convertible RI cho Thứ Hai:</strong> Convertible RI không tiết kiệm bằng Scheduled RI cho lịch cố định 8 giờ mỗi Thứ Hai</li>
+                            </ul></td></tr>
+                            <tr><td>Q40</td><td><ul>
+                                <li><strong>S3 interface endpoint + security group:</strong> interface endpoint thường đắt hơn gateway endpoint, không tối ưu chi phí bằng</li>
+                                <li><strong>S3 Transfer Acceleration + giới hạn IP:</strong> chỉ cải thiện tốc độ truyền, không đảm bảo traffic tránh được internet công cộng</li>
+                                <li><strong>VPN connection giữa VPC và S3:</strong> Amazon S3 không hỗ trợ kết nối VPN trực tiếp</li>
+                            </ul></td></tr>
+                            <tr><td>Q41</td><td><ul>
+                                <li><strong>Đặt API Gateway trong private subnet + NACL:</strong> API Gateway là dịch vụ managed, không thể triển khai trực tiếp trong một subnet riêng</li>
+                                <li><strong>Private integration + VPC endpoint policy:</strong> dùng để định tuyến traffic tới tài nguyên trong VPC, phức tạp hơn và không trực tiếp giới hạn theo IP như resource policy</li>
+                                <li><strong>Sửa security group của API Gateway:</strong> API Gateway không gắn với security group</li>
+                            </ul></td></tr>
+                            <tr><td>Q42</td><td><ul>
+                                <li><strong>DataSync copy dữ liệu về on-premises:</strong> DataSync dùng cho truyền dữ liệu theo lô, không phù hợp truy cập độ trễ thấp liên tục</li>
+                                <li><strong>Copy dữ liệu sang FSx for Lustre + FSx File Gateway:</strong> FSx for Lustre tối ưu cho hiệu năng cao nhưng đắt và phức tạp hơn không cần thiết</li>
+                                <li><strong>Kết nối internet tốc độ cao truy cập trực tiếp S3:</strong> truy cập qua internet không đáp ứng yêu cầu độ trễ thấp</li>
+                            </ul></td></tr>
+                            <tr><td>Q43</td><td><ul>
+                                <li><strong>Đổi target type từ IP sang instance:</strong> không giải quyết nguyên nhân gốc là quản lý việc gỡ/đăng ký instance khi patch</li>
+                                <li><strong>ALB health check gỡ instance lỗi + Run Command patch thủ công:</strong> dựa vào health check gây trễ, patch thủ công kém hiệu quả hơn Automation document</li>
+                                <li><strong>State Manager lên lịch patch:</strong> State Manager không được thiết kế để tự động gỡ/đăng ký lại instance với ALB</li>
+                            </ul></td></tr>
+                            <tr><td>Q44</td><td><ul>
+                                <li><strong>SSE-S3 bỏ hẳn KMS:</strong> không dùng KMS nên không đáp ứng yêu cầu mã hóa bắt buộc bằng KMS của công ty</li>
+                                <li><strong>Mã hóa phía client bằng KMS customer-managed key:</strong> tăng độ phức tạp vận hành, không tối ưu chi phí gọi KMS</li>
+                                <li><strong>SSE-C + lưu key trong Secrets Manager:</strong> buộc công ty tự quản lý key, tăng overhead và không tối ưu chi phí KMS</li>
+                            </ul></td></tr>
+                            <tr><td>Q45</td><td><ul>
+                                <li><strong>Public subnet cho RDS + Direct Connect:</strong> đặt RDS ở public subnet làm lộ ra internet, vi phạm bảo mật</li>
+                                <li><strong>Private subnet nhưng cho phép truy cập trực tiếp qua internet:</strong> private subnet không có internet access trực tiếp, truy cập qua internet vẫn có rủi ro bảo mật</li>
+                                <li><strong>Public subnet cho RDS + Client VPN:</strong> đặt RDS ở public subnet không cần thiết gây rủi ro; Client VPN phù hợp cho nhân viên chứ không phải kết nối từ văn phòng on-premises</li>
+                            </ul></td></tr>
+                            <tr><td>Q46</td><td><ul>
+                                <li><strong>ECS trên Fargate + DynamoDB + S3 Standard-IA:</strong> Fargate co giãn tốt nhưng AWS Batch phù hợp hơn cho xử lý theo lô như video editing</li>
+                                <li><strong>EC2 ASG + ALB + SQS + RDS + S3 Glacier Flexible Retrieval:</strong> Glacier Flexible Retrieval dành cho lưu trữ dài hạn, không phù hợp khi cần truy cập trong 90 ngày; quản lý EC2 cũng tốn overhead hơn</li>
+                                <li><strong>Server xử lý video on-premises qua Storage Gateway:</strong> hạ tầng on-premises phức tạp và tốn kém hơn giải pháp AWS-native như Batch</li>
+                            </ul></td></tr>
+                            <tr><td>Q47</td><td><ul>
+                                <li><strong>S3 access point:</strong> giúp quản lý quyền truy cập nhưng không cung cấp kết nối riêng tư, vẫn cần gateway VPC endpoint</li>
+                                <li><strong>VPC peering connection tới S3:</strong> VPC peering không cung cấp kết nối tới dịch vụ AWS như S3</li>
+                                <li><strong>NAT gateway:</strong> vẫn định tuyến traffic ra internet, traffic S3 vẫn dùng endpoint công cộng</li>
+                            </ul></td></tr>
+                            <tr><td>Q48</td><td><ul>
+                                <li><strong>Cognito user pool + Lambda tạo credential tạm:</strong> Cognito dùng cho xác thực người dùng cuối, không phù hợp quản lý quyền truy cập nội bộ và thêm phức tạp không cần thiết</li>
+                                <li><strong>Tạo IAM user riêng cho từng thành viên:</strong> quản lý nhiều IAM user gây overhead hành chính lớn</li>
+                                <li><strong>Tách account riêng + SCP + cross-account role:</strong> tạo nhiều account và quản lý cross-account role thêm phức tạp không cần thiết</li>
+                            </ul></td></tr>
+                            <tr><td>Q49</td><td><ul>
+                                <li><strong>Global Accelerator định tuyến tới ALB gần nhất:</strong> tốn thêm chi phí và không cache nội dung động tại edge như CloudFront</li>
+                                <li><strong>Thêm EC2/ALB ở nhiều Region + Route 53 latency routing:</strong> triển khai và quản lý tài nguyên đa Region tăng chi phí và overhead vận hành</li>
+                                <li><strong>Chuyển sang S3 static hosting + CloudFront:</strong> recommendation engine phục vụ nội dung động, không thể host trên S3 vốn chỉ dành cho nội dung tĩnh</li>
+                            </ul></td></tr>
+                            <tr><td>Q50</td><td><ul>
+                                <li><strong>ALB phân phối traffic TCP:</strong> ALB tối ưu cho HTTP/HTTPS, không phù hợp cho traffic TCP</li>
+                                <li><strong>Chuyển sang ECS:</strong> đổi sang ECS tăng phức tạp và chi phí vận hành, đề bài yêu cầu dùng EC2</li>
+                                <li><strong>Route 53 latency-based routing:</strong> không cung cấp khả năng tự scale hay load balancing, chỉ dùng để định tuyến giữa các endpoint khác Region</li>
+                            </ul></td></tr>
+                            <tr><td>Q51</td><td><ul>
+                                <li><strong>Storage Gateway File Gateway backed bởi S3:</strong> phù hợp hơn cho tích hợp on-premises với AWS, không tối ưu khi ứng dụng đã di chuyển hẳn lên AWS</li>
+                                <li><strong>EBS volume gắn từng EC2 + phần mềm NFS:</strong> cần cấu hình và quản lý thêm để tạo hệ thống file dùng chung, EFS đơn giản hơn nhiều</li>
+                                <li><strong>FSx for Windows File Server qua SMB:</strong> chỉ hỗ trợ SMB, không hỗ trợ NFS như yêu cầu</li>
+                            </ul></td></tr>
+                            <tr><td>Q52</td><td><ul>
+                                <li><strong>Geolocation routing + ALB:</strong> định tuyến theo vị trí địa lý không đảm bảo luôn là Region có latency thấp nhất</li>
+                                <li><strong>Geoproximity routing + NLB:</strong> cần điều chỉnh bias thủ công gây phức tạp vận hành, NLB cũng kém phù hợp hơn ALB cho traffic HTTP/HTTPS</li>
+                                <li><strong>Weighted routing + ALB:</strong> weighted routing không đảm bảo định tuyến người dùng tới Region gần nhất hay latency thấp nhất</li>
+                            </ul></td></tr>
+                            <tr><td>Q53</td><td><ul>
+                                <li><strong>SSE-KMS với custom key policy:</strong> mã hóa diễn ra sau khi dữ liệu đã đến S3 (server-side), AWS xử lý mã hóa thay vì client</li>
+                                <li><strong>SSE-C:</strong> yêu cầu khách hàng cung cấp key cho mỗi thao tác S3, tăng overhead vận hành và rủi ro nếu quản lý key không tốt</li>
+                                <li><strong>Mã hóa phía client với Amazon S3 managed keys:</strong> S3 managed keys không dùng để mã hóa phía client, không cho khách hàng toàn quyền kiểm soát key như CMK</li>
+                            </ul></td></tr>
+                            <tr><td>Q54</td><td><ul>
+                                <li><strong>App2Container + ECS trên Fargate:</strong> Fargate giảm overhead nhưng ECS vẫn cần cấu hình và bảo trì nhiều hơn App Runner</li>
+                                <li><strong>App2Container + ECS trên EC2:</strong> chạy ECS trên EC2 phải quản lý instance nền, tăng overhead vận hành</li>
+                                <li><strong>App Runner + triển khai lên EKS trên EC2:</strong> EKS thêm phức tạp quản lý cluster Kubernetes và EC2, không giảm được overhead</li>
+                            </ul></td></tr>
+                            <tr><td>Q55</td><td><ul>
+                                <li><strong>Gắn policy trực tiếp vào IAM role của worker node:</strong> cấp quyền rộng cho mọi pod chạy trên node đó, vi phạm nguyên tắc least privilege</li>
+                                <li><strong>Pod security policy:</strong> chỉ quản lý bảo mật ở cấp pod, không kiểm soát trực tiếp quyền truy cập AWS resource qua IAM</li>
+                                <li><strong>Sửa IAM role worker node + map mọi service account vào một role:</strong> không đủ độ chi tiết (granularity) cần thiết cho truy cập an toàn</li>
+                            </ul></td></tr>
+                            <tr><td>Q56</td><td><ul>
+                                <li><strong>Triển khai DMS trên EKS + autoscaler:</strong> AWS DMS không hỗ trợ triển khai trên EKS, gây phức tạp không cần thiết</li>
+                                <li><strong>DMS trên EC2 Spot Instance + scale thủ công:</strong> tăng overhead vận hành, Spot Instance có thể bị gián đoạn ảnh hưởng tới việc replicate</li>
+                                <li><strong>DMS replication instance provisioned + Multi-AZ:</strong> Multi-AZ tăng tính sẵn sàng nhưng không tự động co giãn theo tải công việc</li>
+                            </ul></td></tr>
+                            <tr><td>Q57</td><td><ul>
+                                <li><strong>FSx for Windows (SMB) + FSx for OpenZFS (NFS) riêng biệt:</strong> tách biệt SMB và NFS, không cung cấp chia sẻ chung protocol, tăng phức tạp</li>
+                                <li><strong>S3 + S3 File Gateway:</strong> S3 File Gateway không hỗ trợ đồng thời SMB và NFS</li>
+                                <li><strong>Hai EC2 instance với storage cục bộ riêng cho SMB/NFS:</strong> không phải managed service, thiếu dự phòng cấp AZ, tăng overhead vận hành</li>
+                            </ul></td></tr>
+                            <tr><td>Q58</td><td><ul>
+                                <li><strong>Object Lock compliance mode ở cấp bucket + policy WORM:</strong> Object Lock áp dụng cho từng object cụ thể chứ không phải toàn bucket, và không cần cấu hình WORM riêng ngoài compliance mode</li>
+                                <li><strong>Versioning + lifecycle rule xóa version cũ:</strong> versioning và lifecycle không bảo vệ khỏi việc sửa/xóa trong thời gian lưu giữ</li>
+                                <li><strong>AWS Backup tạo bản backup immutable:</strong> AWS Backup không tích hợp trực tiếp với S3 Object Lock để đáp ứng yêu cầu tuân thủ bất biến</li>
+                            </ul></td></tr>
+                            <tr><td>Q59</td><td><ul>
+                                <li><strong>Tăng IOPS của volume io1 lên trên 64.000:</strong> 64.000 IOPS đã là giới hạn tối đa cho một volume io1 gắn vào một EC2 instance</li>
+                                <li><strong>Tăng dung lượng volume io1 lên 2 TB:</strong> dung lượng không ảnh hưởng trực tiếp tới IOPS ngoài mức đã cấu hình</li>
+                                <li><strong>Đổi sang instance storage-optimized, giữ nguyên volume:</strong> không giải quyết được nút thắt cổ chai ở cấp EBS volume</li>
+                            </ul></td></tr>
+                            <tr><td>Q60</td><td><ul>
+                                <li><strong>Bastion host public subnet + SSH key pair + IAM user:</strong> tăng overhead quản lý SSH key, để lộ bề mặt tấn công qua bastion host</li>
+                                <li><strong>SSM Agent nhưng dùng IAM user tạm cho từng account:</strong> tạo IAM user cục bộ tăng rủi ro quản lý credential, không tập trung như IAM Identity Center</li>
+                                <li><strong>VPN/Direct Connect + IAM user từng account + SSH:</strong> thêm phức tạp và chi phí không cần thiết, SSH cũng tăng rủi ro bảo mật</li>
+                            </ul></td></tr>
+                            <tr><td>Q61</td><td><ul>
+                                <li><strong>AWS Backup snapshot hàng giờ + Glacier + restore khi lỗi:</strong> chỉ hỗ trợ disaster recovery, không cung cấp tính sẵn sàng cao theo thời gian thực</li>
+                                <li><strong>AWS DRS replicate VM + Auto Scaling group đa AZ:</strong> DRS hữu ích cho disaster recovery nhưng gây phức tạp không cần thiết cho ứng dụng đã di chuyển</li>
+                                <li><strong>Refactor thành microservices trên ECS Fargate + NLB:</strong> đề bài yêu cầu không được sửa đổi phần mềm độc quyền (proprietary)</li>
+                            </ul></td></tr>
+                            <tr><td>Q62</td><td><ul>
+                                <li><strong>Read replica cross-Region + promote thủ công:</strong> cần can thiệp thủ công khi failover, tăng downtime và độ phức tạp vận hành, khó đạt RTO</li>
+                                <li><strong>Cluster Aurora mới + AWS DMS replicate:</strong> DMS không lý tưởng cho replicate độ trễ thấp của database giao dịch throughput cao và không tự động failover</li>
+                                <li><strong>S3 CRR backup + restore khi failover:</strong> restore từ backup gây downtime đáng kể, không phù hợp với RPO/RTO yêu cầu</li>
+                            </ul></td></tr>
+                            <tr><td>Q63</td><td><ul>
+                                <li><strong>NLB cho ECS service trên cloud:</strong> NLB chủ yếu dùng cho TCP/UDP, không phù hợp traffic HTTP</li>
+                                <li><strong>Dùng Fargate cho cả cloud và on-premises:</strong> Fargate không thể chạy container ở môi trường on-premises</li>
+                                <li><strong>EC2 launch type cho cloud + ECS Anywhere với Fargate cho on-premises:</strong> ECS Anywhere dùng external instance, không dùng Fargate cho on-premises</li>
+                            </ul></td></tr>
+                            <tr><td>Q64</td><td><ul>
+                                <li><strong>S3 Transfer Acceleration:</strong> chỉ tối ưu tốc độ truyền, không giải quyết chi phí data transfer của bên cung cấp nội dung</li>
+                                <li><strong>S3 Cross-Region Replication sang bucket đối tác:</strong> phát sinh thêm chi phí replicate xuyên Region mà bên cung cấp nội dung phải chịu</li>
+                                <li><strong>Chuyển sang S3 Standard-IA:</strong> tối ưu chi phí lưu trữ, không trực tiếp giảm chi phí data transfer</li>
+                            </ul></td></tr>
+                            <tr><td>Q65</td><td><ul>
+                                <li><strong>AWS ClassicLink expose làm endpoint service:</strong> ClassicLink dùng để nối EC2-Classic đã deprecated với VPC, không áp dụng ở đây</li>
+                                <li><strong>VPC peering giữa từng VPC:</strong> có thể dùng kèm security group nhưng khó quản lý khi tài nguyên/địa chỉ thay đổi, tốn nhiều công sức hành chính</li>
+                                <li><strong>Cấu hình security group giới hạn truy cập:</strong> có thể dùng kèm VPC peering nhưng PrivateLink là giải pháp tốt hơn cho use case này</li>
+                            </ul></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
         <section id="exam-history-summary">
             <button type="button" id="exam-history-toggle" class="knowledge-toggle" aria-expanded="false"
                 aria-controls="exam-history-content">
@@ -2128,6 +2498,16 @@
         (function () {
             const toggle = document.getElementById("knowledge-toggle");
             const content = document.getElementById("knowledge-content");
+            toggle.addEventListener("click", () => {
+                const willOpen = content.hidden;
+                content.hidden = !willOpen;
+                toggle.setAttribute("aria-expanded", String(willOpen));
+            });
+        })();
+
+        (function () {
+            const toggle = document.getElementById("wronganswers-toggle");
+            const content = document.getElementById("wronganswers-content");
             toggle.addEventListener("click", () => {
                 const willOpen = content.hidden;
                 content.hidden = !willOpen;
