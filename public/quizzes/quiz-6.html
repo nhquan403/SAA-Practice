@@ -1092,6 +1092,25 @@
             font-variant-numeric: tabular-nums;
         }
 
+        /* Same specificity as .knowledge-table td above; must stay declared after it. */
+        .exam-history-row-has-detail td {
+            border-bottom: none;
+            padding-bottom: 4px;
+        }
+
+        .exam-history-detail-row td {
+            padding-top: 0;
+        }
+
+        .exam-history-detail-row .exam-wrong-list {
+            gap: 6px;
+        }
+
+        .exam-history-detail-row .exam-wrong-list a {
+            padding: 2px 8px;
+            font-size: 12px;
+        }
+
     </style>
 </head>
 
@@ -1613,7 +1632,7 @@
                     "Thi thử" ở trên và nộp bài để lưu lại lịch sử.</p>
                 <div class="knowledge-table-wrap" id="exam-history-table-wrap" hidden>
                     <table class="knowledge-table exam-history-table">
-                        <thead><tr><th>Thời gian</th><th>Điểm</th><th>Đúng</th><th>Sai</th><th>Câu sai</th></tr></thead>
+                        <thead><tr><th>Thời gian</th><th>Điểm</th><th>Đúng</th><th>Sai</th></tr></thead>
                         <tbody id="exam-history-tbody"></tbody>
                     </table>
                 </div>
@@ -2013,10 +2032,11 @@
                     : 0;
                 const dateStr = new Date(a.timestamp).toLocaleString("vi-VN");
                 const wrongRefNums = Array.isArray(a.wrongRefNums) ? a.wrongRefNums : [];
-                const wrongLinks = wrongRefNums.length > 0
-                    ? wrongRefNums.map(n => `<a href="#q-refnum-${n}">Q${n}</a>`).join("")
-                    : '<span style="color: var(--text-muted); font-size: 13px;">Không có</span>';
-                return `<tr><td>${dateStr}</td><td>${scorePercent}%</td><td>${a.correctCount}</td><td>${a.wrongCount}</td><td><div class="exam-wrong-list">${wrongLinks}</div></td></tr>`;
+                const summaryRow = `<tr class="${wrongRefNums.length > 0 ? "exam-history-row-has-detail" : ""}"><td>${dateStr}</td><td>${scorePercent}%</td><td>${a.correctCount}</td><td>${a.wrongCount}</td></tr>`;
+                const detailRow = wrongRefNums.length > 0
+                    ? `<tr class="exam-history-detail-row"><td colspan="4"><div class="exam-wrong-list">${wrongRefNums.map(n => `<a href="#q-refnum-${n}">Q${n}</a>`).join("")}</div></td></tr>`
+                    : "";
+                return summaryRow + detailRow;
             }).join("");
         }
 
