@@ -2690,8 +2690,10 @@
                 const nearBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 80;
                 btn.classList.toggle("visible", pastTop && !nearBottom);
             }
+            const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
             btn.addEventListener("click", () => {
-                window.scrollTo({ top: document.documentElement.scrollHeight, behavior: reduceMotion ? "auto" : "smooth" });
+                const target = document.documentElement.scrollHeight - window.innerHeight;
+                window.scrollTo({ top: target, behavior: (reduceMotion || coarsePointer) ? "instant" : "smooth" });
             });
             window.addEventListener("scroll", updateScrollBtn, { passive: true });
             window.addEventListener("resize", updateScrollBtn);
