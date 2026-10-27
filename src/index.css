@@ -77,6 +77,24 @@ body {
   color: #fff;
 }
 
+/* Course switcher sits above the quiz tabs; its active state is outlined so it
+   doesn't compete with the filled active quiz tab below it. */
+.tabs-courses {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.tab-course {
+  padding: 6px 14px;
+  font-size: 13px;
+}
+
+.tab-course-active,
+.tab-course-active:hover {
+  border-color: var(--accent);
+  color: var(--text-primary);
+}
+
 .stage {
   position: relative;
   flex: 1 1 auto;
