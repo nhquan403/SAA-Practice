@@ -1,7 +1,7 @@
 ---
 title: "Thêm khoá Claude Certified Developer - Foundations vào app ôn thi"
 description: "Thêm khoá thứ hai (6 đề Claude Certified Developer - Foundations) với đúng cấu trúc và tính năng như khoá AWS SAA, chuyển khoá bằng một thanh chọn ở đầu app."
-status: in-progress
+status: completed
 priority: P1
 effort: "~1 phase"
 tags: [frontend, content, feature]
@@ -48,10 +48,10 @@ cần nhớ", bảng "Vì sao các đáp án sai lại sai", và tab "📘 Tài 
 
 ## Tiêu chí chấp nhận
 
-- [ ] 6 trang quiz Claude mở được qua app, đủ 53 câu, chấm điểm và thi thử chạy đúng.
-- [ ] Lịch sử thi thử Claude không lẫn với SAA.
-- [ ] Mỗi quiz có panel kiến thức (mọi Q1..Q53 được trích dẫn) và panel phân tích
+- [x] 6 trang quiz Claude mở được qua app, đủ 53 câu, chấm điểm và thi thử chạy đúng.
+- [x] Lịch sử thi thử Claude không lẫn với SAA.
+- [x] Mỗi quiz có panel kiến thức (mọi Q1..Q53 được trích dẫn) và panel phân tích
       câu sai (đủ 53 dòng).
-- [ ] Tab Tài liệu của khoá Claude hiển thị, tìm kiếm và mục lục hoạt động.
-- [ ] Chuyển khoá qua lại không làm mất bài đang làm ở quiz nào.
-- [ ] `npm run build` thành công.
+- [x] Tab Tài liệu của khoá Claude hiển thị, tìm kiếm và mục lục hoạt động.
+- [x] Chuyển khoá qua lại không làm mất bài đang làm ở quiz nào.
+- [x] `npm run build` thành công.
