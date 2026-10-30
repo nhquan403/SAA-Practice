@@ -1253,303 +1253,96 @@
 
                 <h3 id="ks-1">1. Chọn kiến trúc: đơn giản trước &amp; các mẫu workflow</h3>
                 <ul>
-                    <li class="knowledge-key"><strong>Tìm giải pháp đơn giản nhất chạy được, chỉ thêm độ phức tạp khi có
-                            nhu cầu đo được.</strong> Agentic system đổi latency và chi phí lấy hiệu năng; với nhiều ứng
-                        dụng, <em>một lần gọi Claude kèm retrieval và vài ví dụ</em> là đủ. Prototype đã đạt độ chính xác,
-                        dưới ba giây và rẻ thì cứ ship, giữ bộ eval làm baseline, chỉ thêm agent khi eval chỉ ra khoảng
-                        trống. Đáp án "xây multi-agent vì sau này câu hỏi có thể khó hơn" là xây cho nhu cầu giả định.
-                        <span class="knowledge-qref">Q4</span></li>
-                    <li>Quy trình <strong>cố định hai bước</strong> (trích xuất hóa đơn rồi đối chiếu quy tắc nghiệp vụ):
-                        gọi thẳng <strong>Messages API</strong> với output schema cho bước trích xuất, rồi kiểm tra quy tắc
-                        <em>bằng code</em> để có kết quả xác định. Không để Claude tự tuyên bố "hóa đơn hợp lệ", không cho
-                        agent tự quyết có kiểm tra hay không. <span class="knowledge-qref">Q6</span></li>
-                    <li><strong>Framework che prompt thật.</strong> Khi agent bỏ qua chỉ dẫn khoảng một lần trong năm và
-                        không ai biết Claude thực sự nhận được gì, bước đầu tiên là <em>xem prompt, tool definition và
-                        history thật</em> qua tracing/debug log, rồi gỡ bớt lớp trừu tượng đang che chúng. Chỉ dẫn có thể
-                        bị cắt, bị ghi đè hoặc chìm giữa tool result dài — model lớn hơn cũng không làm theo được chỉ dẫn
-                        nó chưa từng nhận. <span class="knowledge-qref">Q2</span></li>
-                    <li><strong>Prompt chaining</strong>: chia việc thành các bước tuần tự, mỗi bước xử lý output của bước
-                        trước, có <em>gate kiểm tra bằng code</em> ở giữa. Phân loại câu hỏi rồi mới soạn giải thích theo
-                        loại, giáo viên muốn xem kết quả phân loại trước — tách hai lần gọi, mỗi lần có chỉ dẫn, hợp đồng
-                        output và acceptance check riêng, và <em>phải truyền category đã kiểm tra sang bước sau</em>.
-                        <span class="knowledge-qref">Q10</span></li>
-                    <li class="knowledge-key"><strong>Parallelization khác orchestrator-workers.</strong> Bốn nhà cung cấp
-                        độc lập, cùng một rubric cố định → các subtask <em>biết trước</em>, nên coordinator giao mỗi vendor
-                        cho một subagent với context cô lập, yêu cầu trả điểm rubric kèm bằng chứng trích dẫn, rồi chính
-                        coordinator so sánh để ra <em>một</em> khuyến nghị. Orchestrator-workers chỉ hợp khi subtask không
-                        đoán trước được. <span class="knowledge-qref">Q5</span></li>
-                    <li>Subagent song song mà không có bước tổng hợp thì bài toán mới làm được một nửa: bốn khuyến nghị
-                        rời rạc có thể áp rubric khác nhau và đẩy việc đối chiếu cho con người.
-                        <span class="knowledge-qref">Q5</span></li>
+                    <li class="knowledge-key"><strong>Đơn giản ≠ thiếu</strong>: prototype một lần gọi + retrieval đã đạt mục tiêu thì ship, giữ eval làm baseline → dấu hiệu đề "sau này có thể khó hơn" <span class="knowledge-qref">Q4</span></li>
+                    <li><strong>Quy trình cố định</strong>: Messages API + output schema, kiểm quy tắc bằng code → dấu hiệu đề "trích xuất hóa đơn rồi đối chiếu" <span class="knowledge-qref">Q6</span></li>
+                    <li><strong>Framework che prompt</strong>: xem prompt, tool, history thật qua tracing, gỡ lớp trừu tượng → dấu hiệu đề "không ai biết Claude nhận gì" <span class="knowledge-qref">Q2</span></li>
+                    <li><strong>Prompt chaining</strong>: các bước tuần tự, gate code ở giữa, truyền category đã kiểm sang bước sau → dấu hiệu đề "muốn xem phân loại trước" <span class="knowledge-qref">Q10</span></li>
+                    <li class="knowledge-key"><strong>Parallelization ≠ orchestrator-workers</strong>: subtask biết trước → subagent song song + coordinator tổng hợp một khuyến nghị; không đoán trước → orchestrator <span class="knowledge-qref">Q5</span></li>
                 </ul>
 
                 <h3 id="ks-2">2. Agent SDK, subagent &amp; trạng thái bền vững</h3>
                 <ul>
-                    <li class="knowledge-key"><strong>LangGraph <code>interrupt</code> cần checkpointer bền vững và
-                            <code>thread_id</code> ổn định.</strong> MemorySaver giữ checkpoint trong RAM nên mất hết khi
-                        restart; production dùng checkpointer như <strong>PostgresSaver</strong>, mỗi claim một
-                        <code>thread_id</code>, resume bằng cách gọi lại graph với <code>Command</code> mang giá trị resume.
-                        Node bị gọi lại <em>từ đầu</em> khi resume, nên side effect đặt trước <code>interrupt</code> (gửi
-                        email) sẽ chạy lại — chuyển nó ra sau, tách node riêng, hoặc làm idempotent (ví dụ upsert). Không
-                        bọc <code>interrupt</code> trong <code>try/except</code> vì cơ chế tạm dừng dựa trên một exception
-                        đặc biệt. <span class="knowledge-qref">Q1</span></li>
-                    <li><strong>Tự host Agent SDK khi vận hành phải sở hữu runtime.</strong> Cluster Kubernetes có package
-                        mirror, sidecar observability và identity nội bộ → chạy Agent SDK trong cluster, mỗi session là một
-                        subprocess trong container riêng. Transcript nằm trên đĩa cục bộ và mất khi pod bị thay, nên mirror
-                        sang lưu trữ bền vững bằng <strong>SessionStore adapter</strong> để resume theo session ID hôm sau,
-                        kể cả trên pod khác. Managed Agents hợp khi team <em>không</em> muốn vận hành hạ tầng.
-                        <span class="knowledge-qref">Q7</span></li>
-                    <li>Messages API là <strong>stateless</strong>: không có agent loop thì không ai thực thi tool hay mang
-                        trạng thái giữa các request. <span class="knowledge-qref">Q7</span></li>
-                    <li><strong><code>AgentDefinition</code> có trường <code>model</code></strong> để ghi đè model cho
-                        từng subagent (alias <code>haiku</code>/<code>sonnet</code>/<code>opus</code> hoặc model ID đầy đủ);
-                        <code>inherit</code> nghĩa là dùng lại model của agent chính. Claude quyết định giao việc dựa vào
-                        <strong>description</strong> của subagent, nên mô tả kiểu "helper" khiến nó gần như không bao giờ
-                        được gọi. Sửa cả hai trường giải quyết cùng lúc chi phí và việc ít delegate. Model không đổi được
-                        bằng lời dặn trong prompt. <span class="knowledge-qref">Q8</span></li>
-                    <li><strong>Subagent built-in Explore</strong> của Claude Code là agent read-only, nhanh, chuyên tìm kiếm
-                        và phân tích codebase. Nó đọc hàng chục file trong context riêng và chỉ trả bản tóm tắt về hội thoại
-                        chính. File đã đọc trong hội thoại chính thì nằm lại trong context, dặn "bỏ qua" cũng không gỡ ra
-                        được. <span class="knowledge-qref">Q41</span></li>
-                    <li>Thứ tự đúng là <em>explore → plan → code</em>; viết thay đổi trước rồi mới tìm kiếm là để việc tìm
-                        kiếm phát hiện vấn đề sau khi đã lỡ làm. <span class="knowledge-qref">Q41</span></li>
+                    <li class="knowledge-key"><strong>LangGraph <code>interrupt</code></strong>: PostgresSaver + <code>thread_id</code> ổn định, resume bằng <code>Command</code>; side effect đặt sau interrupt hoặc idempotent → dấu hiệu đề "email gửi trùng" <span class="knowledge-qref">Q1</span></li>
+                    <li><strong>Tự host Agent SDK</strong>: mỗi session một container, SessionStore mirror transcript để resume trên pod khác → dấu hiệu đề "vận hành sở hữu runtime" <span class="knowledge-qref">Q7</span></li>
+                    <li><strong>Messages API stateless</strong>: không tự chạy tool, không giữ trạng thái giữa request <span class="knowledge-qref">Q7</span></li>
+                    <li><strong><code>AgentDefinition</code></strong>: <code>model</code> ghi đè model subagent, <code>description</code> quyết định có được giao việc → dấu hiệu đề "description helper, subagent đắt" <span class="knowledge-qref">Q8</span></li>
+                    <li><strong>Explore subagent</strong>: read-only, đọc nhiều file trong context riêng, chỉ trả tóm tắt; thứ tự explore → plan → code <span class="knowledge-qref">Q41</span></li>
                 </ul>
 
                 <h3 id="ks-3">3. Tool use, structured output &amp; kiểm chứng kết quả</h3>
                 <ul>
-                    <li><strong>Poka-yoke tool</strong>: tool definition đáng được prompt engineering kỹ như prompt chính;
-                        hãy đổi tham số để lỗi khó xảy ra. Ví dụ SWE-bench của Anthropic: model nhầm đường dẫn tương đối sau
-                        khi đổi thư mục, đổi tool sang <em>bắt buộc đường dẫn tuyệt đối</em> là hết lỗi. Prompt đã giải thích
-                        đủ mà lỗi vẫn còn thì chuyển công sức sang thiết kế tool. <span class="knowledge-qref">Q3</span></li>
-                    <li><strong>Anthropic-schema tool</strong> (<code>text_editor</code>, <code>bash</code>) được huấn luyện
-                        trên rất nhiều trajectory dùng đúng chữ ký đó, nên Claude gọi đúng tham số hơn và phục hồi lỗi tốt
-                        hơn tool tự định nghĩa cùng chức năng — trong khi ứng dụng <em>vẫn tự thực thi</em> từng thao tác.
-                        Code execution tool chạy trong sandbox của Anthropic, không chạm được repo của khách.
-                        <span class="knowledge-qref">Q51</span></li>
-                    <li class="knowledge-key"><strong>Tool lỗi thì kết quả phải nói là lỗi.</strong> Trả
-                        <code>tool_result</code> với <code>is_error: true</code> và thông điệp nêu loại lỗi (record bị khóa,
-                        địa chỉ không hợp lệ) để Claude thử lại, hỏi khách sửa, hoặc giải thích. Chuỗi "thành công" giả, kết
-                        quả rỗng, hay exception kết thúc cả session đều sai. <span class="knowledge-qref">Q53</span></li>
-                    <li><strong>Trường có thể vắng mặt phải có cách nói "vắng mặt".</strong> Schema bắt
-                        <code>po_number</code> là string và required thì Claude buộc phải bịa. Khai báo
-                        <code>anyOf</code> string/null, vẫn giữ required, và dặn trả <code>null</code> khi không có. Các ràng
-                        buộc chuỗi như <code>minLength</code> không được structured output hỗ trợ; enum mọi PO thì vượt giới
-                        hạn độ phức tạp schema. <span class="knowledge-qref">Q12</span></li>
-                    <li class="knowledge-key"><strong>Structured output đảm bảo hình dạng, không đảm bảo giá trị đúng.</strong>
-                        Trước khi áp dụng một thay đổi cấu hình: kiểm tra <code>stop_reason</code> là <code>end_turn</code>
-                        (refusal và bản bị cắt là lúc output có thể lệch schema), đối chiếu giá trị với quy tắc nghiệp vụ và
-                        service registry thật, rồi bắt duyệt người với thay đổi vượt ngưỡng rủi ro. Tương tự, đối chiếu mọi
-                        <code>po_number</code> với hệ thống mua hàng. <span class="knowledge-qref">Q40, Q12</span></li>
-                    <li>Điểm tự tin Claude tự chấm, hay ba lần trả lời giống nhau, chỉ chứng minh tính nhất quán — không phải
-                        tính đúng. <span class="knowledge-qref">Q40</span></li>
-                    <li><strong>Parser phải xử lý mọi loại response.</strong> Bằng chứng merge tốt nhất là <em>table-driven
-                            test</em> với response ghi sẵn có text, <code>tool_use</code>, refusal và
-                        <code>stop_reason</code> là <code>max_tokens</code>. Refusal đến như một response thành công bình
-                        thường, không phải lỗi; demo mười câu hỏi thông thường hầu như chỉ ra text.
-                        <span class="knowledge-qref">Q23</span></li>
+                    <li><strong>Poka-yoke tool</strong>: đổi tham số để khó sai, ví dụ bắt đường dẫn tuyệt đối → dấu hiệu đề "đổi thư mục, sai đường dẫn" <span class="knowledge-qref">Q3</span></li>
+                    <li><strong>Anthropic-schema tool</strong>: <code>text_editor</code>/<code>bash</code> được huấn luyện sẵn, app vẫn tự thực thi → dấu hiệu đề "tool tự định nghĩa, tham số sai" <span class="knowledge-qref">Q51</span></li>
+                    <li class="knowledge-key"><strong>Tool lỗi</strong>: <code>tool_result</code> với <code>is_error: true</code> + loại lỗi, không trả "thành công" giả → dấu hiệu đề "không lưu được nhưng báo OK" <span class="knowledge-qref">Q53</span></li>
+                    <li><strong>Trường có thể vắng</strong>: <code>anyOf</code> string/null, vẫn required, dặn trả <code>null</code>; <code>minLength</code> không hỗ trợ → dấu hiệu đề "giá trị bịa" <span class="knowledge-qref">Q12</span></li>
+                    <li class="knowledge-key"><strong>Hình dạng ≠ giá trị</strong>: kiểm <code>stop_reason</code> = <code>end_turn</code>, đối chiếu nguồn thật, duyệt người khi rủi ro cao <span class="knowledge-qref">Q40, Q12</span></li>
+                    <li><strong>Tự chấm tự tin / lặp giống nhau</strong>: chỉ chứng minh nhất quán, không chứng minh đúng <span class="knowledge-qref">Q40</span></li>
+                    <li><strong>Parser</strong>: table-driven test với text, <code>tool_use</code>, refusal, <code>max_tokens</code>; refusal là response thành công bình thường <span class="knowledge-qref">Q23</span></li>
                 </ul>
 
                 <h3 id="ks-4">4. MCP, Skills &amp; cách mở rộng Claude</h3>
                 <ul>
-                    <li><strong>Người không viết code + Claude Desktop + file trên laptop</strong> → cấu hình filesystem MCP
-                        server trong file JSON của Claude Desktop (mở từ Developer settings), trỏ đúng thư mục chia sẻ.
-                        Desktop hỏi duyệt từng hành động trước khi chạy, không cần xây hay host ứng dụng.
-                        <span class="knowledge-qref">Q11</span></li>
-                    <li class="knowledge-key"><strong>MCP connector trong Messages API chỉ nối được server công khai qua
-                            HTTP</strong>; không khởi chạy được stdio server cục bộ trên máy người dùng.
-                        <span class="knowledge-qref">Q11</span></li>
-                    <li><strong>Skill đồng bộ từ claude.ai</strong> chỉ nạp trong Cowork, cloud session và terminal session
-                        đăng nhập bằng tài khoản claude.ai — Claude Code tải về <code>~/.claude/skills/synced/</code>. Đồng
-                        nghiệp dùng API key không có tài khoản để đồng bộ, nên commit skill thành <strong>project skill</strong>
-                        trong <code>.claude/skills</code> để ai cũng có, bất kể cách đăng nhập.
-                        <span class="knowledge-qref">Q15</span></li>
-                    <li><strong>Custom Skill không tự đồng bộ giữa các surface</strong>: skill của Claude Code nằm trên
-                        filesystem, skill của API được upload riêng. Muốn quy trình review giống nhau ở Claude Code và bot
-                        API thì cài cùng một Skill ở từng nơi. Còn truy cập sống (đọc và cập nhật) vào issue tracker cho
-                        nhiều ứng dụng → <strong>một MCP server</strong> dùng chung, bảo trì và kiểm soát quyền ở một chỗ.
-                        <span class="knowledge-qref">Q52</span></li>
-                    <li class="knowledge-key"><strong>Skill nạp vào context hiện tại, subagent chạy trong context
-                            riêng.</strong> Checklist thiết kế API cần ảnh hưởng tới code đang viết → Skill (chỉ nạp khi liên
-                        quan nhờ description). Audit dependency đọc hàng trăm file, chỉ cần báo cáo ngắn → subagent, chỉ
-                        bản tóm tắt quay về. CLAUDE.md nạp mọi session nên tốn context cho thủ tục ít dùng.
-                        <span class="knowledge-qref">Q50, Q15</span></li>
-                    <li><strong>Mở rộng tool có sẵn hay tự viết?</strong> So sánh cả hai phương án với <em>đầy đủ</em> yêu cầu
-                        chức năng (kể cả bước kiểm tra license còn thiếu) và chi phí bảo trì lâu dài, xác minh điểm mở rộng
-                        được hỗ trợ thay vì giả định, rồi chọn phương án đáp ứng trọn yêu cầu. Phương án thắng nên trình
-                        bày cho Claude một khả năng rõ ràng, phạm vi gọn. <span class="knowledge-qref">Q49</span></li>
+                    <li><strong>Người không code + Claude Desktop</strong>: filesystem MCP server trong config JSON của Desktop → dấu hiệu đề "file trên laptop" <span class="knowledge-qref">Q11</span></li>
+                    <li class="knowledge-key"><strong>MCP connector (API) ≠ stdio cục bộ</strong>: connector chỉ nối server HTTP công khai <span class="knowledge-qref">Q11</span></li>
+                    <li><strong>Skill đồng bộ claude.ai</strong>: chỉ có khi đăng nhập claude.ai; dùng API key → commit project skill vào <code>.claude/skills</code> <span class="knowledge-qref">Q15</span></li>
+                    <li><strong>Skill không tự đồng bộ giữa surface</strong>: cài ở từng nơi; truy cập sống issue tracker → một MCP server chung <span class="knowledge-qref">Q52</span></li>
+                    <li class="knowledge-key"><strong>Skill ≠ subagent</strong>: Skill nạp vào context hiện tại khi liên quan; subagent context riêng, chỉ trả tóm tắt → dấu hiệu đề "hàng trăm file" <span class="knowledge-qref">Q50, Q15</span></li>
+                    <li><strong>Mở rộng hay tự viết</strong>: so đủ yêu cầu và chi phí bảo trì, xác minh điểm mở rộng, chọn phương án đáp ứng trọn <span class="knowledge-qref">Q49</span></li>
                 </ul>
 
                 <h3 id="ks-5">5. Cấu hình &amp; quy trình làm việc với Claude Code</h3>
                 <ul>
-                    <li><strong>Tắt plugin chỉ cho riêng mình</strong>: chọn Uninstall cho plugin mà
-                        <code>.claude/settings.json</code> của repo bật, rồi chọn <strong>Disable for me</strong> — Claude
-                        Code ghi <code>false</code> cho plugin đó trong <code>.claude/settings.local.json</code> (file không
-                        vào repo). "Uninstall for everyone" thì xóa khỏi file dùng chung.
-                        <span class="knowledge-qref">Q13</span></li>
-                    <li class="knowledge-key"><strong>Một nguồn duy nhất cho quy ước dùng chung</strong>: đưa phần chung vào
-                        một file và import bằng cú pháp <code>@path</code> từ CLAUDE.md của từng service; file import được
-                        nạp lúc khởi động cùng CLAUDE.md, đường dẫn tương đối tính từ file chứa lệnh import, import lồng
-                        được tối đa bốn tầng. Hoặc đặt tiêu chuẩn chung ở scope CLAUDE.md đủ rộng (managed của tổ chức, user
-                        trong <code>~/.claude</code>), còn build command và ghi chú kiến trúc ở CLAUDE.md của từng repo.
-                        Link văn bản thường không nạp gì cả; README không tự nạp.
-                        <span class="knowledge-qref">Q24, Q26</span></li>
-                    <li><code>CLAUDE.local.md</code> dành cho sở thích cá nhân theo project và nằm ngoài version control,
-                        nên không phải chỗ cho quy ước của team. <span class="knowledge-qref">Q24</span></li>
-                    <li><strong>Chạy trong CI</strong>: <code>claude -p "..." --output-format json</code> chạy
-                        non-interactive, in <em>một</em> object JSON gồm kết quả và metadata session (như session ID) rồi
-                        thoát. <code>stream-json</code> phát sự kiện NDJSON theo thời gian thực; <code>--continue</code> nối
-                        lại hội thoại gần nhất; cần đúng schema thì thêm <code>--json-schema</code>; slash command như
-                        <code>/export</code> chỉ dành cho phiên tương tác. <span class="knowledge-qref">Q27</span></li>
-                    <li><strong>Debug hook</strong>: <code>--debug</code> không in ra terminal mà ghi vào
-                        <code>~/.claude/debug/&lt;session-id&gt;.txt</code> (hoặc đường dẫn của <code>--debug-file</code>).
-                        Mỗi lần command hook chạy để lại một dòng Hooks: event, tool khớp, lệnh, kết quả, thời gian. Đọc log
-                        trước khi viết lại — có thể matcher chỉ phủ Write mà không phủ Edit. PostToolUse chạy sau khi tool
-                        hoàn tất, đúng event để format file. <span class="knowledge-qref">Q28</span></li>
-                    <li><strong>Ghim model khi chạy qua Bedrock/Vertex/Foundry</strong>: alias như <code>opus</code> phân giải
-                        về default của nhà cung cấp, có thể trễ bản mới hoặc trỏ tới model chưa bật trong account nên gây
-                        fallback. Ghim model ID của Bedrock bằng biến môi trường như
-                        <code>ANTHROPIC_DEFAULT_OPUS_MODEL</code> trong <strong>managed settings</strong>, cập nhật có chủ
-                        đích sau khi đánh giá. <span class="knowledge-qref">Q21</span></li>
-                    <li class="knowledge-key"><strong>Không tin test do chính session tự viết.</strong> Cho Claude một bước
-                        kiểm tra độc lập chạy được (test suite và build có sẵn) để nó lặp đến khi pass, rồi thêm bước
-                        <em>adversarial review</em>: subagent review diff trong context mới dựa trên plan và yêu cầu, sau đó
-                        người review. Hỏi chính session "đã đúng chưa" là để tác giả tự xác nhận.
-                        <span class="knowledge-qref">Q19</span></li>
+                    <li><strong>Tắt plugin cho mình</strong>: Uninstall → Disable for me, ghi <code>false</code> vào <code>settings.local.json</code> → dấu hiệu đề "chỉ riêng tôi" <span class="knowledge-qref">Q13</span></li>
+                    <li class="knowledge-key"><strong>Import <code>@path</code> ≠ link thường</strong>: <code>@path</code> nạp lúc khởi động, lồng tối đa 4 tầng; link và README không nạp → dấu hiệu đề "bản copy lệch nhau" <span class="knowledge-qref">Q24, Q26</span></li>
+                    <li><strong>Scope CLAUDE.md</strong>: chuẩn chung ở managed/user scope, build command ở repo; <code>CLAUDE.local.md</code> chỉ cho sở thích cá nhân <span class="knowledge-qref">Q26, Q24</span></li>
+                    <li><strong>CI</strong>: <code>claude -p --output-format json</code> in một object JSON rồi thoát; <code>stream-json</code> là NDJSON; cần schema thì <code>--json-schema</code> <span class="knowledge-qref">Q27</span></li>
+                    <li><strong>Debug hook</strong>: <code>--debug</code> ghi vào <code>~/.claude/debug/&lt;session-id&gt;.txt</code>; đọc log trước, matcher có thể thiếu Edit → dấu hiệu đề "không in gì" <span class="knowledge-qref">Q28</span></li>
+                    <li><strong>Ghim model trên Bedrock/Vertex</strong>: <code>ANTHROPIC_DEFAULT_OPUS_MODEL</code> trong managed settings → dấu hiệu đề "alias fallback model cũ" <span class="knowledge-qref">Q21</span></li>
+                    <li class="knowledge-key"><strong>Tự kiểm ≠ review độc lập</strong>: test/build có sẵn để lặp đến pass, rồi subagent review context mới, rồi người review <span class="knowledge-qref">Q19</span></li>
                 </ul>
 
                 <h3 id="ks-6">6. Prompt engineering, context engineering &amp; retrieval</h3>
                 <ul>
-                    <li class="knowledge-key"><strong>Ví dụ là cách đáng tin nhất để khóa định dạng.</strong> Prompt đã nêu
-                        đủ sáu trường nhưng giá trị trôi (severity lúc chữ lúc số, impact lúc một dòng lúc cả đoạn) → thêm
-                        3–5 ví dụ đa dạng bọc trong thẻ <code>&lt;example&gt;</code>, thể hiện đúng thang severity và độ dài
-                        impact, rồi chạy lại bộ eval. Chữ in hoa và cảnh báo chỉ nhấn mạnh điều Claude đã làm.
-                        <span class="knowledge-qref">Q39</span></li>
-                    <li><strong>XML tag khi prompt trộn chỉ dẫn, ví dụ và input</strong>: ví dụ trong
-                        <code>&lt;example&gt;</code> nằm trong <code>&lt;examples&gt;</code>, ticket thật trong
-                        <code>&lt;input&gt;</code>, chỉ dẫn trong <code>&lt;instructions&gt;</code> — chi tiết ví dụ hết lọt
-                        vào câu trả lời. Đồng thời yêu cầu viết reply trong một thẻ tên rõ như <code>&lt;reply&gt;</code> để
-                        parser chỉ lấy nội dung thẻ đó. Nói Claude <em>nên làm gì</em> thay vì "đừng làm gì".
-                        <span class="knowledge-qref">Q44</span></li>
-                    <li><strong>Context engineering là bước tiến tự nhiên của prompt engineering.</strong> Prompt engineering
-                        viết và tổ chức chỉ dẫn, ví dụ; context engineering chọn và duy trì tập token tốt nhất trong suốt quá
-                        trình chạy — tool result, dữ liệu truy xuất, trạng thái task — hướng tới tập token nhỏ nhất mà nhiều
-                        tín hiệu nhất. Hai việc chồng lấn vì chỉ dẫn cũng là một phần của context.
-                        <span class="knowledge-qref">Q38</span></li>
-                    <li><strong>Contextual Retrieval</strong>: dùng Claude viết một đoạn context ngắn <em>riêng cho từng
-                            chunk</em> (sản phẩm, mục) và chèn vào đầu chunk trước khi tạo embedding và index BM25; prompt
-                        caching giữ chi phí xử lý từng tài liệu thấp. Gắn bản tóm tắt chung của cả tài liệu cho mọi chunk gần
-                        như không cải thiện; nhồi hết tài liệu vào prompt chỉ hợp với knowledge base nhỏ.
-                        <span class="knowledge-qref">Q43</span></li>
-                    <li><strong>Prompt caching khớp prefix giống hệt tới cache breakpoint.</strong> Đặt chỉ dẫn và tool
-                        definition dùng chung lên trước, có breakpoint ngay sau, rồi mới đến tài liệu của từng khách — prefix
-                        chung được tái sử dụng mà dữ liệu khách không bị trộn. Xác nhận bằng
-                        <code>cache_read_input_tokens</code>. <span class="knowledge-qref">Q14</span></li>
-                    <li><strong>Tọa độ trong ảnh</strong>: Claude trả pixel tuyệt đối theo <em>ảnh đã resize</em> mà nó nhìn
-                        thấy (kích thước lớn nhất giữ tỉ lệ trong giới hạn cạnh và visual token, rồi pad). Ảnh 1920×1080
-                        thành 1456×819 ở tier chuẩn. Lệch đều cả vị trí lẫn tỉ lệ → resize trước khi gửi, hoặc quy đổi tọa độ
-                        về ảnh gốc. <span class="knowledge-qref">Q25</span></li>
+                    <li class="knowledge-key"><strong>Khóa định dạng</strong>: 3–5 ví dụ đa dạng trong <code>&lt;example&gt;</code>, chạy lại eval; chữ in hoa không đủ → dấu hiệu đề "giá trị trôi định dạng" <span class="knowledge-qref">Q39</span></li>
+                    <li><strong>XML tag</strong>: tách <code>&lt;examples&gt;</code>, <code>&lt;input&gt;</code>, <code>&lt;instructions&gt;</code>, output trong <code>&lt;reply&gt;</code> → dấu hiệu đề "chép chi tiết từ ví dụ" <span class="knowledge-qref">Q44</span></li>
+                    <li><strong>Context engineering</strong>: chọn, duy trì tập token nhỏ nhất nhiều tín hiệu nhất suốt quá trình chạy; mở rộng prompt engineering <span class="knowledge-qref">Q38</span></li>
+                    <li><strong>Contextual Retrieval</strong>: Claude viết context riêng từng chunk, chèn trước embedding và BM25 → dấu hiệu đề "chunk không rõ sản phẩm" <span class="knowledge-qref">Q43</span></li>
+                    <li><strong>Prompt caching</strong>: phần chung lên trước, breakpoint sau đó, dữ liệu khách sau; kiểm <code>cache_read_input_tokens</code> <span class="knowledge-qref">Q14</span></li>
+                    <li><strong>Tọa độ ảnh</strong>: theo ảnh đã resize (1920×1080 → 1456×819); resize trước hoặc quy đổi → dấu hiệu đề "lệch đều" <span class="knowledge-qref">Q25</span></li>
                 </ul>
 
                 <h3 id="ks-7">7. Model, thinking, token &amp; chi phí</h3>
                 <ul>
-                    <li class="knowledge-key"><strong>Chọn model bắt đầu từ tiêu chí, không từ "model mạnh nhất".</strong>
-                        Chưa có ngưỡng chất lượng, ngân sách latency hay chi phí thì làm rõ với product team trước, rồi so
-                        model trên bộ eval dựng từ prompt và dữ liệu thật. Tiêu chí chính: capability, tốc độ, chi phí và
-                        effort. <span class="knowledge-qref">Q30</span></li>
-                    <li><strong>Efficiency-first</strong>: tác vụ đơn giản, khối lượng lớn, latency chặt, ngân sách nhỏ (phân
-                        loại hàng triệu tin trạng thái giao hàng) → bắt đầu với model nhanh, rẻ như Claude Haiku 5.5, test
-                        kỹ trên eval của use case, chỉ nâng cấp khi đo được khoảng trống. Leaderboard công khai và context
-                        window lớn không quyết định độ chính xác. <span class="knowledge-qref">Q37</span></li>
-                    <li><strong>Adaptive thinking</strong>: Claude tự quyết khi nào và nghĩ bao nhiêu dựa trên tham số
-                        <code>effort</code> và độ khó câu hỏi; câu dễ thì trả lời thẳng, không có thinking block — đó là
-                        thiết kế, không phải bug. Muốn nghĩ nhiều hơn ở câu khó thì tăng effort. Nhiều model hiện tại chỉ hỗ
-                        trợ adaptive, nên <code>budget_tokens</code> thủ công có thể không dùng được.
-                        <span class="knowledge-qref">Q32</span></li>
-                    <li><strong>Summarized thinking bị tính tiền theo toàn bộ thinking token đã sinh</strong>, không theo độ
-                        dài bản tóm tắt hiển thị. Không có tùy chọn hiển thị chuỗi suy nghĩ thô. Đối soát hóa đơn bằng trường
-                        usage của từng response. <span class="knowledge-qref">Q34</span></li>
-                    <li><strong>Tokenizer mới</strong>: Claude 4.7 trở đi sinh khoảng 30% token nhiều hơn cho cùng văn bản.
-                        Đếm lại prompt đại diện bằng token counting endpoint với model mới rồi sửa ngân sách context,
-                        <code>max_tokens</code> và chi phí. Tỉ lệ cố định từ → token là sai; cached token vẫn chiếm context.
-                        <span class="knowledge-qref">Q33</span></li>
-                    <li><strong>Server-side fallback khi bị refuse</strong>: mỗi attempt tính giá theo model đã chạy nó, ghi
-                        trong mảng <code>usage.iterations</code>; usage cấp cao nhất chỉ là attempt trả về, không cộng dồn.
-                        Trường <code>model</code> của response và fallback content block cho biết ai đã trả lời.
-                        <span class="knowledge-qref">Q35</span></li>
-                    <li class="knowledge-key"><strong>Rate limit tính riêng từng chiều</strong>: RPM, input token mỗi phút
-                        (ITPM) và output token mỗi phút (OTPM), theo lớp model, ở cấp organization; vượt chiều nào cũng ra
-                        429. Với đa số model chỉ <em>input chưa cache</em> tính vào ITPM. Ước tính đỉnh từng chiều, so với
-                        limit, xin nâng limit <em>trước</em> launch. <span class="knowledge-qref">Q18</span></li>
-                    <li><strong>Hóa đơn tăng nhanh hơn traffic</strong> → ghi token usage theo từng tính năng trước khi đổi
-                        gì. Mỗi response trả input, output, cache read/write; Usage and Cost API tách theo API key và
-                        workspace, nên mỗi tính năng một key giúp quy trách nhiệm ở cấp tổ chức.
-                        <span class="knowledge-qref">Q31</span></li>
+                    <li class="knowledge-key"><strong>Chọn model</strong>: làm rõ tiêu chí chất lượng, latency, chi phí trước, rồi so trên eval dữ liệu thật <span class="knowledge-qref">Q30</span></li>
+                    <li><strong>Efficiency-first</strong>: việc đơn giản, khối lượng lớn → bắt đầu Haiku, nâng cấp khi eval cho thấy thiếu → dấu hiệu đề "hàng triệu tin" <span class="knowledge-qref">Q37</span></li>
+                    <li><strong>Adaptive thinking</strong>: câu dễ không có thinking block là thiết kế; muốn nghĩ nhiều thì tăng <code>effort</code> <span class="knowledge-qref">Q32</span></li>
+                    <li><strong>Summarized thinking</strong>: tính tiền toàn bộ thinking token, không theo bản tóm tắt; đối soát bằng usage <span class="knowledge-qref">Q34</span></li>
+                    <li><strong>Tokenizer mới (4.7+)</strong>: ~30% token nhiều hơn; đếm lại bằng token counting endpoint, sửa <code>max_tokens</code>, ngân sách <span class="knowledge-qref">Q33</span></li>
+                    <li><strong>Server-side fallback</strong>: usage từng attempt ở <code>usage.iterations</code>, top-level không cộng dồn; xem trường <code>model</code> <span class="knowledge-qref">Q35</span></li>
+                    <li class="knowledge-key"><strong>Rate limit tách chiều</strong>: RPM, ITPM (input chưa cache), OTPM; vượt chiều nào cũng 429, xin nâng trước launch <span class="knowledge-qref">Q18</span></li>
+                    <li><strong>Hóa đơn tăng nhanh hơn traffic</strong>: ghi usage theo tính năng, mỗi tính năng một key, xem Usage and Cost API <span class="knowledge-qref">Q31</span></li>
                 </ul>
 
                 <h3 id="ks-8">8. Yêu cầu, đánh giá &amp; vận hành</h3>
                 <ul>
-                    <li><strong>"Phải nhanh" chưa phải yêu cầu kiểm thử được.</strong> Viết thành hai mục tiêu: TTFT dưới hai
-                        giây (lấy từ nghiên cứu người dùng bỏ trang) đạt bằng streaming, và một mục tiêu thời gian hoàn tất ở
-                        percentile nêu rõ (ví dụ p95), đo cả hai trong production. Cắt <code>max_tokens</code> chỉ làm
-                        báo cáo cụt. <span class="knowledge-qref">Q16</span></li>
-                    <li class="knowledge-key"><strong>Functional khác infrastructure requirement.</strong> Gán một trong sáu
-                        nhãn cho mỗi ticket là việc hệ thống <em>làm</em> → functional, kiểm bằng accuracy trên bộ ticket có
-                        nhãn. Tiếp tục nhận ticket khi một region sập là cách dịch vụ <em>vận hành</em> → availability, kiểm
-                        bằng uptime và diễn tập failover, do platform team sở hữu.
-                        <span class="knowledge-qref">Q22</span></li>
-                    <li><strong>Failover sang Bedrock</strong>: Bedrock không hỗ trợ mọi tính năng của Claude API — Files API,
-                        server-side tool như web search và Message Batches API nằm trong danh sách không hỗ trợ — và dùng
-                        model ID riêng. Liệt kê tính năng đang dùng, đối chiếu, thiết kế đường dự phòng (gửi tài liệu inline,
-                        tự search, request thời gian thực), rồi test failover. Yêu cầu là "vẫn chạy", không phải "giống hệt".
-                        <span class="knowledge-qref">Q17</span></li>
-                    <li><strong>Việc chạy hàng phút không giữ HTTP request mở.</strong> Trả <code>202 Accepted</code> kèm job
-                        ID, sinh báo cáo trong background worker có streaming, client poll endpoint trạng thái. Request dài,
-                        nhất là trên mười phút, nên dùng streaming hoặc Message Batches API vì mạng có thể cắt kết nối rảnh;
-                        SDK kiểm tra rằng request non-streaming không vượt timeout mười phút.
-                        <span class="knowledge-qref">Q20</span></li>
-                    <li><strong>Sau release là giai đoạn vận hành và bảo trì</strong>: monitoring, ứng phó sự cố, cải tiến có
-                        kế hoạch, chủ sở hữu vận hành rõ ràng. Model có ngày deprecation → test với model mới trước ngày
-                        retire; eval chạy liên tục, capability eval "tốt nghiệp" thành regression suite.
-                        <span class="knowledge-qref">Q9</span></li>
-                    <li class="knowledge-key"><strong>Migration model phải giữ mọi yêu cầu, không đổi lỗi này lấy lỗi
-                            kia.</strong> Model mới hơn suy luận tốt hơn 11% nhưng 4% output lệch cấu trúc → chỉnh system
-                        prompt cho model mới (model mới làm theo chỉ dẫn sát chữ hơn), chạy lại eval đại diện và regression
-                        eval (kỳ vọng pass gần 100%), chỉ chuyển khi hết regression.
-                        <span class="knowledge-qref">Q29</span></li>
-                    <li><strong>Output dao động giữa các lần chạy</strong> → chạy nhiều trial mỗi case, so tỉ lệ thành công và
-                        tỉ lệ lỗi nghiêm trọng trên cùng bộ case. Messages API không có seed để ra output xác định.
-                        <span class="knowledge-qref">Q36</span></li>
-                    <li><strong>Mười hai test case là quá ít</strong> → dùng Claude sinh nhiều edge case từ bộ seed (thuộc
-                        tính mâu thuẫn, thiếu giá trị), review expected output, chấm tự động bằng code. Nhiều case chấm tự
-                        động cho nhiều tín hiệu hơn vài case chấm tay. <span class="knowledge-qref">Q42</span></li>
+                    <li><strong>"Phải nhanh"</strong>: TTFT &lt; 2s bằng streaming + thời gian hoàn tất theo p95, đo trong production <span class="knowledge-qref">Q16</span></li>
+                    <li class="knowledge-key"><strong>Functional ≠ infrastructure</strong>: gán nhãn ticket là functional (accuracy); chạy khi region sập là availability (failover) <span class="knowledge-qref">Q22</span></li>
+                    <li><strong>Failover Bedrock</strong>: thiếu Files API, web search, Batches; model ID riêng → liệt kê, thiết kế đường dự phòng, test <span class="knowledge-qref">Q17</span></li>
+                    <li><strong>Việc chạy hàng phút</strong>: <code>202 Accepted</code> + job ID, worker streaming, client poll → dấu hiệu đề "proxy cắt kết nối" <span class="knowledge-qref">Q20</span></li>
+                    <li><strong>Sau release</strong>: monitoring, sự cố, chủ sở hữu vận hành; test model mới trước ngày retire <span class="knowledge-qref">Q9</span></li>
+                    <li class="knowledge-key"><strong>Migration model</strong>: chỉnh prompt cho model mới, chạy eval + regression (~100%), chỉ chuyển khi hết regression <span class="knowledge-qref">Q29</span></li>
+                    <li><strong>Output dao động</strong>: nhiều trial mỗi case, so tỉ lệ; Messages API không có seed <span class="knowledge-qref">Q36</span></li>
+                    <li><strong>Quá ít test case</strong>: Claude sinh edge case từ seed, review expected, chấm bằng code <span class="knowledge-qref">Q42</span></li>
                 </ul>
 
                 <h3 id="ks-9">9. Bảo mật, guardrails &amp; cô lập dữ liệu</h3>
                 <ul>
-                    <li class="knowledge-key"><strong>Cô lập dữ liệu khách là trách nhiệm của ứng dụng.</strong> Truy xuất
-                        tài liệu theo client ID từ <em>session đã xác thực trên server</em>, không theo chữ người dùng gõ, để
-                        request chỉ chứa tài liệu của đúng khách đó. Cache isolation chỉ tách giữa các workspace (hoặc
-                        organization trên một số nền tảng), không tách các khách trong cùng workspace; API key xác thực ứng
-                        dụng, không quyết định nội dung prompt. <span class="knowledge-qref">Q14</span></li>
-                    <li><strong>Defense in depth</strong>: xếp lớp biện pháp bổ trợ ở input, quyền tool, ranh giới thực thi và
-                        output để một lớp hỏng vẫn có lớp khác chặn. Nội dung truy xuất là không tin cậy (indirect prompt
-                        injection); ranh giới phải được thực thi ngoài model. Middleware an toàn bị timeout thì phải
-                        <em>fail closed</em>, không cho request đi qua. <span class="knowledge-qref">Q45</span></li>
-                    <li><strong>Dữ liệu cấm gửi ra ngoài</strong> (số badge, mã cửa): xác định ranh giới tin cậy đầu ra, nội
-                        dung được phép, và lọc/redact <em>trước khi</em> request rời ứng dụng. Nguyên tắc tối thiểu hóa dữ
-                        liệu: Claude không cần thì đừng gửi. Mã hóa đường truyền không ngăn service đích nhận giá trị; dặn
-                        Claude bỏ qua thì giá trị đã đi rồi. <span class="knowledge-qref">Q46</span></li>
-                    <li><strong>Mỗi hệ thống và môi trường một API key</strong>, đặt key vào workspace có spend limit và rate
-                        limit riêng, theo dõi usage theo workspace và key. Nhờ vậy biết hệ thống nào gây spike và thu hồi
-                        đúng một key. Rotate, metadata trong request hay secrets manager đều giữ nguyên một credential chung.
-                        <span class="knowledge-qref">Q47</span></li>
-                    <li><strong>Harmlessness screen</strong> cho jailbreak cố ý: model nhẹ như Claude Haiku sàng lọc tin nhắn
-                        trước khi vào hội thoại chính, bị ràng buộc bằng structured output thành một verdict đơn giản, và
-                        <em>coi refusal là harmful</em> (vì Haiku có classifier an toàn riêng nên request sàng lọc có thể bị
-                        từ chối). Nhanh, rẻ, chặn trước khi tool đăng forum vào cuộc.
-                        <span class="knowledge-qref">Q48</span></li>
-                    <li>Prompt an toàn là hướng dẫn, không phải cơ chế thực thi; nó nên có mặt nhưng không được là lớp bảo vệ
-                        duy nhất. <span class="knowledge-qref">Q45, Q48</span></li>
+                    <li class="knowledge-key"><strong>Cô lập khách</strong>: truy xuất theo client ID từ session đã xác thực; cache chỉ tách theo workspace <span class="knowledge-qref">Q14</span></li>
+                    <li><strong>Defense in depth</strong>: nhiều lớp input, quyền tool, output; nội dung truy xuất không tin cậy; middleware lỗi → fail closed <span class="knowledge-qref">Q45</span></li>
+                    <li><strong>Dữ liệu cấm gửi ra</strong>: redact trước khi rời ứng dụng; mã hóa đường truyền không thay được → dấu hiệu đề "mã cửa, badge" <span class="knowledge-qref">Q46</span></li>
+                    <li><strong>Mỗi hệ thống một API key</strong>: workspace có spend/rate limit riêng, thu hồi đúng một key → dấu hiệu đề "không biết ai gây spike" <span class="knowledge-qref">Q47</span></li>
+                    <li><strong>Harmlessness screen</strong>: Haiku + structured output ra verdict, coi refusal là harmful → dấu hiệu đề "jailbreak, rẻ, nhanh" <span class="knowledge-qref">Q48</span></li>
+                    <li class="knowledge-key"><strong>Lời dặn ≠ thực thi</strong>: prompt an toàn cần có nhưng không là lớp duy nhất <span class="knowledge-qref">Q45, Q48</span></li>
                 </ul>
 
                 <h3 id="ks-10">10. Bảng so sánh dễ nhầm</h3>
@@ -1560,11 +1353,10 @@
                             <tr><th>Mẫu</th><th>Chọn khi</th><th>Câu</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td>Một lần gọi + retrieval + ví dụ</td><td>Đã đạt mục tiêu chất lượng, latency, chi phí</td><td><span class="knowledge-qref">Q4</span></td></tr>
-                            <tr><td>Gọi API trực tiếp + kiểm tra bằng code</td><td>Quy trình cố định, quy tắc xác định</td><td><span class="knowledge-qref">Q6</span></td></tr>
-                            <tr><td>Prompt chaining có gate</td><td>Bước sau phụ thuộc bước trước, cần kiểm tra kết quả trung gian</td><td><span class="knowledge-qref">Q10</span></td></tr>
-                            <tr><td>Parallelization + coordinator tổng hợp</td><td>Subtask độc lập, biết trước, cần một kết luận chung</td><td><span class="knowledge-qref">Q5</span></td></tr>
-                            <tr><td>Orchestrator-workers</td><td>Subtask không đoán trước được, phải chia lúc chạy</td><td><span class="knowledge-qref">Q5</span></td></tr>
+                            <tr><td>Một lần gọi + retrieval + ví dụ</td><td>Đã đạt chất lượng, latency, chi phí</td><td><span class="knowledge-qref">Q4</span></td></tr>
+                            <tr><td>Gọi API + kiểm bằng code</td><td>Quy trình cố định, quy tắc xác định</td><td><span class="knowledge-qref">Q6</span></td></tr>
+                            <tr><td>Prompt chaining có gate</td><td>Bước sau phụ thuộc bước trước, cần kiểm trung gian</td><td><span class="knowledge-qref">Q10</span></td></tr>
+                            <tr><td>Parallelization + coordinator</td><td>Subtask độc lập, biết trước, cần kết luận chung</td><td><span class="knowledge-qref">Q5</span></td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1576,10 +1368,8 @@
                             <tr><th>Cơ chế</th><th>Nạp vào đâu, khi nào</th><th>Dùng cho</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td>Skill</td><td>Context hiện tại, chỉ khi liên quan</td><td>Thủ tục/checklist cần định hướng việc đang làm <span class="knowledge-qref">Q50, Q15</span></td></tr>
-                            <tr><td>Subagent</td><td>Context riêng, chỉ tóm tắt quay về</td><td>Việc nặng, đọc nhiều file, tự chứa <span class="knowledge-qref">Q41, Q50</span></td></tr>
                             <tr><td>CLAUDE.md</td><td>Mọi session, lúc khởi động</td><td>Quy ước luôn cần; chia sẻ bằng <code>@path</code> <span class="knowledge-qref">Q24, Q26</span></td></tr>
-                            <tr><td>MCP server</td><td>Tool dùng chung cho nhiều ứng dụng</td><td>Truy cập sống vào hệ thống bên ngoài <span class="knowledge-qref">Q11, Q52</span></td></tr>
+                            <tr><td>MCP server</td><td>Tool dùng chung nhiều ứng dụng</td><td>Truy cập sống hệ thống ngoài <span class="knowledge-qref">Q11, Q52</span></td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1591,11 +1381,11 @@
                             <tr><th>Biện pháp</th><th>Đảm bảo được</th><th>Không đảm bảo</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td>Structured output</td><td>Kiểu và cấu trúc JSON</td><td>Giá trị có thật, đúng nghiệp vụ <span class="knowledge-qref">Q12, Q40</span></td></tr>
-                            <tr><td>Kiểm tra <code>stop_reason</code></td><td>Response hoàn chỉnh, không phải refusal/bị cắt</td><td>Nội dung đúng <span class="knowledge-qref">Q23, Q40</span></td></tr>
-                            <tr><td>Đối chiếu nguồn sự thật</td><td>Giá trị khớp hệ thống thật</td><td>An toàn với thay đổi rủi ro cao <span class="knowledge-qref">Q12, Q40</span></td></tr>
-                            <tr><td>Duyệt người theo ngưỡng</td><td>Thay đổi rủi ro cao có người xác nhận</td><td>— (lớp cuối) <span class="knowledge-qref">Q40</span></td></tr>
-                            <tr><td>Tự chấm điểm / nhiều lần giống nhau</td><td>Tính nhất quán</td><td>Tính đúng <span class="knowledge-qref">Q40</span></td></tr>
+                            <tr><td>Structured output</td><td>Kiểu và cấu trúc JSON</td><td>Giá trị đúng nghiệp vụ <span class="knowledge-qref">Q12, Q40</span></td></tr>
+                            <tr><td>Kiểm <code>stop_reason</code></td><td>Không bị refusal/cắt</td><td>Nội dung đúng <span class="knowledge-qref">Q23, Q40</span></td></tr>
+                            <tr><td>Đối chiếu nguồn thật</td><td>Giá trị khớp hệ thống</td><td>An toàn thay đổi rủi ro cao <span class="knowledge-qref">Q12, Q40</span></td></tr>
+                            <tr><td>Duyệt người theo ngưỡng</td><td>Người xác nhận thay đổi rủi ro</td><td>— (lớp cuối) <span class="knowledge-qref">Q40</span></td></tr>
+                            <tr><td>Tự chấm / lặp giống nhau</td><td>Tính nhất quán</td><td>Tính đúng <span class="knowledge-qref">Q40</span></td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1607,11 +1397,11 @@
                             <tr><th>Tham số / cách làm</th><th>Thực sự làm gì</th><th>Không làm được</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td><code>temperature</code></td><td>Thêm/bớt ngẫu nhiên; giá trị khác mặc định bị lỗi 400 trên model hiện tại</td><td>Biểu đạt giá trị vắng mặt, khóa định dạng, tách ví dụ khỏi input <span class="knowledge-qref">Q12, Q39, Q44</span></td></tr>
-                            <tr><td><code>max_tokens</code></td><td>Giới hạn độ dài sinh</td><td>Làm phản hồi "cảm giác nhanh", sửa lỗi cấu trúc; nó cũng không phải mức tính tiền <span class="knowledge-qref">Q16, Q20, Q29, Q34</span></td></tr>
-                            <tr><td>Prompt caching</td><td>Giảm chi phí và độ trễ cho prefix lặp lại</td><td>Giảm kích thước context, cô lập khách trong cùng workspace <span class="knowledge-qref">Q14, Q33</span></td></tr>
+                            <tr><td><code>temperature</code></td><td>Độ ngẫu nhiên; khác mặc định → lỗi 400</td><td>Khóa định dạng, biểu đạt vắng mặt <span class="knowledge-qref">Q12, Q39, Q44</span></td></tr>
+                            <tr><td><code>max_tokens</code></td><td>Giới hạn độ dài sinh</td><td>Làm nhanh, sửa cấu trúc, quyết định tiền <span class="knowledge-qref">Q16, Q20, Q29, Q34</span></td></tr>
+                            <tr><td>Prompt caching</td><td>Giảm chi phí, độ trễ prefix lặp</td><td>Giảm context, cô lập khách cùng workspace <span class="knowledge-qref">Q14, Q33</span></td></tr>
                             <tr><td><code>effort</code></td><td>Dịch chuyển lượng thinking</td><td>— <span class="knowledge-qref">Q32</span></td></tr>
-                            <tr><td>Model lớn hơn</td><td>Thường làm theo chỉ dẫn tốt hơn, nhưng chậm và đắt hơn</td><td>Sửa chỉ dẫn không tới nơi, tool dễ gây lỗi, TTFT <span class="knowledge-qref">Q2, Q3, Q16</span></td></tr>
+                            <tr><td>Model lớn hơn</td><td>Theo chỉ dẫn tốt hơn, chậm, đắt</td><td>Sửa chỉ dẫn bị mất, tool dễ sai, TTFT <span class="knowledge-qref">Q2, Q3, Q16</span></td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1623,12 +1413,12 @@
                             <tr><th>Vị trí</th><th>Phạm vi</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td><code>.claude/settings.json</code></td><td>Dùng chung cho team, commit vào repo (plugin, hook) <span class="knowledge-qref">Q13, Q28</span></td></tr>
-                            <tr><td><code>.claude/settings.local.json</code></td><td>Cá nhân, ngoài repo — "Disable for me" ghi vào đây <span class="knowledge-qref">Q13</span></td></tr>
-                            <tr><td>Managed settings</td><td>Toàn tổ chức, ví dụ ghim model bằng biến môi trường <span class="knowledge-qref">Q21</span></td></tr>
-                            <tr><td><code>.claude/skills</code></td><td>Project skill, ai clone repo cũng có <span class="knowledge-qref">Q15</span></td></tr>
-                            <tr><td><code>~/.claude/skills/synced/</code></td><td>Skill đồng bộ từ claude.ai, chỉ khi đăng nhập claude.ai <span class="knowledge-qref">Q15</span></td></tr>
-                            <tr><td><code>CLAUDE.local.md</code></td><td>Sở thích cá nhân theo project, ngoài version control <span class="knowledge-qref">Q24</span></td></tr>
+                            <tr><td><code>.claude/settings.json</code></td><td>Dùng chung team, commit repo <span class="knowledge-qref">Q13, Q28</span></td></tr>
+                            <tr><td><code>.claude/settings.local.json</code></td><td>Cá nhân, ngoài repo; "Disable for me" ghi đây <span class="knowledge-qref">Q13</span></td></tr>
+                            <tr><td>Managed settings</td><td>Toàn tổ chức, ví dụ ghim model <span class="knowledge-qref">Q21</span></td></tr>
+                            <tr><td><code>.claude/skills</code></td><td>Project skill, ai clone cũng có <span class="knowledge-qref">Q15</span></td></tr>
+                            <tr><td><code>~/.claude/skills/synced/</code></td><td>Skill đồng bộ, chỉ khi đăng nhập claude.ai <span class="knowledge-qref">Q15</span></td></tr>
+                            <tr><td><code>CLAUDE.local.md</code></td><td>Sở thích cá nhân, ngoài version control <span class="knowledge-qref">Q24</span></td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1640,28 +1430,22 @@
                             <tr><th>Con số / tham số</th><th>Ý nghĩa</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td>~30%</td><td>Lượng token tăng thêm của tokenizer mới (Claude 4.7 trở đi) cho cùng văn bản <span class="knowledge-qref">Q33</span></td></tr>
-                            <tr><td>10 phút</td><td>Ngưỡng request dài nên dùng streaming/Message Batches; SDK kiểm tra request non-streaming không vượt timeout này <span class="knowledge-qref">Q20</span></td></tr>
-                            <tr><td>2 giây</td><td>Mục tiêu TTFT rút từ nghiên cứu người dùng bỏ trang <span class="knowledge-qref">Q16</span></td></tr>
-                            <tr><td>1920×1080 → 1456×819</td><td>Ví dụ resize ảnh chụp màn hình ở tier chuẩn (không phải 1568×882) <span class="knowledge-qref">Q25</span></td></tr>
-                            <tr><td>4 tầng</td><td>Độ sâu lồng tối đa của import <code>@path</code> trong CLAUDE.md <span class="knowledge-qref">Q24</span></td></tr>
-                            <tr><td>3–5 ví dụ</td><td>Số ví dụ đa dạng để khóa định dạng output <span class="knowledge-qref">Q39</span></td></tr>
-                            <tr><td>Gần 100%</td><td>Mức pass kỳ vọng của regression eval <span class="knowledge-qref">Q29</span></td></tr>
-                            <tr><td>600 RPM / 600.000 ITPM / 300.000 OTPM</td><td>Nhu cầu đỉnh tính được trong Q18 (600 request × 1.000 input chưa cache, × 500 output) <span class="knowledge-qref">Q18</span></td></tr>
-                            <tr><td>Lỗi 429</td><td>Vượt bất kỳ chiều rate limit nào <span class="knowledge-qref">Q18</span></td></tr>
-                            <tr><td>Lỗi 400</td><td><code>temperature</code> khác mặc định trên model hiện tại <span class="knowledge-qref">Q12</span></td></tr>
-                            <tr><td><code>202 Accepted</code></td><td>Trả ngay kèm job ID cho việc chạy lâu <span class="knowledge-qref">Q20</span></td></tr>
-                            <tr><td><code>stop_reason</code></td><td><code>end_turn</code> (hoàn tất), <code>max_tokens</code> (bị cắt), refusal <span class="knowledge-qref">Q23, Q40</span></td></tr>
-                            <tr><td><code>is_error: true</code></td><td>Đánh dấu <code>tool_result</code> là lỗi thật <span class="knowledge-qref">Q53</span></td></tr>
-                            <tr><td><code>usage.iterations</code></td><td>Usage từng attempt khi có server-side fallback <span class="knowledge-qref">Q35</span></td></tr>
-                            <tr><td><code>cache_read_input_tokens</code></td><td>Số token đọc từ cache, xác nhận tiết kiệm <span class="knowledge-qref">Q14</span></td></tr>
-                            <tr><td><code>anyOf</code> string/null</td><td>Cho phép trường required nhận <code>null</code>; <code>minLength</code> không được hỗ trợ <span class="knowledge-qref">Q12</span></td></tr>
-                            <tr><td><code>AgentDefinition.model</code></td><td><code>haiku</code>/<code>sonnet</code>/<code>opus</code>, model ID đầy đủ, hoặc <code>inherit</code> <span class="knowledge-qref">Q8</span></td></tr>
-                            <tr><td><code>ANTHROPIC_DEFAULT_OPUS_MODEL</code></td><td>Ghim model ID mà alias <code>opus</code> trỏ tới <span class="knowledge-qref">Q21</span></td></tr>
-                            <tr><td><code>-p</code> + <code>--output-format json</code></td><td>Chạy non-interactive, in một object JSON rồi thoát <span class="knowledge-qref">Q27</span></td></tr>
-                            <tr><td><code>~/.claude/debug/&lt;session-id&gt;.txt</code></td><td>Nơi <code>--debug</code> ghi log hook (đổi bằng <code>--debug-file</code>) <span class="knowledge-qref">Q28</span></td></tr>
-                            <tr><td><code>thread_id</code> + <code>Command</code></td><td>Resume đúng graph LangGraph đã dừng ở <code>interrupt</code> <span class="knowledge-qref">Q1</span></td></tr>
-                            <tr><td><code>text_editor</code>, <code>bash</code></td><td>Anthropic-schema tool, ứng dụng tự thực thi <span class="knowledge-qref">Q51</span></td></tr>
+                            <tr><td>~30%</td><td>Token tăng thêm của tokenizer 4.7+ <span class="knowledge-qref">Q33</span></td></tr>
+                            <tr><td>10 phút</td><td>Timeout non-streaming; dài hơn dùng streaming/Batches <span class="knowledge-qref">Q20</span></td></tr>
+                            <tr><td>2 giây</td><td>Mục tiêu TTFT <span class="knowledge-qref">Q16</span></td></tr>
+                            <tr><td>1920×1080 → 1456×819</td><td>Resize ảnh ở tier chuẩn <span class="knowledge-qref">Q25</span></td></tr>
+                            <tr><td>4 tầng</td><td>Độ sâu lồng tối đa của <code>@path</code> <span class="knowledge-qref">Q24</span></td></tr>
+                            <tr><td>3–5 ví dụ</td><td>Số ví dụ để khóa định dạng <span class="knowledge-qref">Q39</span></td></tr>
+                            <tr><td>Gần 100%</td><td>Pass kỳ vọng của regression eval <span class="knowledge-qref">Q29</span></td></tr>
+                            <tr><td>600 RPM / 600k ITPM / 300k OTPM</td><td>Nhu cầu đỉnh tính được trong đề <span class="knowledge-qref">Q18</span></td></tr>
+                            <tr><td>Lỗi 429</td><td>Vượt bất kỳ chiều rate limit <span class="knowledge-qref">Q18</span></td></tr>
+                            <tr><td>Lỗi 400</td><td><code>temperature</code> khác mặc định <span class="knowledge-qref">Q12</span></td></tr>
+                            <tr><td><code>202 Accepted</code></td><td>Trả ngay kèm job ID <span class="knowledge-qref">Q20</span></td></tr>
+                            <tr><td><code>stop_reason</code></td><td><code>end_turn</code>, <code>max_tokens</code>, refusal <span class="knowledge-qref">Q23, Q40</span></td></tr>
+                            <tr><td><code>anyOf</code> string/null</td><td>Trường required nhận <code>null</code> <span class="knowledge-qref">Q12</span></td></tr>
+                            <tr><td><code>ANTHROPIC_DEFAULT_OPUS_MODEL</code></td><td>Ghim model mà alias <code>opus</code> trỏ tới <span class="knowledge-qref">Q21</span></td></tr>
+                            <tr><td><code>-p</code> + <code>--output-format json</code></td><td>Non-interactive, một object JSON rồi thoát <span class="knowledge-qref">Q27</span></td></tr>
+                            <tr><td><code>~/.claude/debug/&lt;session-id&gt;.txt</code></td><td>Log của <code>--debug</code> <span class="knowledge-qref">Q28</span></td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1673,164 +1457,96 @@
                             <tr><th>Từ khóa trong đề</th><th>Hướng đáp án</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td>prototype đơn giản đã đạt mục tiêu</td><td>Ship bản đơn giản, thêm agent khi eval cho thấy cần</td></tr>
-                            <tr><td>framework, không ai biết Claude nhận gì</td><td>Tracing/debug log xem request thật, gỡ lớp trừu tượng</td></tr>
-                            <tr><td>vendor độc lập, một rubric, một khuyến nghị</td><td>Subagent song song + coordinator so điểm có trích dẫn</td></tr>
-                            <tr><td>giáo viên muốn xem phân loại trước</td><td>Prompt chaining, hai lần gọi, gate giữa</td></tr>
-                            <tr><td>claim biến mất khi restart, email gửi trùng</td><td>PostgresSaver + <code>thread_id</code>; side effect sau <code>interrupt</code></td></tr>
-                            <tr><td>vận hành phải sở hữu runtime, resume hôm sau</td><td>Tự host Agent SDK + SessionStore</td></tr>
-                            <tr><td>description "helper", subagent đắt</td><td>Sửa <code>model</code> và <code>description</code> trong AgentDefinition</td></tr>
-                            <tr><td>đường dẫn tương đối, đổi thư mục</td><td>Poka-yoke: bắt buộc đường dẫn tuyệt đối</td></tr>
-                            <tr><td>edit_file/run_command tự định nghĩa, tham số sai</td><td><code>text_editor</code> và <code>bash</code> schema của Anthropic</td></tr>
-                            <tr><td>chuỗi thành công dù không lưu được</td><td><code>is_error: true</code> + loại lỗi</td></tr>
-                            <tr><td>giá trị bịa nhưng trông hợp lý</td><td>Cho phép <code>null</code> + đối chiếu nguồn sự thật</td></tr>
-                            <tr><td>analyst không code, Claude Desktop, file trên laptop</td><td>Filesystem MCP server trong config của Desktop</td></tr>
-                            <tr><td>đồng nghiệp dùng API key không thấy skill</td><td>Project skill trong <code>.claude/skills</code></td></tr>
-                            <tr><td>vừa Claude Code vừa bot API, issue tracker sống</td><td>Skill cài ở từng surface + một MCP server</td></tr>
-                            <tr><td>đọc hàng trăm file, chỉ cần báo cáo ngắn</td><td>Subagent (Explore hoặc tự định nghĩa)</td></tr>
-                            <tr><td>nhiều bản copy quy ước bị lệch nhau</td><td>Một file chung + import <code>@path</code> / scope chung</td></tr>
-                            <tr><td>tắt plugin cho riêng mình</td><td>Disable for me → <code>settings.local.json</code></td></tr>
-                            <tr><td>debug không in gì ra terminal</td><td>Đọc file log trong <code>~/.claude/debug</code></td></tr>
-                            <tr><td>Bedrock, session fallback model cũ</td><td>Ghim model ID qua managed settings</td></tr>
-                            <tr><td>tự viết test trong cùng session</td><td>Check độc lập + subagent review context mới + người review</td></tr>
-                            <tr><td>giá trị trôi định dạng dù đã nêu tên trường</td><td>3–5 ví dụ trong thẻ example</td></tr>
-                            <tr><td>chép tên/mã đơn từ ví dụ, parser khó tách</td><td>XML tag cho ví dụ/input + thẻ output</td></tr>
-                            <tr><td>chunk không nói thuộc sản phẩm nào</td><td>Contextual Retrieval</td></tr>
-                            <tr><td>box lệch đều vị trí và tỉ lệ</td><td>Quy đổi tọa độ theo ảnh đã resize</td></tr>
-                            <tr><td>câu dễ không có thinking block</td><td>Adaptive thinking hoạt động đúng; chỉnh effort</td></tr>
-                            <tr><td>billed output lớn hơn text hiển thị</td><td>Summarized thinking tính toàn bộ thinking token</td></tr>
-                            <tr><td>đổi model, vượt context, chi phí tăng</td><td>Đếm lại bằng token counting endpoint, sửa ngân sách</td></tr>
-                            <tr><td>refusal, model khác trả lời, hóa đơn lệch</td><td><code>usage.iterations</code> + trường <code>model</code></td></tr>
-                            <tr><td>"answers must feel fast"</td><td>TTFT + streaming và thời gian hoàn tất theo percentile</td></tr>
-                            <tr><td>proxy cắt kết nối, chạy 5–12 phút</td><td>202 + job ID + worker streaming + poll</td></tr>
-                            <tr><td>kết quả xếp hạng đổi giữa các lần chạy</td><td>Nhiều trial mỗi case, so tỉ lệ</td></tr>
-                            <tr><td>dữ liệu bị cấm gửi tới dịch vụ ngoài</td><td>Redact trước ranh giới đầu ra</td></tr>
-                            <tr><td>một key chung, không biết ai gây spike</td><td>Key riêng + workspace có limit riêng</td></tr>
-                            <tr><td>kiểm tra rẻ, nhanh trước hội thoại chính</td><td>Haiku harmlessness screen, refusal = harmful</td></tr>
+                            <tr><td>prototype đơn giản đã đạt mục tiêu</td><td>Ship bản đơn giản</td></tr>
+                            <tr><td>không ai biết Claude nhận gì</td><td>Tracing xem request thật</td></tr>
+                            <tr><td>vendor độc lập, một rubric</td><td>Subagent song song + coordinator</td></tr>
+                            <tr><td>sở hữu runtime, resume hôm sau</td><td>Tự host Agent SDK + SessionStore</td></tr>
+                            <tr><td>báo thành công dù không lưu</td><td><code>is_error: true</code></td></tr>
+                            <tr><td>giá trị bịa trông hợp lý</td><td>Cho phép <code>null</code> + đối chiếu</td></tr>
+                            <tr><td>dùng API key không thấy skill</td><td>Project skill <code>.claude/skills</code></td></tr>
+                            <tr><td>Claude Code + bot API, issue tracker</td><td>Skill từng surface + một MCP</td></tr>
+                            <tr><td>Bedrock fallback model cũ</td><td>Ghim model ID qua managed settings</td></tr>
+                            <tr><td>tự viết test cùng session</td><td>Check độc lập + review context mới</td></tr>
+                            <tr><td>chép chi tiết ví dụ, khó parse</td><td>XML tag + thẻ output</td></tr>
+                            <tr><td>câu dễ không có thinking</td><td>Đúng thiết kế; chỉnh effort</td></tr>
+                            <tr><td>billed output &gt; text hiển thị</td><td>Tính toàn bộ thinking token</td></tr>
+                            <tr><td>đổi model, vượt context</td><td>Token counting endpoint</td></tr>
+                            <tr><td>refusal, model khác trả lời</td><td><code>usage.iterations</code> + <code>model</code></td></tr>
+                            <tr><td>"must feel fast"</td><td>TTFT + streaming + p95</td></tr>
+                            <tr><td>xếp hạng đổi giữa các lần</td><td>Nhiều trial, so tỉ lệ</td></tr>
+                            <tr><td>kiểm tra rẻ trước hội thoại</td><td>Haiku screen, refusal = harmful</td></tr>
                         </tbody>
                     </table>
                 </div>
 
                 <h3 id="ks-13">13. Mẹo làm bài thi</h3>
                 <ul>
-                    <li><strong>"Làm gì trước tiên?" thường là thu thập bằng chứng.</strong> Xem request thật, đọc debug log,
-                        ghi usage theo tính năng, làm rõ tiêu chí — trước khi đổi framework, viết lại hook hay đổi model.
-                        <span class="knowledge-qref">Q2, Q28, Q30, Q31</span></li>
-                    <li><strong>Loại đáp án xây cho tương lai giả định.</strong> "Sau này có thể phức tạp hơn", "sẵn sàng cho
-                        tính năng mới", "giữ toàn quyền kiểm soát" đều là lý do thêm độ phức tạp chưa được chứng minh.
-                        <span class="knowledge-qref">Q4, Q6, Q49</span></li>
-                    <li><strong>Sửa ở nơi lỗi sinh ra.</strong> Tool dễ gây lỗi thì sửa tool; schema không cho nói "vắng mặt"
-                        thì sửa schema; tọa độ lệch đều thì sửa phép quy đổi. Thêm agent review, model lớn hơn hay lặp lại
-                        request chỉ chữa triệu chứng. <span class="knowledge-qref">Q3, Q12, Q25, Q51</span></li>
-                    <li><strong>Câu "Select two" thường ghép phòng ngừa với kiểm chứng</strong>: cho phép <code>null</code> +
-                        đối chiếu hệ thống mua hàng; checkpointer bền vững + dời side effect; truy xuất theo session + đặt
-                        cache breakpoint; check độc lập + review context mới.
-                        <span class="knowledge-qref">Q12, Q1, Q14, Q19</span></li>
-                    <li><strong>Hỏi "cái này được thực thi hay chỉ là lời dặn?"</strong> Lời dặn trong system prompt hay
-                        CLAUDE.md không khóa được model, không cô lập dữ liệu, không chặn jailbreak.
-                        <span class="knowledge-qref">Q8, Q14, Q21, Q45, Q46, Q48</span></li>
-                    <li><strong>Ưu tiên đáp án có đo lường và có tiêu chí.</strong> Eval đại diện, nhiều trial, regression
-                        eval, mục tiêu có percentile. <span class="knowledge-qref">Q16, Q29, Q36, Q37, Q42</span></li>
-                    <li><strong>Đọc kỹ ai là người dùng.</strong> Người không viết code thì không đưa terminal; team không có
-                        ngân sách host thì loại ứng dụng web; vận hành phải sở hữu runtime thì loại managed.
-                        <span class="knowledge-qref">Q7, Q11</span></li>
+                    <li><strong>"Làm gì trước?"</strong>: thu thập bằng chứng — request thật, debug log, usage, tiêu chí <span class="knowledge-qref">Q2, Q28, Q30, Q31</span></li>
+                    <li><strong>Loại đáp án xây cho tương lai giả định</strong>: "sau này phức tạp hơn", "toàn quyền kiểm soát" <span class="knowledge-qref">Q4, Q6, Q49</span></li>
+                    <li><strong>Sửa tại nơi lỗi sinh</strong>: tool, schema, phép quy đổi; model lớn hơn chỉ chữa triệu chứng <span class="knowledge-qref">Q3, Q12, Q25, Q51</span></li>
+                    <li><strong>"Select two"</strong>: thường ghép phòng ngừa + kiểm chứng <span class="knowledge-qref">Q12, Q1, Q14, Q19</span></li>
+                    <li><strong>Thực thi hay lời dặn?</strong>: lời dặn không khóa model, không cô lập, không chặn jailbreak <span class="knowledge-qref">Q8, Q14, Q21, Q45, Q46, Q48</span></li>
+                    <li><strong>Ưu tiên có đo lường</strong>: eval đại diện, nhiều trial, regression, percentile <span class="knowledge-qref">Q16, Q29, Q36, Q37, Q42</span></li>
+                    <li><strong>Đọc kỹ người dùng</strong>: không code thì không terminal; sở hữu runtime thì loại managed <span class="knowledge-qref">Q7, Q11</span></li>
                 </ul>
 
                 <h3 id="ks-14">14. Bẫy thường gặp</h3>
                 <ul>
-                    <li class="knowledge-key"><strong>Schema hợp lệ không có nghĩa là giá trị đúng.</strong>
-                        <span class="knowledge-qref">Q12, Q40</span></li>
-                    <li class="knowledge-key"><strong>Prompt caching không cô lập khách hàng và không giảm context.</strong>
-                        Cache tách theo workspace, còn cached token vẫn chiếm context window.
-                        <span class="knowledge-qref">Q14, Q33</span></li>
-                    <li class="knowledge-key"><strong>Test do chính session viết, hay session tự xác nhận, không phải review
-                            độc lập.</strong> <span class="knowledge-qref">Q19</span></li>
-                    <li class="knowledge-key"><strong>Node LangGraph chạy lại từ đầu khi resume</strong>, nên side effect trước
-                        <code>interrupt</code> lặp lại. <span class="knowledge-qref">Q1</span></li>
-                    <li><strong>Top-level usage không cộng dồn các attempt khi có fallback.</strong>
-                        <span class="knowledge-qref">Q35</span></li>
-                    <li><strong>Hóa đơn tính toàn bộ thinking, không theo bản tóm tắt; <code>max_tokens</code> không phải mức
-                            tính tiền.</strong> <span class="knowledge-qref">Q34</span></li>
-                    <li><strong>Token count không giống nhau giữa các model.</strong> <span class="knowledge-qref">Q33</span></li>
-                    <li><strong>Bedrock không có đủ tính năng và dùng model ID riêng.</strong>
-                        <span class="knowledge-qref">Q17, Q21</span></li>
-                    <li><strong>Rate limit không phải một con số token gộp</strong>, và token limit áp cho cả traffic thời gian
-                        thực. <span class="knowledge-qref">Q18</span></li>
-                    <li><strong><code>--debug</code> không in ra terminal; echo trong hook cũng vậy.</strong>
-                        <span class="knowledge-qref">Q28</span></li>
-                    <li><strong><code>-p</code> tự thoát; <code>--continue</code> là nối lại hội thoại cũ.</strong>
-                        <span class="knowledge-qref">Q27</span></li>
-                    <li><strong>Link văn bản và README không được Claude Code nạp</strong>; chỉ <code>@path</code> mới nạp.
-                        <span class="knowledge-qref">Q24, Q26</span></li>
-                    <li><strong>Không có thinking block ở câu dễ không phải bug.</strong> <span class="knowledge-qref">Q32</span></li>
-                    <li><strong>Messages API không có seed để ra output xác định</strong>, và temperature khác mặc định bị từ
-                        chối trên model hiện tại. <span class="knowledge-qref">Q36, Q39</span></li>
-                    <li><strong>Mã hóa đường truyền không phải tối thiểu hóa dữ liệu.</strong>
-                        <span class="knowledge-qref">Q46</span></li>
-                    <li><strong>Code execution tool chạy trong sandbox của Anthropic</strong>, không đụng được repo của bạn.
-                        <span class="knowledge-qref">Q51</span></li>
+                    <li class="knowledge-key"><strong>Schema hợp lệ ≠ giá trị đúng</strong> <span class="knowledge-qref">Q12, Q40</span></li>
+                    <li class="knowledge-key"><strong>Caching không cô lập khách, không giảm context</strong> <span class="knowledge-qref">Q14, Q33</span></li>
+                    <li><strong>Session tự viết test, tự xác nhận ≠ review độc lập</strong> <span class="knowledge-qref">Q19</span></li>
+                    <li><strong>Node LangGraph chạy lại từ đầu khi resume</strong> <span class="knowledge-qref">Q1</span></li>
+                    <li><strong>Top-level usage không cộng dồn attempt fallback</strong> <span class="knowledge-qref">Q35</span></li>
+                    <li><strong>Tính tiền toàn bộ thinking; <code>max_tokens</code> không phải mức tính tiền</strong> <span class="knowledge-qref">Q34</span></li>
+                    <li><strong>Token count khác nhau giữa model</strong> <span class="knowledge-qref">Q33</span></li>
+                    <li><strong>Bedrock thiếu tính năng, model ID riêng</strong> <span class="knowledge-qref">Q17, Q21</span></li>
+                    <li><strong>Rate limit không phải một con số gộp</strong> <span class="knowledge-qref">Q18</span></li>
+                    <li><strong><code>--debug</code> và echo trong hook không in ra terminal</strong> <span class="knowledge-qref">Q28</span></li>
+                    <li><strong><code>-p</code> tự thoát; <code>--continue</code> nối hội thoại cũ</strong> <span class="knowledge-qref">Q27</span></li>
+                    <li><strong>Link văn bản, README không được nạp; chỉ <code>@path</code></strong> <span class="knowledge-qref">Q24, Q26</span></li>
+                    <li><strong>Không có thinking ở câu dễ không phải bug</strong> <span class="knowledge-qref">Q32</span></li>
+                    <li><strong>Không có seed; temperature khác mặc định bị từ chối</strong> <span class="knowledge-qref">Q36, Q39</span></li>
+                    <li><strong>Mã hóa đường truyền ≠ tối thiểu hóa dữ liệu</strong> <span class="knowledge-qref">Q46</span></li>
+                    <li><strong>Code execution tool chạy sandbox Anthropic, không chạm repo</strong> <span class="knowledge-qref">Q51</span></li>
                 </ul>
 
                 <h3 id="ks-15">15. Chủ đề hỏi lặp lại</h3>
                 <ul>
-                    <li><strong>Bắt đầu đơn giản, thêm phức tạp khi có nhu cầu đo được</strong>
-                        <span class="knowledge-qref">Q2, Q4, Q6, Q49</span></li>
-                    <li><strong>Subagent để cô lập context, chỉ tóm tắt quay về</strong>
-                        <span class="knowledge-qref">Q5, Q8, Q41, Q50</span></li>
-                    <li><strong>Structured output và kiểm chứng giá trị phía ứng dụng</strong>
-                        <span class="knowledge-qref">Q6, Q12, Q40</span></li>
-                    <li><strong>Luôn kiểm tra <code>stop_reason</code></strong>
-                        <span class="knowledge-qref">Q23, Q40</span></li>
-                    <li><strong>Thiết kế tool để Claude khó gọi sai và biết khi nào thất bại</strong>
-                        <span class="knowledge-qref">Q3, Q51, Q53</span></li>
-                    <li><strong>Skill, CLAUDE.md và cách chia sẻ cấu hình trong team</strong>
-                        <span class="knowledge-qref">Q13, Q15, Q24, Q26, Q50, Q52</span></li>
-                    <li><strong>Chọn model theo tiêu chí và eval của chính use case</strong>
-                        <span class="knowledge-qref">Q29, Q30, Q37</span></li>
-                    <li><strong>Hiểu đúng token, usage và hóa đơn</strong>
-                        <span class="knowledge-qref">Q18, Q31, Q33, Q34, Q35</span></li>
-                    <li><strong>Bedrock / nền tảng bên thứ ba khác Claude API</strong>
-                        <span class="knowledge-qref">Q17, Q21</span></li>
-                    <li><strong>Đánh giá lặp lại, nhiều trial, nhiều case</strong>
-                        <span class="knowledge-qref">Q29, Q36, Q42</span></li>
-                    <li><strong>Temperature không phải cách sửa lỗi định dạng hay nội dung</strong>
-                        <span class="knowledge-qref">Q12, Q39, Q44</span></li>
-                    <li><strong>Ví dụ và XML tag để khóa định dạng</strong>
-                        <span class="knowledge-qref">Q39, Q44</span></li>
-                    <li><strong>Ranh giới được thực thi ngoài model, không phải lời dặn</strong>
-                        <span class="knowledge-qref">Q14, Q45, Q46, Q47, Q48</span></li>
-                    <li><strong>Biến yêu cầu mơ hồ thành mục tiêu đo được</strong>
-                        <span class="knowledge-qref">Q16, Q22, Q30</span></li>
+                    <li><strong>Đơn giản trước, phức tạp khi đo được</strong> <span class="knowledge-qref">Q2, Q4, Q6, Q49</span></li>
+                    <li><strong>Subagent cô lập context</strong> <span class="knowledge-qref">Q5, Q8, Q41, Q50</span></li>
+                    <li><strong>Structured output + kiểm chứng giá trị</strong> <span class="knowledge-qref">Q6, Q12, Q40</span></li>
+                    <li><strong>Luôn kiểm <code>stop_reason</code></strong> <span class="knowledge-qref">Q23, Q40</span></li>
+                    <li><strong>Tool khó gọi sai, báo lỗi rõ</strong> <span class="knowledge-qref">Q3, Q51, Q53</span></li>
+                    <li><strong>Skill, CLAUDE.md, chia sẻ cấu hình team</strong> <span class="knowledge-qref">Q13, Q15, Q24, Q26, Q50, Q52</span></li>
+                    <li><strong>Chọn model theo tiêu chí và eval</strong> <span class="knowledge-qref">Q29, Q30, Q37</span></li>
+                    <li><strong>Token, usage, hóa đơn</strong> <span class="knowledge-qref">Q18, Q31, Q33, Q34, Q35</span></li>
+                    <li><strong>Bedrock khác Claude API</strong> <span class="knowledge-qref">Q17, Q21</span></li>
+                    <li><strong>Nhiều trial, nhiều case</strong> <span class="knowledge-qref">Q29, Q36, Q42</span></li>
+                    <li><strong>Temperature không sửa định dạng</strong> <span class="knowledge-qref">Q12, Q39, Q44</span></li>
+                    <li><strong>Ví dụ + XML tag khóa định dạng</strong> <span class="knowledge-qref">Q39, Q44</span></li>
+                    <li><strong>Ranh giới thực thi ngoài model</strong> <span class="knowledge-qref">Q14, Q45, Q46, Q47, Q48</span></li>
+                    <li><strong>Yêu cầu mơ hồ → mục tiêu đo được</strong> <span class="knowledge-qref">Q16, Q22, Q30</span></li>
                 </ul>
 
                 <h3 id="ks-16">16. Danh sách viết tắt &amp; giải thích thuật ngữ</h3>
-                <p class="knowledge-intro">
-                    Tổng hợp các chữ viết tắt và thuật ngữ xuất hiện trong câu hỏi, đáp án và phần giải thích của Quiz 5,
-                    gom theo nhóm để tra nhanh khi gặp trong đề.
-                </p>
 
                 <h4>Agent, workflow &amp; Claude Code</h4>
                 <div class="knowledge-table-wrap">
                     <table class="knowledge-table">
                         <thead><tr><th>Viết tắt</th><th>Tên đầy đủ</th><th>Giải thích</th></tr></thead>
                         <tbody>
-                            <tr><td>SDK</td><td>Software Development Kit</td><td>Bộ thư viện chính thức; Agent SDK cung cấp agent loop, tool, session giống Claude Code</td></tr>
-                            <tr><td>Subagent</td><td>—</td><td>Agent con chạy trong context riêng, chỉ trả kết quả tóm tắt cho agent chính</td></tr>
-                            <tr><td>Explore</td><td>—</td><td>Subagent built-in của Claude Code, read-only, chuyên tìm kiếm và phân tích codebase</td></tr>
-                            <tr><td>AgentDefinition</td><td>—</td><td>Cấu hình subagent trong Agent SDK: description, tools, model…</td></tr>
-                            <tr><td>Prompt chaining</td><td>—</td><td>Chia việc thành các bước tuần tự, có gate kiểm tra giữa các bước</td></tr>
-                            <tr><td>Parallelization</td><td>—</td><td>Chạy song song các subtask độc lập đã biết trước</td></tr>
-                            <tr><td>Orchestrator-workers</td><td>—</td><td>Orchestrator chia việc lúc chạy khi subtask không đoán trước được</td></tr>
-                            <tr><td>Managed Agents</td><td>Claude Managed Agents</td><td>Anthropic vận hành runtime và sandbox thay cho team</td></tr>
-                            <tr><td>SessionStore</td><td>—</td><td>Adapter mirror transcript session sang lưu trữ bền vững để resume</td></tr>
-                            <tr><td>Checkpointer</td><td>—</td><td>Thành phần LangGraph lưu trạng thái graph; MemorySaver (RAM) và PostgresSaver (bền vững)</td></tr>
-                            <tr><td>Idempotent</td><td>—</td><td>Chạy lại nhiều lần không tạo thêm tác dụng (ví dụ upsert)</td></tr>
-                            <tr><td>Hook</td><td>—</td><td>Lệnh Claude Code tự chạy ở một event như PreToolUse, PostToolUse</td></tr>
-                            <tr><td>Plugin</td><td>—</td><td>Gói mở rộng cho Claude Code, bật/tắt qua settings</td></tr>
-                            <tr><td>CI</td><td>Continuous Integration</td><td>Pipeline tự động build và test mỗi thay đổi</td></tr>
-                            <tr><td>PR</td><td>Pull Request</td><td>Đề xuất gộp thay đổi code, nơi review diễn ra</td></tr>
-                            <tr><td>CLI</td><td>Command-Line Interface</td><td>Giao diện dòng lệnh, như <code>claude -p</code></td></tr>
-                            <tr><td>Poka-yoke</td><td>— (tiếng Nhật)</td><td>Thiết kế chống sai: làm cho lỗi khó xảy ra ngay từ giao diện</td></tr>
+                            <tr><td>SDK</td><td>Software Development Kit</td><td>Bộ thư viện; Agent SDK có agent loop, tool, session</td></tr>
+                            <tr><td>Subagent</td><td>—</td><td>Agent con, context riêng, trả tóm tắt</td></tr>
+                            <tr><td>Explore</td><td>—</td><td>Subagent built-in read-only, tìm kiếm codebase</td></tr>
+                            <tr><td>AgentDefinition</td><td>—</td><td>Cấu hình subagent: description, tools, model</td></tr>
+                            <tr><td>Orchestrator-workers</td><td>—</td><td>Chia việc lúc chạy, subtask không đoán trước</td></tr>
+                            <tr><td>Managed Agents</td><td>Claude Managed Agents</td><td>Anthropic vận hành runtime và sandbox</td></tr>
+                            <tr><td>SessionStore</td><td>—</td><td>Mirror transcript sang lưu trữ bền vững</td></tr>
+                            <tr><td>Checkpointer</td><td>—</td><td>Lưu trạng thái LangGraph: MemorySaver, PostgresSaver</td></tr>
+                            <tr><td>Idempotent</td><td>—</td><td>Chạy lại không thêm tác dụng (upsert)</td></tr>
+                            <tr><td>Hook</td><td>—</td><td>Lệnh tự chạy ở event như PostToolUse</td></tr>
+                            <tr><td>Plugin</td><td>—</td><td>Gói mở rộng Claude Code, bật/tắt qua settings</td></tr>
+                            <tr><td>Poka-yoke</td><td>— (tiếng Nhật)</td><td>Thiết kế chống sai</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1840,21 +1556,14 @@
                     <table class="knowledge-table">
                         <thead><tr><th>Viết tắt</th><th>Tên đầy đủ</th><th>Giải thích</th></tr></thead>
                         <tbody>
-                            <tr><td>MCP</td><td>Model Context Protocol</td><td>Giao thức chuẩn để expose tool và dữ liệu cho nhiều ứng dụng Claude</td></tr>
-                            <tr><td>stdio</td><td>Standard input/output</td><td>Kiểu transport MCP server cục bộ; MCP connector của Messages API không hỗ trợ</td></tr>
-                            <tr><td>Skill</td><td>Agent Skill</td><td>Gói chỉ dẫn và tài liệu tham khảo, chỉ nạp đầy đủ khi task cần</td></tr>
-                            <tr><td>API</td><td>Application Programming Interface</td><td>Giao diện lập trình; Messages API là API chính để gọi Claude</td></tr>
-                            <tr><td>JSON</td><td>JavaScript Object Notation</td><td>Định dạng dữ liệu cho structured output và cấu hình</td></tr>
-                            <tr><td>NDJSON</td><td>Newline-Delimited JSON</td><td>Mỗi dòng một object JSON — dạng của <code>stream-json</code></td></tr>
-                            <tr><td>HTTP</td><td>Hypertext Transfer Protocol</td><td>Giao thức web; 202, 400, 429 là mã trạng thái HTTP</td></tr>
-                            <tr><td>Structured outputs</td><td>—</td><td>Ràng buộc response theo JSON schema, đảm bảo hình dạng chứ không đảm bảo giá trị</td></tr>
-                            <tr><td>tool_result</td><td>—</td><td>Block ứng dụng gửi lại kết quả tool cho Claude, có cờ <code>is_error</code></td></tr>
-                            <tr><td>Anthropic-schema tool</td><td>—</td><td>Tool có schema do Anthropic công bố (<code>text_editor</code>, <code>bash</code>), ứng dụng tự thực thi</td></tr>
-                            <tr><td>Files API</td><td>—</td><td>Upload file một lần rồi tham chiếu trong request</td></tr>
-                            <tr><td>Message Batches API</td><td>—</td><td>Xử lý hàng loạt request bất đồng bộ</td></tr>
-                            <tr><td>Usage and Cost API</td><td>—</td><td>Báo cáo usage và chi phí theo API key, workspace</td></tr>
-                            <tr><td>OCR</td><td>Optical Character Recognition</td><td>Nhận dạng chữ trong ảnh</td></tr>
-                            <tr><td>Bounding box</td><td>—</td><td>Khung chữ nhật đánh dấu vị trí đối tượng trong ảnh</td></tr>
+                            <tr><td>MCP</td><td>Model Context Protocol</td><td>Giao thức chuẩn expose tool, dữ liệu</td></tr>
+                            <tr><td>stdio</td><td>Standard input/output</td><td>Transport MCP cục bộ; connector API không hỗ trợ</td></tr>
+                            <tr><td>Skill</td><td>Agent Skill</td><td>Gói chỉ dẫn, nạp khi task cần</td></tr>
+                            <tr><td>NDJSON</td><td>Newline-Delimited JSON</td><td>Mỗi dòng một object — dạng <code>stream-json</code></td></tr>
+                            <tr><td>tool_result</td><td>—</td><td>Kết quả tool gửi lại, có <code>is_error</code></td></tr>
+                            <tr><td>Files API</td><td>—</td><td>Upload file một lần, tham chiếu lại</td></tr>
+                            <tr><td>Message Batches API</td><td>—</td><td>Xử lý hàng loạt bất đồng bộ</td></tr>
+                            <tr><td>Usage and Cost API</td><td>—</td><td>Báo cáo usage theo key, workspace</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1864,24 +1573,18 @@
                     <table class="knowledge-table">
                         <thead><tr><th>Viết tắt</th><th>Tên đầy đủ</th><th>Giải thích</th></tr></thead>
                         <tbody>
-                            <tr><td>TTFT</td><td>Time To First Token</td><td>Thời gian từ lúc gửi prompt đến token đầu tiên — chỉ số "cảm giác nhanh"</td></tr>
-                            <tr><td>p95</td><td>95th percentile</td><td>95% request hoàn tất trong mức thời gian này</td></tr>
-                            <tr><td>RPM</td><td>Requests Per Minute</td><td>Rate limit số request mỗi phút</td></tr>
-                            <tr><td>ITPM</td><td>Input Tokens Per Minute</td><td>Rate limit input token mỗi phút; đa số model chỉ tính input chưa cache</td></tr>
-                            <tr><td>OTPM</td><td>Output Tokens Per Minute</td><td>Rate limit output token mỗi phút</td></tr>
-                            <tr><td>Adaptive thinking</td><td>—</td><td>Claude tự quyết khi nào và nghĩ bao nhiêu, điều chỉnh qua <code>effort</code></td></tr>
-                            <tr><td>Summarized thinking</td><td>—</td><td>Hiển thị bản tóm tắt suy nghĩ; vẫn tính tiền toàn bộ thinking token</td></tr>
-                            <tr><td>Effort</td><td>—</td><td>Tham số dịch chuyển lượng suy nghĩ của Claude</td></tr>
-                            <tr><td>Tokenizer</td><td>—</td><td>Bộ tách văn bản thành token; khác nhau giữa các thế hệ model</td></tr>
-                            <tr><td>Server-side fallback</td><td>—</td><td>Khi bị refuse, API tự chuyển sang model khác trong cùng request</td></tr>
-                            <tr><td>Eval</td><td>Evaluation</td><td>Bộ case và cách chấm để đo chất lượng</td></tr>
-                            <tr><td>Capability / regression eval</td><td>—</td><td>Đo khả năng mới / chống thụt lùi (kỳ vọng pass gần 100%)</td></tr>
-                            <tr><td>Trial</td><td>—</td><td>Một lần chạy của một case; chạy nhiều trial để đo tỉ lệ</td></tr>
-                            <tr><td>Table-driven test</td><td>—</td><td>Test lặp qua bảng đầu vào và kết quả mong đợi</td></tr>
-                            <tr><td>RAG / retrieval</td><td>Retrieval-Augmented Generation</td><td>Truy xuất tài liệu liên quan rồi đưa vào prompt</td></tr>
-                            <tr><td>BM25</td><td>Best Matching 25</td><td>Thuật toán xếp hạng theo từ khóa, dùng cùng embedding trong Contextual Retrieval</td></tr>
-                            <tr><td>Embedding</td><td>—</td><td>Vector biểu diễn ngữ nghĩa để tìm kiếm tương tự</td></tr>
-                            <tr><td>Chunk</td><td>—</td><td>Đoạn nhỏ cắt ra từ tài liệu để index</td></tr>
+                            <tr><td>TTFT</td><td>Time To First Token</td><td>Thời gian tới token đầu — "cảm giác nhanh"</td></tr>
+                            <tr><td>p95</td><td>95th percentile</td><td>95% request hoàn tất trong mức này</td></tr>
+                            <tr><td>RPM</td><td>Requests Per Minute</td><td>Số request mỗi phút</td></tr>
+                            <tr><td>ITPM</td><td>Input Tokens Per Minute</td><td>Input token mỗi phút, thường chỉ chưa cache</td></tr>
+                            <tr><td>OTPM</td><td>Output Tokens Per Minute</td><td>Output token mỗi phút</td></tr>
+                            <tr><td>Effort</td><td>—</td><td>Tham số chỉnh lượng suy nghĩ</td></tr>
+                            <tr><td>Tokenizer</td><td>—</td><td>Tách văn bản thành token; khác giữa model</td></tr>
+                            <tr><td>Server-side fallback</td><td>—</td><td>Bị refuse thì tự chuyển model khác</td></tr>
+                            <tr><td>Capability / regression eval</td><td>—</td><td>Đo khả năng mới / chống thụt lùi</td></tr>
+                            <tr><td>Table-driven test</td><td>—</td><td>Test lặp qua bảng input/kết quả mong đợi</td></tr>
+                            <tr><td>RAG / retrieval</td><td>Retrieval-Augmented Generation</td><td>Truy xuất tài liệu rồi đưa vào prompt</td></tr>
+                            <tr><td>BM25</td><td>Best Matching 25</td><td>Xếp hạng theo từ khóa</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1891,22 +1594,15 @@
                     <table class="knowledge-table">
                         <thead><tr><th>Viết tắt</th><th>Tên đầy đủ</th><th>Giải thích</th></tr></thead>
                         <tbody>
-                            <tr><td>OWASP</td><td>Open Worldwide Application Security Project</td><td>Tổ chức bảo mật; LLM02:2025 là rủi ro lộ thông tin nhạy cảm</td></tr>
-                            <tr><td>LLM</td><td>Large Language Model</td><td>Mô hình ngôn ngữ lớn</td></tr>
-                            <tr><td>Prompt injection</td><td>—</td><td>Chỉ dẫn độc hại chèn vào input; "indirect" khi nằm trong nội dung truy xuất</td></tr>
-                            <tr><td>Jailbreak</td><td>—</td><td>Tin nhắn cố ý soạn để vượt hướng dẫn an toàn</td></tr>
-                            <tr><td>Harmlessness screen</td><td>—</td><td>Model nhẹ sàng lọc input trước khi vào hội thoại chính</td></tr>
-                            <tr><td>Fail closed</td><td>—</td><td>Khi thành phần bảo vệ lỗi thì chặn, không cho đi qua</td></tr>
-                            <tr><td>Workspace</td><td>—</td><td>Nhóm API key trong organization, có spend/rate limit riêng; ranh giới cache isolation</td></tr>
-                            <tr><td>Bedrock</td><td>Amazon Bedrock</td><td>Nền tảng AWS chạy Claude, model ID và tính năng riêng</td></tr>
-                            <tr><td>Vertex AI</td><td>Google Cloud Vertex AI</td><td>Nền tảng Google Cloud chạy Claude</td></tr>
-                            <tr><td>Foundry</td><td>Microsoft Foundry</td><td>Nền tảng Microsoft chạy Claude</td></tr>
-                            <tr><td>Deprecation</td><td>—</td><td>Thông báo ngừng hỗ trợ model trước ngày retire</td></tr>
-                            <tr><td>SLO</td><td>Service-Level Objective</td><td>Mục tiêu vận hành như uptime, thời gian phản hồi</td></tr>
-                            <tr><td>RAM</td><td>Random Access Memory</td><td>Bộ nhớ tạm — nơi MemorySaver giữ checkpoint, mất khi restart</td></tr>
-                            <tr><td>SaaS</td><td>Software as a Service</td><td>Phần mềm cung cấp dưới dạng dịch vụ cho nhiều khách</td></tr>
-                            <tr><td>HR</td><td>Human Resources</td><td>Nhân sự — bối cảnh câu hỏi về chính sách</td></tr>
-                            <tr><td>PO</td><td>Purchase Order</td><td>Đơn đặt hàng — trường <code>po_number</code> trong Q12</td></tr>
+                            <tr><td>OWASP</td><td>Open Worldwide Application Security Project</td><td>Tổ chức bảo mật; LLM02:2025 lộ thông tin nhạy cảm</td></tr>
+                            <tr><td>Prompt injection</td><td>—</td><td>Chỉ dẫn độc hại chèn vào input</td></tr>
+                            <tr><td>Jailbreak</td><td>—</td><td>Tin nhắn cố ý vượt hướng dẫn an toàn</td></tr>
+                            <tr><td>Fail closed</td><td>—</td><td>Thành phần bảo vệ lỗi thì chặn</td></tr>
+                            <tr><td>Workspace</td><td>—</td><td>Nhóm key có limit riêng; ranh giới cache</td></tr>
+                            <tr><td>Bedrock</td><td>Amazon Bedrock</td><td>Claude trên AWS, model ID riêng</td></tr>
+                            <tr><td>Deprecation</td><td>—</td><td>Báo ngừng hỗ trợ model trước ngày retire</td></tr>
+                            <tr><td>SLO</td><td>Service-Level Objective</td><td>Mục tiêu vận hành như uptime</td></tr>
+                            <tr><td>PO</td><td>Purchase Order</td><td>Đơn đặt hàng — <code>po_number</code></td></tr>
                         </tbody>
                     </table>
                 </div>
