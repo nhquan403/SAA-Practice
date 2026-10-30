@@ -1253,322 +1253,100 @@
 
                 <h3 id="ks-1">1. Claude Agent SDK: permission mode, session &amp; input mode</h3>
                 <ul>
-                    <li><strong>Plan mode</strong> cho Claude khám phá repo và đề xuất kế hoạch <em>mà không sửa file
-                        nguồn</em>: tool chỉ đọc vẫn chạy, còn mọi lệnh sửa file không bao giờ được tự duyệt mà phải qua
-                        callback <code>canUseTool</code>. Đề nói <em>"phải duyệt cách làm trước khi sửa bất kỳ file
-                        nào"</em> là tín hiệu chọn plan mode. <span class="knowledge-qref">Q1</span></li>
-                    <li>Permission mode <strong>đổi được ngay trong session đang chạy</strong> bằng
-                        <code>setPermissionMode</code> (TypeScript) hoặc <code>set_permission_mode</code> (Python), áp dụng
-                        lập tức cho các tool request sau đó. Mô hình tài liệu khuyên: bắt đầu chặt, nới dần khi đã tin,
-                        ví dụ chuyển sang <code>acceptEdits</code> sau khi duyệt plan. Session giữ nguyên context nên kế
-                        hoạch đã duyệt đi thẳng vào phần triển khai. <span class="knowledge-qref">Q1</span></li>
-                    <li class="knowledge-key">Phân biệt các mode: <strong>bypassPermissions</strong> = chạy tool không
-                        hỏi gì cả (không có điểm duyệt trước). <strong>dontAsk</strong> = cái gì lẽ ra phải hỏi thì bị
-                        <em>từ chối</em> luôn, <code>canUseTool</code> không được gọi. <strong>plan</strong> = chỉ đề xuất,
-                        không sửa. <strong>acceptEdits</strong> = tự duyệt lệnh sửa file. Yêu cầu "duyệt trước, rồi
-                        sửa tự động" = plan rồi đổi sang acceptEdits. <span class="knowledge-qref">Q1, Q43</span></li>
-                    <li><strong>Fork session</strong>: resume với <code>fork_session</code> bật sẽ tạo session mới mang
-                        bản sao lịch sử gốc rồi rẽ nhánh; fork có session ID riêng, ID gốc và lịch sử gốc giữ nguyên.
-                        Lưu cả hai ID để resume riêng từng nhánh. Lưu ý: fork rẽ nhánh <em>hội thoại</em>, không rẽ
-                        nhánh filesystem — muốn hoàn tác file thì dùng file checkpointing.
-                        <span class="knowledge-qref">Q3</span></li>
-                    <li>Resume bình thường (kể cả resume cùng một ID trong hai query song song) chỉ <em>nối tiếp</em>
-                        một session, không tạo bản sao độc lập. Dặn Claude "coi như nhánh riêng" cũng không tạo ra
-                        nhánh. <span class="knowledge-qref">Q3</span></li>
-                    <li><strong>Streaming input mode</strong> (mode được tài liệu khuyên dùng) truyền một async
-                        generator message vào <code>query</code>, giữ một session tương tác lâu dài: đính kèm ảnh trực
-                        tiếp, xếp hàng nhiều message xử lý theo thứ tự, interrupt, thấy phản hồi khi đang sinh và giữ
-                        context qua các lượt. <span class="knowledge-qref">Q4</span></li>
-                    <li><strong>Single message input</strong> chỉ hợp với phản hồi one-shot và môi trường stateless như
-                        lambda function; nó không hỗ trợ đính ảnh trực tiếp, xếp hàng message động hay interrupt thời
-                        gian thực. <span class="knowledge-qref">Q4</span></li>
+                    <li><strong>Plan mode</strong>: chỉ đọc + đề xuất, mọi lệnh sửa file phải qua <code>canUseTool</code> → dấu hiệu đề "duyệt cách làm trước khi sửa file" <span class="knowledge-qref">Q1</span></li>
+                    <li><strong>Đổi mode giữa session</strong>: <code>setPermissionMode</code> / <code>set_permission_mode</code>, áp dụng ngay, giữ context → dấu hiệu đề "duyệt plan xong thì sửa tự động" <span class="knowledge-qref">Q1</span></li>
+                    <li class="knowledge-key"><strong>dontAsk ≠ bypassPermissions</strong>: dontAsk từ chối mọi thứ cần hỏi; bypass chạy hết không hỏi; acceptEdits tự duyệt sửa file <span class="knowledge-qref">Q1, Q43</span></li>
+                    <li><strong>Fork session</strong>: <code>fork_session</code> tạo session ID mới có bản sao lịch sử, gốc giữ nguyên; không rẽ nhánh file → dấu hiệu đề "thử giả thuyết khác" <span class="knowledge-qref">Q3</span></li>
+                    <li><strong>Resume</strong>: chỉ nối tiếp cùng session, kể cả hai query song song; không tạo nhánh độc lập <span class="knowledge-qref">Q3</span></li>
+                    <li class="knowledge-key"><strong>Streaming input ≠ single message</strong>: streaming (khuyên dùng) cho đính ảnh, xếp hàng message, interrupt; single chỉ one-shot/lambda <span class="knowledge-qref">Q4</span></li>
                 </ul>
 
                 <h3 id="ks-2">2. Workflow pattern &amp; kiến trúc multi-agent</h3>
                 <ul>
-                    <li><strong>Evaluator-optimizer</strong>: một bước sinh kết quả, một bước khác đánh giá và trả
-                        feedback cụ thể, lặp lại. Hợp khi có <em>tiêu chí đánh giá rõ ràng</em> và việc tinh chỉnh lặp
-                        mang lại giá trị đo được — ví dụ migration chạy thử trên bản sao DB rồi so schema với đích. Thêm
-                        retry limit để vòng lặp có giới hạn và chuyển cho người xem nếu không hội tụ.
-                        <span class="knowledge-qref">Q5</span></li>
-                    <li><strong>Parallelization</strong> có hai dạng: <em>sectioning</em> (chia việc thành các phần độc
-                        lập) và <em>voting</em> (chạy cùng một việc nhiều lần để lấy kết quả đa dạng). Review lỗ hổng
-                        bảo mật bằng nhiều prompt khác nhau rồi gắn cờ theo số review báo lỗi chính là ví dụ Anthropic
-                        đưa ra; có thể chỉnh ngưỡng vote để cân bằng bỏ sót và báo nhầm.
-                        <span class="knowledge-qref">Q6</span></li>
-                    <li><strong>Prompt chaining</strong> chạy chuỗi bước cố định một lượt, không quay lại sửa;
-                        <strong>Routing</strong> phân loại input rồi gửi tới <em>một</em> handler chuyên biệt. Cả hai
-                        không kiểm thử/sửa kết quả và không cho nhiều góc nhìn độc lập.
-                        <span class="knowledge-qref">Q5, Q6</span></li>
-                    <li class="knowledge-key">Tự kiểm tra trong <em>cùng một conversation</em> thường lặp lại đúng điểm
-                        mù cũ. Muốn review bắt được lỗi thì dùng <strong>call review riêng</strong>, đưa policy, bản
-                        nháp và checklist ngoại lệ, yêu cầu chỉ ra kết luận không có căn cứ. Hỏi lại ba lần hay thêm câu
-                        "be critical" chỉ đo độ nhất quán, không đo độ đúng. <span class="knowledge-qref">Q41, Q6</span></li>
-                    <li><strong>Coordinator phải là người giữ cửa</strong>: mỗi subagent cần mục tiêu, định dạng output,
-                        hướng dẫn tool/nguồn và ranh giới nhiệm vụ rõ ràng, nếu không sẽ trùng việc và bỏ sót.
-                        Coordinator áp giới hạn tool và token, validate schema handoff, so sánh số liệu xung đột trước
-                        khi phát hành. Agent SDK hỗ trợ giới hạn độ sâu, concurrency và chi phí của subagent. Phát hiện
-                        sau khi phát hành (audit, trace) là quá muộn; "mới nhất" không có nghĩa là "đúng".
-                        <span class="knowledge-qref">Q2</span></li>
-                    <li><strong>Agent chạy dài qua nhiều context window</strong>: làm từng feature một, commit git với
-                        message mô tả rõ, cập nhật file tiến độ mà session sau đọc đầu tiên. Git cho phép revert và khôi
-                        phục trạng thái chạy được; file tiến độ giúp session mới bắt nhịp mà không phải đoán. Dán toàn
-                        bộ transcript cũ hay "nhớ lại" đều không hiệu quả vì context mới hoàn toàn trống.
-                        <span class="knowledge-qref">Q38</span></li>
+                    <li><strong>Evaluator-optimizer</strong>: sinh → đánh giá → feedback, lặp có retry limit → dấu hiệu đề "có tiêu chí rõ, sửa tới khi đạt" <span class="knowledge-qref">Q5</span></li>
+                    <li><strong>Parallelization voting</strong>: chạy cùng việc bằng nhiều prompt, gắn cờ theo ngưỡng phiếu → dấu hiệu đề "review bảo mật hay bỏ sót" <span class="knowledge-qref">Q6</span></li>
+                    <li><strong>Chaining / routing</strong>: chuỗi cố định một lượt / gửi tới một handler; không tự sửa, không đa góc nhìn <span class="knowledge-qref">Q5, Q6</span></li>
+                    <li class="knowledge-key"><strong>Tự review cùng conversation ≠ call review riêng</strong>: cùng conversation lặp điểm mù; call riêng + policy + checklist mới bắt lỗi <span class="knowledge-qref">Q41, Q6</span></li>
+                    <li><strong>Coordinator giữ cửa</strong>: giao mục tiêu, format, ranh giới; giới hạn tool/token; validate handoff trước khi phát hành, không audit sau <span class="knowledge-qref">Q2</span></li>
+                    <li><strong>Agent nhiều context window</strong>: từng feature một, git commit rõ, file tiến độ cho session sau đọc đầu tiên <span class="knowledge-qref">Q38</span></li>
                 </ul>
 
                 <h3 id="ks-3">3. Tool use: agentic loop, định nghĩa tool &amp; độ an toàn</h3>
                 <ul>
-                    <li class="knowledge-key"><strong>Agentic loop chuẩn</strong>: lặp <code>while stop_reason ==
-                        "tool_use"</code> — chạy tool, append nguyên assistant turn của Claude và một user message chứa
-                        các block <code>tool_result</code>, rồi gửi request tiếp; thoát khi <code>end_turn</code> hoặc
-                        stop reason khác. Giữ danh sách message chạy liên tục và thêm giới hạn số vòng để chống chạy
-                        vô tận. SDK tool runner có thể tự lo vòng lặp này. <span class="knowledge-qref">Q7</span></li>
-                    <li>Luôn <strong>kiểm tra <code>stop_reason</code> trước khi chạy tool</strong>. Response dừng vì
-                        <code>max_tokens</code> mà block cuối là <code>tool_use</code> thì input bị cắt dở — không được
-                        chạy. Cách tài liệu chỉ: retry với <code>max_tokens</code> lớn hơn để Claude viết xong tool
-                        call, và với tool có input lớn thì đặt <code>max_tokens</code> dư từ đầu.
-                        <span class="knowledge-qref">Q48</span></li>
-                    <li><strong>Parallel tool use bật mặc định</strong>. Muốn tắt thì đặt
-                        <code>disable_parallel_tool_use: true</code> <em>bên trong object <code>tool_choice</code></em>,
-                        không phải tham số top-level. Với <code>auto</code>, Claude gọi tối đa một tool mỗi response và
-                        thấy kết quả trước khi gọi tool phụ thuộc tiếp theo. <code>tool_choice: none</code> thì tắt hẳn
-                        tool. <span class="knowledge-qref">Q12</span></li>
-                    <li><strong>Mô tả tool là hướng dẫn cho model</strong>: Anthropic gọi mô tả cực kỳ chi tiết là yếu
-                        tố quan trọng nhất cho hiệu năng tool, khuyên ít nhất 3–4 câu nói tool làm gì, khi nào dùng và
-                        khi nào không, caveat. Schema tham số hay ví dụ argument chỉ bổ sung, không thay được mô tả.
-                        <span class="knowledge-qref">Q49</span></li>
-                    <li><strong>Programmatic tool calling</strong>: đặt <code>allowed_callers</code> của tool là code
-                        execution để Claude viết code gọi tool như hàm. Kết quả trung gian không vào context, code lọc
-                        hoặc gộp trước khi Claude thấy, và không tốn một vòng model cho mỗi lần gọi. Hợp với fan-out
-                        qua nhiều mục và kết quả lớn có thể lọc. Tool search với deferred loading chỉ tiết kiệm token
-                        <em>định nghĩa tool</em>, không phải token <em>kết quả</em>. <span class="knowledge-qref">Q53</span></li>
-                    <li><strong>Citation cho RAG qua tool</strong>: custom tool trả về block <code>search_result</code>
-                        gồm <code>source</code> (URL), <code>title</code> và mảng text content; citation cho search result
-                        <em>tắt mặc định</em> nên phải bật. Claude sẽ gắn citation
-                        <code>search_result_location</code> vào từng đoạn dựa trên bài viết.
-                        <span class="knowledge-qref">Q17</span></li>
-                    <li class="knowledge-key"><strong>Thao tác có side effect phải idempotent ở tầng ứng dụng</strong>:
-                        tạo idempotency key cho mỗi lần charge dự định, lưu kết quả bền vững, retry dùng lại key để trả
-                        kết quả đã lưu. <code>idempotentHint</code> trong Agent SDK chỉ là metadata mang tính thông tin,
-                        không chặn hay khử trùng lặp. Lời dặn trong prompt cũng không phải bảo đảm.
-                        <span class="knowledge-qref">Q15</span></li>
+                    <li class="knowledge-key"><strong>Agentic loop</strong>: lặp khi <code>stop_reason == "tool_use"</code>, append assistant turn + <code>tool_result</code>, có giới hạn vòng → dấu hiệu đề "dừng giữa chừng" <span class="knowledge-qref">Q7</span></li>
+                    <li><strong>max_tokens cắt tool_use</strong>: kiểm <code>stop_reason</code> trước, không chạy tool dở; retry với <code>max_tokens</code> lớn hơn <span class="knowledge-qref">Q48</span></li>
+                    <li><strong>Parallel tool use</strong>: bật mặc định; tắt bằng <code>disable_parallel_tool_use</code> <em>trong</em> <code>tool_choice</code> → dấu hiệu đề "tool phụ thuộc kết quả tool kia" <span class="knowledge-qref">Q12</span></li>
+                    <li><strong>Mô tả tool</strong>: yếu tố quan trọng nhất, ≥ 3–4 câu: làm gì, khi nào dùng/không dùng, caveat <span class="knowledge-qref">Q49</span></li>
+                    <li><strong>Programmatic tool calling</strong>: <code>allowed_callers</code> = code execution, lọc kết quả trong code → dấu hiệu đề "hàng trăm kết quả, cần vài cái" <span class="knowledge-qref">Q53</span></li>
+                    <li><strong>Citation RAG</strong>: tool trả block <code>search_result</code> (source, title, content); citation tắt mặc định, phải bật <span class="knowledge-qref">Q17</span></li>
+                    <li class="knowledge-key"><strong>Idempotency key ≠ <code>idempotentHint</code></strong>: key lưu bền vững chặn charge trùng; hint chỉ là metadata <span class="knowledge-qref">Q15</span></li>
                 </ul>
 
                 <h3 id="ks-4">4. Server tools &amp; MCP</h3>
                 <ul>
-                    <li><strong>Web fetch</strong> chỉ fetch được URL <em>đã xuất hiện</em> trong context: user message,
-                        client tool result, hoặc kết quả web search/fetch trước đó. URL chỉ nằm ở system prompt hay
-                        trong output của chính Claude bị từ chối (<code>url_not_allowed</code>). Muốn URL ở system prompt
-                        fetch được thì đưa cả vào user message. <code>max_content_tokens</code> giới hạn lượng nội dung
-                        fetch vào context; <code>max_uses</code> giới hạn số lần fetch và lần fail cũng bị tính.
-                        <span class="knowledge-qref">Q9</span></li>
-                    <li><strong>Code execution container tắt hoàn toàn internet</strong>, không có request ra ngoài và
-                        cách ly khỏi host lẫn container khác. Vì vậy <code>pip install</code> hay tải dữ liệu luôn fail,
-                        và không có cấu hình nào mở mạng. File đưa vào bằng Files API + block
-                        <code>container_upload</code>; dùng thư viện cài sẵn như pandas, numpy, matplotlib.
-                        <span class="knowledge-qref">Q45</span></li>
-                    <li><strong>MCP connector</strong> cho Messages API nối tới remote MCP server mà không phải tự viết
-                        MCP client. Mỗi entry trong <code>mcp_servers</code> có URL bắt buộc HTTPS, name và
-                        <code>authorization_token</code> tùy chọn; bên gọi API tự lo OAuth và refresh token. Dùng
-                        <code>mcp_toolset</code> đặt mặc định disabled và chỉ bật vài tool như một allowlist. Connector
-                        chỉ hỗ trợ <em>tool call</em> (không có resources/prompts) và không nối được stdio server cục
-                        bộ. <span class="knowledge-qref">Q20</span></li>
-                    <li><strong>Transport</strong>: <em>stdio</em> nối client với process server nó tự khởi chạy cục
-                        bộ, không phải transport mạng. <em>Streamable HTTP</em> cho server chạy độc lập, phục vụ nhiều
-                        client qua HTTP POST/GET trên một MCP endpoint, hợp với load balancer. Server phải validate header
-                        <code>Origin</code> để chống DNS rebinding; xác thực bằng luồng OAuth của MCP với identity
-                        provider làm authorization server. <span class="knowledge-qref">Q50</span></li>
-                    <li class="knowledge-key"><strong>Credential trong MCP</strong>: dùng OAuth cấp token ngắn hạn theo
-                        từng người, scope tối thiểu, audience là chính MCP server; server phải kiểm tra token được cấp
-                        cho mình và <em>không được</em> chuyển tiếp token của client xuống dịch vụ phía sau (token
-                        passthrough gây lỗi confused deputy) — server tự lấy credential riêng cho downstream.
-                        <span class="knowledge-qref">Q47</span></li>
-                    <li><strong>Elicitation</strong> cho server xin input của user giữa lúc tool đang chạy.
-                        <em>Form mode</em> kèm schema mô tả trường, hợp với input thường (chọn template, đặt tên).
-                        Thông tin nhạy cảm như mật khẩu, API key, access token thì spec cấm dùng form mode, phải dùng
-                        <em>URL mode</em>: user nhập trên trang HTTPS do server kiểm soát, server lưu gắn với danh tính
-                        user, key không đi qua model context hay MCP client. <span class="knowledge-qref">Q51</span></li>
-                    <li>MCP connector và Files API đều <strong>không đủ điều kiện ZDR</strong>; dời tài liệu ra sau một
-                        MCP server không giải quyết yêu cầu lưu trữ. <span class="knowledge-qref">Q19</span></li>
+                    <li><strong>Web fetch</strong>: chỉ fetch URL đã có trong user message/tool result; URL ở system prompt bị <code>url_not_allowed</code> <span class="knowledge-qref">Q9</span></li>
+                    <li><strong>Code execution</strong>: container không internet, không cấu hình mở được; file qua <code>container_upload</code>, dùng thư viện sẵn → dấu hiệu đề "pip install fail" <span class="knowledge-qref">Q45</span></li>
+                    <li><strong>MCP connector</strong>: <code>mcp_servers</code> URL HTTPS, <code>mcp_toolset</code> làm allowlist; chỉ tool call, không stdio <span class="knowledge-qref">Q20</span></li>
+                    <li class="knowledge-key"><strong>stdio ≠ Streamable HTTP</strong>: stdio là process cục bộ; Streamable HTTP cho nhiều client, load balancer, validate <code>Origin</code> + OAuth <span class="knowledge-qref">Q50</span></li>
+                    <li><strong>Credential MCP</strong>: token ngắn hạn theo user, audience là server; cấm token passthrough (confused deputy) <span class="knowledge-qref">Q47</span></li>
+                    <li class="knowledge-key"><strong>Form mode ≠ URL mode elicitation</strong>: form cho input thường; API key/mật khẩu bắt buộc URL mode, không qua model <span class="knowledge-qref">Q51</span></li>
+                    <li><strong>ZDR</strong>: MCP connector và Files API đều không đủ điều kiện ZDR <span class="knowledge-qref">Q19</span></li>
                 </ul>
 
                 <h3 id="ks-5">5. Cấu hình Claude Code</h3>
                 <ul>
-                    <li><strong>Skill</strong>: mặc định cả developer lẫn Claude đều gọi được. Đặt
-                        <code>disable-model-invocation: true</code> để Claude không tự gọi — dành cho workflow có side
-                        effect hoặc cần người quyết định thời điểm như release/deploy. Ngược lại
-                        <code>user-invocable: false</code> nghĩa là <em>chỉ Claude</em> gọi được, hợp cho kiến thức
-                        nền. <span class="knowledge-qref">Q22</span></li>
-                    <li><code>context: fork</code> trong frontmatter chạy skill trong subagent riêng nhận nội dung skill
-                        làm prompt; subagent không thấy lịch sử hội thoại, việc đọc file không làm đầy context chính và
-                        chỉ kết quả quay về. Vì thế nội dung skill phải tự đứng được.
-                        <span class="knowledge-qref">Q22</span></li>
-                    <li><strong>Checkpoint &amp; /rewind</strong>: Claude Code tạo checkpoint mỗi prompt và theo dõi thay
-                        đổi của tool sửa file. <code>/rewind</code> (hoặc Esc hai lần) → "Restore code and conversation".
-                        <em>File bị Bash sửa không được theo dõi</em>, phải khôi phục bằng git. <code>/clear</code> chỉ
-                        xóa context hội thoại, không hoàn tác file. Checkpoint là phục hồi cấp session, Git mới là lịch sử
-                        lâu dài. <span class="knowledge-qref">Q25</span></li>
-                    <li class="knowledge-key"><strong>Hook chặn phải chạy trước hành động</strong>:
-                        <code>PreToolUse</code> chạy trước tool call nên chặn được — exit code 2 kèm lý do trên stderr
-                        (được gửi lại cho Claude), hoặc JSON <code>permissionDecision: "deny"</code> kèm
-                        <code>permissionDecisionReason</code>. <code>PostToolUse</code> chạy sau khi tool xong, exit 2 chỉ
-                        phản hồi chứ không hoàn tác; <code>Stop</code> chạy khi Claude trả lời xong.
-                        <span class="knowledge-qref">Q46</span></li>
-                    <li><strong>Sandbox Bash chống prompt injection không phụ thuộc vào Claude</strong>: lệnh shell chạy
-                        trong ranh giới sandbox, kết nối mạng đi qua proxy kiểm tra host theo danh sách allowed domains
-                        (ban đầu trống). Thêm <code>sandbox credentials</code> với mode <code>deny</code>: đường dẫn file
-                        bị chặn đọc, biến môi trường bị unset trước mỗi lệnh. Dòng dặn trong CLAUDE.md chỉ là hướng
-                        dẫn, không phải ranh giới bắt buộc. <span class="knowledge-qref">Q43</span></li>
-                    <li><strong>GitHub Actions</strong>: chạy <code>/install-github-app</code> (cài GitHub App và secret)
-                        hoặc thêm workflow <code>claude-code-action</code> thủ công; API key lưu ở GitHub Secrets, không
-                        bao giờ nằm trong repo. Ở interactive mode, khi workflow không có prompt, Claude chờ trigger
-                        <code>@claude</code> trong comment issue/PR. Chỉ cấp cho workflow quyền cần thiết.
-                        <span class="knowledge-qref">Q24</span></li>
-                    <li><strong>Plugin + marketplace</strong> đóng gói skill, subagent, hook và MCP server thành một
-                        đơn vị để chia sẻ cho nhiều team, cài nhiều project, phát hành có version. Marketplace đặt trong
-                        git repo (private cũng được, dùng git credential sẵn có); team chạy plugin marketplace add rồi
-                        cài theo tên, nhận bản mới khi update hoặc bật auto-update. CLAUDE.md chỉ chứa chỉ dẫn, không
-                        chứa hook hay kết nối MCP chạy được. <span class="knowledge-qref">Q52</span></li>
+                    <li class="knowledge-key"><strong><code>disable-model-invocation: true</code> ≠ <code>user-invocable: false</code></strong>: cái đầu chỉ người gọi (deploy); cái sau chỉ Claude gọi <span class="knowledge-qref">Q22</span></li>
+                    <li><strong><code>context: fork</code></strong>: skill chạy trong subagent, không thấy lịch sử, giữ context chính sạch → dấu hiệu đề "đọc hàng trăm file" <span class="knowledge-qref">Q22</span></li>
+                    <li><strong>/rewind</strong>: khôi phục code + hội thoại; file do Bash sửa phải dùng git; <code>/clear</code> không hoàn tác file <span class="knowledge-qref">Q25</span></li>
+                    <li class="knowledge-key"><strong>PreToolUse ≠ PostToolUse</strong>: Pre chặn được (exit 2 / <code>permissionDecision: "deny"</code>); Post chỉ phản hồi, không hoàn tác <span class="knowledge-qref">Q46</span></li>
+                    <li><strong>Sandbox Bash</strong>: proxy allowlist domain (mặc định trống) + <code>sandbox credentials</code> deny; CLAUDE.md không phải ranh giới <span class="knowledge-qref">Q43</span></li>
+                    <li><strong>GitHub Actions</strong>: <code>/install-github-app</code> hoặc claude-code-action, key ở GitHub Secrets → dấu hiệu đề "@claude trong PR" <span class="knowledge-qref">Q24</span></li>
+                    <li><strong>Plugin + marketplace</strong>: đóng gói skill/hook/MCP, có version, auto-update → dấu hiệu đề "nhiều team, một lệnh cài" <span class="knowledge-qref">Q52</span></li>
                 </ul>
 
                 <h3 id="ks-6">6. Prompt caching &amp; extended thinking</h3>
                 <ul>
-                    <li><strong>Cache pre-warming</strong>: lúc khởi động và định kỳ trong TTL, gửi request
-                        <code>max_tokens: 0</code> với breakpoint <em>tường minh</em> trên block cuối dùng chung (system
-                        prompt + tool definitions). Request này ghi cache và trả về không sinh output. Automatic caching
-                        đặt breakpoint ở block cuối — trong request warm-up đó là message giữ chỗ, nên request thật
-                        không hit. <code>max_tokens: 0</code> thay cho mẹo cũ <code>max_tokens: 1</code>, bị từ chối khi
-                        bật streaming và trong Message Batches. <span class="knowledge-qref">Q10</span></li>
-                    <li class="knowledge-key"><strong>Thứ bậc cache: tools → system → messages</strong>. Thay đổi ở một
-                        tầng làm mất cache tầng đó và mọi tầng sau. Đổi <code>tool_choice</code> giữ cache tools và
-                        system nhưng làm mất cache message; đổi định nghĩa tool (kể cả thứ tự) mất toàn bộ; sửa system
-                        prompt mất system và message. Muốn giữ cache thì giữ <code>tool_choice</code> cố định và điều
-                        hướng tool bằng chỉ dẫn trong message. <span class="knowledge-qref">Q36</span></li>
-                    <li><strong>Thinking blocks phải gửi lại nguyên vẹn</strong>: tool call là một response bị tạm dừng,
-                        nên assistant turn mới nhất phải giữ đủ các block <code>thinking</code> và
-                        <code>redacted_thinking</code> kèm <code>tool_use</code>, không sửa, không đảo thứ tự, không lọc,
-                        không dựng lại. Xóa đi cũng chẳng tiết kiệm vì API tự lọc thinking cũ và chỉ tính input cho block
-                        thực sự đưa cho Claude. <span class="knowledge-qref">Q11</span></li>
-                    <li><strong>Manual extended thinking</strong>: <code>budget_tokens</code> tối thiểu 1.024 và phải
-                        <em>nhỏ hơn</em> <code>max_tokens</code>, vì thinking tính vào <code>max_tokens</code> của lượt
-                        (ngoại lệ: interleaved thinking với tool). Thinking của lượt hiện tại được tính phí như output
-                        token và chiếm context window. Budget là mục tiêu, không phải lượng dùng hết — ước tính chi phí
-                        theo usage thực tế trả về. <span class="knowledge-qref">Q30</span></li>
-                    <li class="knowledge-key"><strong>Claude Opus 5.5</strong>: thinking luôn bật, adaptive là mode duy
-                        nhất; <code>temperature</code>/<code>top_p</code>/<code>top_k</code> khác mặc định trả lỗi 400
-                        (mặc định không phải 0); forced tool use (<code>tool_choice</code> type <code>any</code> hoặc
-                        tool có tên) cũng trả 400. Thay bằng <code>tool_choice: auto</code> + strict tool use (hoặc
-                        structured outputs) và prompt nói rõ khi nào gọi tool. <span class="knowledge-qref">Q33</span></li>
+                    <li><strong>Pre-warm cache</strong>: <code>max_tokens: 0</code> + breakpoint tường minh trên block chung; automatic caching sẽ trượt → dấu hiệu đề "request đầu chậm" <span class="knowledge-qref">Q10</span></li>
+                    <li class="knowledge-key"><strong>Thứ bậc tools → system → messages</strong>: đổi <code>tool_choice</code> mất cache messages; đổi/xếp lại tool mất toàn bộ <span class="knowledge-qref">Q36</span></li>
+                    <li><strong>Thinking blocks</strong>: gửi lại nguyên vẹn <code>thinking</code> + <code>redacted_thinking</code> cùng <code>tool_use</code>, không sửa/lọc <span class="knowledge-qref">Q11</span></li>
+                    <li><strong>budget_tokens</strong>: ≥ 1.024 và &lt; <code>max_tokens</code>; thinking tính phí như output, ước tính theo usage thực <span class="knowledge-qref">Q30</span></li>
+                    <li class="knowledge-key"><strong>Claude Opus 5.5</strong>: chỉ adaptive thinking; đổi temperature/top_p/top_k hoặc forced tool use → 400; dùng <code>auto</code> + strict tool <span class="knowledge-qref">Q33</span></li>
                 </ul>
 
                 <h3 id="ks-7">7. Vận hành API &amp; SDK: batch, lỗi, retry, streaming</h3>
                 <ul>
-                    <li><strong>Message Batches API</strong> xử lý bất đồng bộ lượng lớn request độc lập, không tương
-                        tác, giá bằng 50% giá chuẩn. Mỗi request có kết quả riêng: succeeded, errored, canceled hoặc
-                        expired nếu batch chạm giới hạn 24 giờ. Kết quả không theo thứ tự input — khớp bằng
-                        <code>custom_id</code> và gửi lại request expired. Giảm giá đến từ <em>endpoint</em>, không phải
-                        từ việc gửi ban đêm. <span class="knowledge-qref">Q13</span></li>
-                    <li><strong>529 overloaded_error</strong> nghĩa là API quá tải tạm thời. SDK mặc định retry 2 lần
-                        với exponential backoff, chỉnh bằng <code>max_retries</code>. Trên đường tương tác, dùng circuit
-                        breaker mở sau nhiều lỗi quá tải, hạ <code>max_retries</code>, hiện fallback khi breaker mở. Batch
-                        không hợp cho người dùng đang chờ vài giây. <span class="knowledge-qref">Q14</span></li>
-                    <li class="knowledge-key"><strong>Đọc error type và message trước khi sửa code</strong>: HTTP 400
-                        <code>invalid_request_error</code> có thể là request sai định dạng <em>hoặc</em> đã chạm spend
-                        limit tự đặt ("You have reached your specified workspace API usage limits") — nâng/bỏ limit ở trang
-                        Billing của Console. Key bị thu hồi/hết hạn là 401 <code>authentication_error</code>. SDK không tự
-                        retry lỗi 400. <span class="knowledge-qref">Q26</span></li>
-                    <li><strong>Phân loại lỗi theo tác động và khả năng tự phục hồi</strong>: 429 (rate limit) và 529
-                        (overloaded) là lỗi tạm thời được SDK tự retry; 400 không thành công khi retry. Kết hợp error type
-                        + kết quả retry + ảnh hưởng tới người dùng để quyết định page on-call hay chỉ ghi log chẩn đoán.
-                        Vẫn giữ log của lỗi không page để xem xu hướng. <span class="knowledge-qref">Q27</span></li>
-                    <li><strong>Backpressure khi streaming</strong>: dùng <code>asyncio.Queue</code> có
-                        <code>maxsize</code> để <code>put</code> chờ khi đầy, và đóng stream Claude khi browser ngắt kết
-                        nối. Streaming helper với <code>get_final_message</code> lại gom cả message nên tốn bộ nhớ hơn;
-                        <code>stream=True</code> dùng ít bộ nhớ hơn vì không dựng message cuối.
-                        <span class="knowledge-qref">Q16</span></li>
-                    <li><strong>Pagination</strong>: list method trả về từng trang. Python SDK hỗ trợ auto-pagination khi
-                        lặp <code>for</code> trên lời gọi list, hoặc đi từng trang với <code>has_next_page()</code>,
-                        <code>next_page_info()</code>, <code>get_next_page()</code> (TypeScript dùng <code>for
-                        await</code>). <code>limit</code> chỉ là kích thước trang; trang tiếp theo dùng cursor như
-                        <code>last_id</code>. <span class="knowledge-qref">Q31</span></li>
-                    <li><strong>Tham số chưa có trong SDK cũ</strong>: truyền qua <code>extra_body</code> (cùng họ
-                        <code>extra_query</code>, <code>extra_headers</code>) với dữ liệu tin cậy; tham số
-                        <code>extra_</code> ghi đè tham số cùng tên. Vẫn giữ retry, timeout, response có kiểu của SDK; sau
-                        khi nâng cấp thì chuyển sang named argument. <span class="knowledge-qref">Q32</span></li>
+                    <li><strong>Message Batches</strong>: giá 50%, tối đa 24 giờ, khớp bằng <code>custom_id</code>, gửi lại expired → dấu hiệu đề "chi phí là chính, chờ được" <span class="knowledge-qref">Q13</span></li>
+                    <li><strong>529 overloaded</strong>: SDK retry 2 lần; trang tương tác dùng circuit breaker + giảm <code>max_retries</code> + fallback <span class="knowledge-qref">Q14</span></li>
+                    <li class="knowledge-key"><strong>400 spend limit ≠ 401 key</strong>: "workspace API usage limits" là 400, sửa ở Billing; key thu hồi là 401 <span class="knowledge-qref">Q26</span></li>
+                    <li><strong>Phân loại lỗi</strong>: 429/529 tạm thời tự retry; 400 retry vô ích; page theo tác động user, vẫn log phần còn lại <span class="knowledge-qref">Q27</span></li>
+                    <li><strong>Backpressure</strong>: <code>asyncio.Queue(maxsize)</code>, đóng stream khi browser ngắt; <code>stream=True</code> ít bộ nhớ hơn helper <span class="knowledge-qref">Q16</span></li>
+                    <li><strong>Pagination</strong>: lặp <code>for</code> để auto-paginate; <code>limit</code> chỉ là cỡ trang → dấu hiệu đề "luôn đúng 20 mục" <span class="knowledge-qref">Q31</span></li>
+                    <li><strong><code>extra_body</code></strong>: truyền tham số SDK cũ chưa có, giữ retry/timeout → dấu hiệu đề "unexpected keyword argument" <span class="knowledge-qref">Q32</span></li>
                 </ul>
 
                 <h3 id="ks-8">8. Chọn model, vision, embeddings &amp; lưu trữ dữ liệu</h3>
                 <ul>
-                    <li><strong>Models API</strong> trả về <code>max_input_tokens</code>, <code>max_tokens</code> và
-                        object <code>capabilities</code> (ví dụ có nhận web search/code execution tool không, có cho tắt
-                        thinking không). Đọc lúc runtime thay vì bảng hardcode; tài liệu khuyên không suy ra dòng model
-                        từ model ID. <span class="knowledge-qref">Q23</span></li>
-                    <li><strong>Chọn model theo hướng efficiency-first</strong>: task đơn giản, khối lượng lớn, latency và
-                        chi phí chặt thì bắt đầu với model nhỏ, nhanh như Haiku và kiểm thử trên bộ mẫu có nhãn; chưa đạt
-                        thì mới so model lớn hơn hoặc chỉnh effort. Đây là quyết định theo workload, không phải luật
-                        "nhỏ luôn thắng". <span class="knowledge-qref">Q28</span></li>
-                    <li><strong>Effort parameter</strong> đổi capability lấy tốc độ và chi phí trong <em>cùng một
-                        model</em>, ảnh hưởng mọi output token (text, tool call, thinking). Effort thấp cho việc đơn giản
-                        nhạy tốc độ, cao cho suy luận phức tạp; thường là đòn bẩy tốt hơn đổi model. Giữ effort cố định
-                        trong conversation dựa vào cache hit. <span class="knowledge-qref">Q34</span></li>
-                    <li><strong>Output không hoàn toàn deterministic</strong>: mỗi token được lấy mẫu từ phân phối xác
-                        suất, kể cả ở temperature thấp nhất. Khoảng 2% nhãn khác nhau là hành vi bình thường, không phải
-                        SDK sửa request. Messages API stateless; model ID là snapshot cố định. Cách xử lý: đo độ nhất quán
-                        trên eval set, thêm ví dụ có nhãn cho ca biên, ràng buộc format.
-                        <span class="knowledge-qref">Q29</span></li>
-                    <li><strong>Nhiều ảnh trong một request</strong>: giới thiệu mỗi ảnh bằng nhãn ngắn (Image 1, Image
-                        2) và yêu cầu Claude dẫn đúng nhãn. Ảnh lớn hơn độ phân giải native bị downscale, chữ nhỏ mờ đi →
-                        crop vùng cần xem và resize trong giới hạn. Nén JPEG nhiều lần gây artifact; gửi 8000×8000 cũng bị
-                        downscale. <span class="knowledge-qref">Q8</span></li>
-                    <li class="knowledge-key"><strong>Anthropic không có embedding model</strong>, nên không có endpoint
-                        embeddings trên Claude API. Dùng nhà cung cấp riêng như Voyage AI để tạo vector, truy xuất đoạn
-                        liên quan rồi gửi cho Claude trả lời. Token counting endpoint chỉ trả về <em>số lượng</em> token.
-                        <span class="knowledge-qref">Q21</span></li>
-                    <li><strong>Zero Data Retention xét theo từng tính năng</strong>: Messages API chuẩn và prompt caching
-                        đủ điều kiện ZDR; Files API thì không (file giữ tới khi bị xóa hoặc hết hạn), MCP connector cũng
-                        không. PDF nhỏ thì gửi inline dạng base64 document block mỗi request.
-                        <span class="knowledge-qref">Q19</span></li>
+                    <li><strong>Models API</strong>: đọc <code>max_input_tokens</code>, <code>capabilities</code> lúc runtime thay bảng hardcode <span class="knowledge-qref">Q23</span></li>
+                    <li><strong>Efficiency-first</strong>: việc đơn giản, khối lượng lớn → thử Haiku trên bộ mẫu có nhãn trước, chưa đạt mới nâng <span class="knowledge-qref">Q28</span></li>
+                    <li class="knowledge-key"><strong>Effort ≠ đổi model</strong>: effort chỉnh tốc độ/chi phí trong cùng model, thường là đòn bẩy tốt hơn <span class="knowledge-qref">Q34</span></li>
+                    <li><strong>Không deterministic</strong>: lệch ~2% nhãn là bình thường kể cả temperature thấp; đo trên eval, thêm ví dụ ca biên <span class="knowledge-qref">Q29</span></li>
+                    <li><strong>Nhiều ảnh</strong>: gắn nhãn Image 1/2; ảnh lớn bị downscale → crop vùng cần đọc <span class="knowledge-qref">Q8</span></li>
+                    <li class="knowledge-key"><strong>Không có embeddings endpoint</strong>: dùng Voyage AI tạo vector; token counting chỉ đếm số token <span class="knowledge-qref">Q21</span></li>
+                    <li><strong>ZDR theo tính năng</strong>: Messages + prompt caching đủ điều kiện; Files API không → gửi PDF inline base64 <span class="knowledge-qref">Q19</span></li>
                 </ul>
 
                 <h3 id="ks-9">9. Prompt engineering, đánh giá &amp; guardrail</h3>
                 <ul>
-                    <li><strong>Few-shot cho ca khó</strong>: thêm cặp input bất thường + extraction đã duyệt vào
-                        <em>bên cạnh</em> ví dụ thường, bọc trong thẻ <code>&lt;example&gt;</code>, rồi chạy lại eval trên
-                        cả ghi chú thường lẫn bất thường. Ví dụ cần liên quan và đa dạng; thay hết bằng ca biên có thể
-                        làm hỏng ca thường; chỉ có input mà thiếu output thì không minh họa phép biến đổi.
-                        <span class="knowledge-qref">Q39</span></li>
-                    <li><strong>Hai quy tắc mâu thuẫn</strong> (luôn ngắn gọn vs. giải thích chi tiết từng lỗi) khiến
-                        Claude phải đoán bên nào thắng. Sửa bằng một chỉ dẫn có điều kiện: một dòng cho check đạt, chi
-                        tiết cho check trượt, kèm lý do vì sao format đó quan trọng. Viết hoa, lặp lại chỉ tăng áp lực
-                        và dễ overcorrect. <span class="knowledge-qref">Q40</span></li>
-                    <li><strong>Khi không có structured outputs</strong>: system instructions là nơi định nghĩa hợp đồng
-                        output — schema JSON tường minh với trường bắt buộc và kiểu, yêu cầu chỉ trả object thô. Nói điều
-                        cần làm ("chỉ trả một JSON object") thay vì cấm đoán. Ứng dụng vẫn validate mỗi response. JSON
-                        hợp lệ cú pháp vẫn có thể là JSON sai. <span class="knowledge-qref">Q42</span></li>
-                    <li><strong>Yêu cầu phải kiểm thử được</strong>: "chính xác" → bộ mẫu có nhãn phủ đủ mọi layout,
-                        chấm từng trường, ngưỡng accuracy tối thiểu làm release gate. "Nhanh" → giới hạn latency
-                        percentile 95 đo ở tải đỉnh trong cửa sổ test xác định, nêu rõ đo baseline latency hay time to
-                        first token. Trung bình che outlier; benchmark công khai không đại diện dữ liệu của bạn.
-                        <span class="knowledge-qref">Q18</span></li>
-                    <li><strong>Nâng cấp model phải có eval riêng cho task</strong>: chạy bộ request đại diện, chấm việc
-                        chọn tool và độ đúng argument cho cả model cũ lẫn mới, so lỗi trước khi promote; sau đó rollout
-                        từng giai đoạn. Benchmark coding công khai không nói gì về workflow riêng.
-                        <span class="knowledge-qref">Q35</span></li>
-                    <li class="knowledge-key"><strong>Đánh đổi chưa có thứ tự ưu tiên thì định nghĩa tiêu chí
-                        trước</strong>: đặt tiêu chí chấp nhận (kèm mức tối thiểu) cho từng chiều như suy luận xuyên
-                        chương và độ chính xác citation, rồi mới chọn chiến lược và validate trên tài liệu đại diện.
-                        "Vừa context window" là tính khả thi, không phải đạt yêu cầu; chi phí/latency chỉ so khi chất
-                        lượng đã đạt. Kỹ thuật long-context (đặt tài liệu đầu prompt, bảo Claude trích dẫn đoạn liên
-                        quan) hoặc tính năng Citations có thể cải thiện độ chính xác. <span class="knowledge-qref">Q37</span></li>
-                    <li><strong>Chính sách văn bản tường minh thì kiểm tra tất định</strong>: release gate dùng keyword
-                        filter, regex hoặc xử lý văn bản để chặn định danh/cụm từ cấm trước khi tới người đọc. Prompt vẫn
-                        nêu hạn chế nhưng việc xuất bản không còn phụ thuộc Claude tuân thủ; model review chỉ là lớp bổ
-                        sung cho ca tinh tế. <span class="knowledge-qref">Q44</span></li>
+                    <li><strong>Few-shot ca khó</strong>: thêm cặp input bất thường + output đã duyệt <em>bên cạnh</em> ví dụ thường, chạy lại eval <span class="knowledge-qref">Q39</span></li>
+                    <li><strong>Quy tắc mâu thuẫn</strong>: thay bằng chỉ dẫn có điều kiện kèm lý do; không viết hoa, lặp lại <span class="knowledge-qref">Q40</span></li>
+                    <li><strong>Không có structured outputs</strong>: schema JSON tường minh trong system, nói điều cần làm, app vẫn validate <span class="knowledge-qref">Q42</span></li>
+                    <li><strong>Yêu cầu kiểm thử được</strong>: "chính xác" → bộ có nhãn + ngưỡng; "nhanh" → p95 ở tải đỉnh <span class="knowledge-qref">Q18</span></li>
+                    <li><strong>Nâng cấp model</strong>: eval riêng chấm chọn tool + argument trên cả hai model, rồi rollout dần <span class="knowledge-qref">Q35</span></li>
+                    <li class="knowledge-key"><strong>"Vừa context" ≠ "đạt yêu cầu"</strong>: chưa có ưu tiên thì định nghĩa tiêu chí chấp nhận trước, rồi mới chọn chiến lược <span class="knowledge-qref">Q37</span></li>
+                    <li><strong>Chính sách văn bản tường minh</strong>: keyword/regex chặn trước khi xuất bản, không dựa Claude tuân thủ <span class="knowledge-qref">Q44</span></li>
                 </ul>
 
                 <h3 id="ks-10">10. Bảng so sánh dễ nhầm</h3>
-                <p class="knowledge-intro">Phần lớn câu sai đến từ việc lẫn lộn các cặp dưới đây.</p>
 
                 <h4>Workflow pattern</h4>
                 <div class="knowledge-table-wrap">
@@ -1577,11 +1355,11 @@
                             <tr><th>Pattern</th><th>Cách chạy</th><th>Chọn khi</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td>Prompt chaining</td><td>Chuỗi bước cố định, mỗi bước xử lý output bước trước, một lượt</td><td>Việc tách được thành các bước tuần tự, không cần quay lại</td></tr>
-                            <tr><td>Routing</td><td>Phân loại input rồi gửi tới một handler chuyên biệt</td><td>Loại input khác nhau cần prompt khác nhau</td></tr>
-                            <tr><td>Parallelization – sectioning</td><td>Chia việc thành các phần độc lập chạy song song</td><td>Các phần không phụ thuộc nhau</td></tr>
-                            <tr><td>Parallelization – voting</td><td>Chạy cùng một việc nhiều lần, gộp theo phiếu</td><td>Cần nhiều góc nhìn để tăng độ tin cậy (review bảo mật)</td></tr>
-                            <tr><td>Evaluator-optimizer</td><td>Sinh → đánh giá → feedback → sửa, lặp có giới hạn</td><td>Có tiêu chí đánh giá rõ, lặp lại mang giá trị đo được</td></tr>
+                            <tr><td>Prompt chaining</td><td>Chuỗi bước cố định, một lượt</td><td>Bước tuần tự, không quay lại</td></tr>
+                            <tr><td>Routing</td><td>Phân loại → một handler chuyên biệt</td><td>Loại input cần prompt khác nhau</td></tr>
+                            <tr><td>Sectioning</td><td>Chia phần độc lập chạy song song</td><td>Các phần không phụ thuộc</td></tr>
+                            <tr><td>Voting</td><td>Chạy một việc nhiều lần, gộp phiếu</td><td>Cần độ tin cậy cao (review bảo mật)</td></tr>
+                            <tr><td>Evaluator-optimizer</td><td>Sinh → đánh giá → sửa, có giới hạn</td><td>Có tiêu chí đánh giá rõ</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1593,10 +1371,10 @@
                             <tr><th>Mode</th><th>Hành vi</th><th>Dùng khi</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td>plan</td><td>Khám phá và đề xuất, không sửa file nguồn</td><td>Cần người duyệt cách làm trước khi sửa</td></tr>
-                            <tr><td>acceptEdits</td><td>Tự duyệt lệnh sửa file</td><td>Đã duyệt kế hoạch, muốn sửa không phải hỏi từng file</td></tr>
-                            <tr><td>dontAsk</td><td>Cái gì lẽ ra phải hỏi thì bị từ chối, không gọi <code>canUseTool</code></td><td>Chỉ cho phép những gì đã pre-approve</td></tr>
-                            <tr><td>bypassPermissions</td><td>Chạy tool không hỏi gì</td><td>Hiếm khi là đáp án khi đề đòi duyệt hoặc an toàn</td></tr>
+                            <tr><td>plan</td><td>Đề xuất, không sửa file</td><td>Cần duyệt trước khi sửa</td></tr>
+                            <tr><td>acceptEdits</td><td>Tự duyệt sửa file</td><td>Đã duyệt kế hoạch</td></tr>
+                            <tr><td>dontAsk</td><td>Từ chối mọi thứ cần hỏi</td><td>Chỉ cho việc đã pre-approve</td></tr>
+                            <tr><td>bypassPermissions</td><td>Chạy tool không hỏi</td><td>Hiếm khi đúng khi đề đòi an toàn</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1608,9 +1386,9 @@
                             <tr><th>Event</th><th>Thời điểm</th><th>Exit code 2 làm gì</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td>PreToolUse</td><td>Trước tool call</td><td>Chặn tool call, stderr gửi lại Claude làm lý do</td></tr>
-                            <tr><td>PostToolUse</td><td>Sau khi tool đã chạy xong</td><td>Chỉ phản hồi cho Claude, không hoàn tác</td></tr>
-                            <tr><td>Stop</td><td>Khi Claude trả lời xong</td><td>Quá muộn để chặn từng lần ghi file</td></tr>
+                            <tr><td>PreToolUse</td><td>Trước tool call</td><td>Chặn, stderr gửi Claude làm lý do</td></tr>
+                            <tr><td>PostToolUse</td><td>Sau khi tool chạy</td><td>Chỉ phản hồi, không hoàn tác</td></tr>
+                            <tr><td>Stop</td><td>Khi Claude trả lời xong</td><td>Quá muộn để chặn</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1622,11 +1400,11 @@
                             <tr><th>Cấu hình</th><th>Tác dụng</th><th>Hợp với</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td><code>disable-model-invocation: true</code></td><td>Claude không tự gọi, chỉ chạy khi người gõ lệnh</td><td>Release, deploy, việc có side effect</td></tr>
-                            <tr><td><code>user-invocable: false</code></td><td>Chỉ Claude gọi được</td><td>Kiến thức nền, không phải lệnh</td></tr>
-                            <tr><td><code>context: fork</code></td><td>Chạy trong subagent riêng, không thấy lịch sử</td><td>Việc đọc nhiều file, cần giữ context chính sạch</td></tr>
-                            <tr><td>CLAUDE.md</td><td>Nạp vào mọi session</td><td>Chỉ dẫn chung; không chứa hook/MCP chạy được</td></tr>
-                            <tr><td>Plugin + marketplace</td><td>Đóng gói skill, subagent, hook, MCP; cài một lệnh, có version</td><td>Phân phối một setup chuẩn cho nhiều team</td></tr>
+                            <tr><td><code>disable-model-invocation: true</code></td><td>Chỉ người gõ lệnh mới chạy</td><td>Release, deploy</td></tr>
+                            <tr><td><code>user-invocable: false</code></td><td>Chỉ Claude gọi được</td><td>Kiến thức nền</td></tr>
+                            <tr><td><code>context: fork</code></td><td>Subagent riêng, không thấy lịch sử</td><td>Đọc nhiều file, giữ context sạch</td></tr>
+                            <tr><td>CLAUDE.md</td><td>Nạp vào mọi session</td><td>Chỉ dẫn chung, không chạy hook/MCP</td></tr>
+                            <tr><td>Plugin + marketplace</td><td>Gói skill/hook/MCP, có version</td><td>Phân phối cho nhiều team</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1638,11 +1416,11 @@
                             <tr><th>Cơ chế</th><th>Làm gì</th><th>Không làm gì</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td><code>/rewind</code></td><td>Khôi phục code (sửa bằng tool) và hội thoại về checkpoint</td><td>Không khôi phục file bị Bash sửa</td></tr>
-                            <tr><td><code>/clear</code></td><td>Bắt đầu context hội thoại mới</td><td>Không hoàn tác file</td></tr>
-                            <tr><td>Resume</td><td>Nối tiếp đúng session đó</td><td>Không tạo nhánh độc lập</td></tr>
-                            <tr><td>Fork session</td><td>Session mới có bản sao lịch sử, ID riêng, gốc giữ nguyên</td><td>Không rẽ nhánh filesystem</td></tr>
-                            <tr><td>Git + file tiến độ</td><td>Lịch sử lâu dài, revert, bắt nhịp session mới</td><td>—</td></tr>
+                            <tr><td><code>/rewind</code></td><td>Khôi phục code (tool sửa) + hội thoại</td><td>Không khôi phục file Bash sửa</td></tr>
+                            <tr><td><code>/clear</code></td><td>Context hội thoại mới</td><td>Không hoàn tác file</td></tr>
+                            <tr><td>Resume</td><td>Nối tiếp đúng session</td><td>Không tạo nhánh</td></tr>
+                            <tr><td>Fork session</td><td>ID mới, bản sao lịch sử</td><td>Không rẽ nhánh filesystem</td></tr>
+                            <tr><td>Git + file tiến độ</td><td>Lịch sử lâu dài, bắt nhịp session mới</td><td>—</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1654,12 +1432,12 @@
                             <tr><th>Cấu hình</th><th>Hiệu quả</th><th>Lưu ý</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td><code>tool_choice: auto</code></td><td>Claude tự quyết có gọi tool hay không</td><td>Kết hợp strict tool use khi model cấm forced tool use</td></tr>
-                            <tr><td><code>tool_choice: any</code> / tool có tên</td><td>Ép gọi tool</td><td>Bị 400 trên Claude Opus 5.5</td></tr>
-                            <tr><td><code>tool_choice: none</code></td><td>Không cho dùng tool</td><td>Không phải cách gọi tool tuần tự</td></tr>
-                            <tr><td><code>disable_parallel_tool_use</code></td><td>Tối đa một tool mỗi response</td><td>Đặt trong <code>tool_choice</code>, không phải top-level</td></tr>
-                            <tr><td><code>allowed_callers</code> = code execution</td><td>Programmatic tool calling, lọc kết quả trong code</td><td>Giảm token kết quả và số vòng model</td></tr>
-                            <tr><td>Tool search + deferred loading</td><td>Chỉ nạp định nghĩa tool khi cần</td><td>Chỉ giảm token định nghĩa, không giảm token kết quả</td></tr>
+                            <tr><td><code>tool_choice: auto</code></td><td>Claude tự quyết gọi tool</td><td>Kèm strict tool use trên Opus 5.5</td></tr>
+                            <tr><td><code>tool_choice: any</code> / có tên</td><td>Ép gọi tool</td><td>400 trên Claude Opus 5.5</td></tr>
+                            <tr><td><code>tool_choice: none</code></td><td>Cấm dùng tool</td><td>Không phải gọi tuần tự</td></tr>
+                            <tr><td><code>disable_parallel_tool_use</code></td><td>Tối đa một tool mỗi response</td><td>Đặt trong <code>tool_choice</code></td></tr>
+                            <tr><td><code>allowed_callers</code> = code execution</td><td>Lọc kết quả trong code</td><td>Giảm token kết quả, số vòng</td></tr>
+                            <tr><td>Tool search + deferred loading</td><td>Nạp định nghĩa tool khi cần</td><td>Không giảm token kết quả</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1671,10 +1449,10 @@
                             <tr><th>Cách</th><th>Đặc điểm</th><th>ZDR</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td>Base64 document block trong Messages</td><td>Gửi lại mỗi request</td><td>Đủ điều kiện</td></tr>
+                            <tr><td>Base64 document block</td><td>Gửi lại mỗi request</td><td>Đủ điều kiện</td></tr>
                             <tr><td>Prompt caching</td><td>Giảm chi phí xử lý lặp</td><td>Đủ điều kiện</td></tr>
-                            <tr><td>Files API</td><td>Upload một lần, tham chiếu <code>file_id</code>; file giữ tới khi xóa/hết hạn</td><td>Không</td></tr>
-                            <tr><td>MCP connector</td><td>Nối remote MCP server, chỉ tool call</td><td>Không</td></tr>
+                            <tr><td>Files API</td><td><code>file_id</code>, giữ tới khi xóa/hết hạn</td><td>Không</td></tr>
+                            <tr><td>MCP connector</td><td>Remote MCP, chỉ tool call</td><td>Không</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1686,11 +1464,11 @@
                             <tr><th>Rủi ro</th><th>Chỉ là hướng dẫn (yếu)</th><th>Cơ chế bắt buộc (đúng)</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td>Charge trùng khi retry</td><td>Dặn Claude kiểm tra trước; <code>idempotentHint</code></td><td>Idempotency key lưu bền vững <span class="knowledge-qref">Q15</span></td></tr>
-                            <tr><td>Prompt injection lấy credential</td><td>Dòng dặn trong CLAUDE.md</td><td>Sandbox + allowlist domain + credentials deny <span class="knowledge-qref">Q43</span></td></tr>
-                            <tr><td>Văn bản cấm bị xuất bản</td><td>Mở rộng system prompt; Claude thứ hai duyệt</td><td>Kiểm tra tất định trước khi gửi <span class="knowledge-qref">Q44</span></td></tr>
-                            <tr><td>Ghi secret vào file</td><td>Dặn trong CLAUDE.md; PostToolUse</td><td>PreToolUse chặn bằng exit 2/deny <span class="knowledge-qref">Q46</span></td></tr>
-                            <tr><td>Rò dữ liệu từ code execution</td><td>Dặn không upload</td><td>Container vốn không có internet <span class="knowledge-qref">Q45</span></td></tr>
+                            <tr><td>Charge trùng khi retry</td><td>Dặn Claude; <code>idempotentHint</code></td><td>Idempotency key lưu bền <span class="knowledge-qref">Q15</span></td></tr>
+                            <tr><td>Injection lấy credential</td><td>Dặn trong CLAUDE.md</td><td>Sandbox + allowlist + credentials deny <span class="knowledge-qref">Q43</span></td></tr>
+                            <tr><td>Xuất bản văn bản cấm</td><td>System prompt; Claude thứ hai duyệt</td><td>Kiểm tra tất định <span class="knowledge-qref">Q44</span></td></tr>
+                            <tr><td>Ghi secret vào file</td><td>CLAUDE.md; PostToolUse</td><td>PreToolUse exit 2/deny <span class="knowledge-qref">Q46</span></td></tr>
+                            <tr><td>Rò dữ liệu từ code execution</td><td>Dặn không upload</td><td>Container không internet <span class="knowledge-qref">Q45</span></td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1702,24 +1480,24 @@
                             <tr><th>Con số / tham số</th><th>Ý nghĩa</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td>50%</td><td>Giá của mọi usage qua Message Batches so với giá chuẩn <span class="knowledge-qref">Q13</span></td></tr>
-                            <tr><td>24 giờ</td><td>Giới hạn xử lý một batch; request chưa xong thành expired <span class="knowledge-qref">Q13</span></td></tr>
-                            <tr><td>2 lần</td><td>Số lần SDK mặc định retry lỗi như 429/529, với exponential backoff (<code>max_retries</code>) <span class="knowledge-qref">Q14</span></td></tr>
-                            <tr><td>1.024</td><td>Giá trị tối thiểu của <code>budget_tokens</code>; budget phải nhỏ hơn <code>max_tokens</code> <span class="knowledge-qref">Q30</span></td></tr>
-                            <tr><td><code>max_tokens: 0</code></td><td>Request pre-warm cache, ghi cache không sinh output; bị từ chối khi streaming hoặc trong Batches <span class="knowledge-qref">Q10</span></td></tr>
-                            <tr><td>3–4 câu</td><td>Độ dài tối thiểu Anthropic khuyên cho mô tả mỗi tool <span class="knowledge-qref">Q49</span></td></tr>
-                            <tr><td>Exit code 2</td><td>Trong PreToolUse: chặn tool call, stderr là lý do <span class="knowledge-qref">Q46</span></td></tr>
-                            <tr><td>400 <code>invalid_request_error</code></td><td>Request sai hoặc chạm spend limit tự đặt; retry không giúp <span class="knowledge-qref">Q26, Q27</span></td></tr>
-                            <tr><td>401 <code>authentication_error</code></td><td>Key bị thu hồi hoặc hết hạn <span class="knowledge-qref">Q26</span></td></tr>
-                            <tr><td>429 / 529</td><td>Rate limit / API quá tải — tạm thời, SDK tự retry <span class="knowledge-qref">Q14, Q27</span></td></tr>
-                            <tr><td>p95</td><td>Latency percentile thứ 95 làm tiêu chí "nhanh" kiểm thử được <span class="knowledge-qref">Q18</span></td></tr>
-                            <tr><td>Tools → system → messages</td><td>Thứ bậc cache; đổi tầng nào mất cache tầng đó trở xuống <span class="knowledge-qref">Q36</span></td></tr>
+                            <tr><td>50%</td><td>Giá Message Batches so với giá chuẩn <span class="knowledge-qref">Q13</span></td></tr>
+                            <tr><td>24 giờ</td><td>Giới hạn một batch; quá thì expired <span class="knowledge-qref">Q13</span></td></tr>
+                            <tr><td>2 lần</td><td>SDK mặc định retry 429/529 (<code>max_retries</code>) <span class="knowledge-qref">Q14</span></td></tr>
+                            <tr><td>1.024</td><td><code>budget_tokens</code> tối thiểu, phải &lt; <code>max_tokens</code> <span class="knowledge-qref">Q30</span></td></tr>
+                            <tr><td><code>max_tokens: 0</code></td><td>Pre-warm cache; không dùng với streaming/Batches <span class="knowledge-qref">Q10</span></td></tr>
+                            <tr><td>3–4 câu</td><td>Độ dài tối thiểu mô tả tool <span class="knowledge-qref">Q49</span></td></tr>
+                            <tr><td>Exit code 2</td><td>PreToolUse chặn, stderr là lý do <span class="knowledge-qref">Q46</span></td></tr>
+                            <tr><td>400 <code>invalid_request_error</code></td><td>Request sai hoặc chạm spend limit <span class="knowledge-qref">Q26, Q27</span></td></tr>
+                            <tr><td>401 <code>authentication_error</code></td><td>Key thu hồi/hết hạn <span class="knowledge-qref">Q26</span></td></tr>
+                            <tr><td>429 / 529</td><td>Rate limit / quá tải, SDK tự retry <span class="knowledge-qref">Q14, Q27</span></td></tr>
+                            <tr><td>p95</td><td>Tiêu chí "nhanh" kiểm thử được <span class="knowledge-qref">Q18</span></td></tr>
+                            <tr><td>Tools → system → messages</td><td>Đổi tầng nào mất cache từ đó trở xuống <span class="knowledge-qref">Q36</span></td></tr>
                             <tr><td>Mặc định bật</td><td>Parallel tool use <span class="knowledge-qref">Q12</span></td></tr>
-                            <tr><td>Mặc định tắt</td><td>Citation cho block <code>search_result</code> <span class="knowledge-qref">Q17</span></td></tr>
-                            <tr><td>Mặc định trống</td><td>Danh sách allowed domains của sandbox Bash <span class="knowledge-qref">Q43</span></td></tr>
-                            <tr><td>Mặc định ≠ 0</td><td>Temperature mặc định không phải 0; temperature 0 vẫn không hoàn toàn deterministic <span class="knowledge-qref">Q29, Q33</span></td></tr>
-                            <tr><td>HTTPS</td><td>URL bắt buộc của mỗi entry trong <code>mcp_servers</code> <span class="knowledge-qref">Q20</span></td></tr>
-                            <tr><td><code>max_content_tokens</code> / <code>max_uses</code></td><td>Giới hạn nội dung mỗi trang fetch / số lần fetch (lần fail cũng tính) <span class="knowledge-qref">Q9</span></td></tr>
+                            <tr><td>Mặc định tắt</td><td>Citation cho <code>search_result</code> <span class="knowledge-qref">Q17</span></td></tr>
+                            <tr><td>Mặc định trống</td><td>Allowed domains của sandbox Bash <span class="knowledge-qref">Q43</span></td></tr>
+                            <tr><td>Mặc định ≠ 0</td><td>Temperature; 0 vẫn không deterministic <span class="knowledge-qref">Q29, Q33</span></td></tr>
+                            <tr><td>HTTPS</td><td>Bắt buộc cho URL trong <code>mcp_servers</code> <span class="knowledge-qref">Q20</span></td></tr>
+                            <tr><td><code>max_content_tokens</code> / <code>max_uses</code></td><td>Nội dung mỗi fetch / số lần fetch (fail cũng tính) <span class="knowledge-qref">Q9</span></td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1731,168 +1509,118 @@
                             <tr><th>Từ khóa trong đề</th><th>Hướng đáp án</th></tr>
                         </thead>
                         <tbody>
-                            <tr><td>duyệt cách làm trước khi sửa file, rồi sửa không hỏi</td><td>Plan mode → <code>setPermissionMode</code> sang acceptEdits</td></tr>
-                            <tr><td>thử giả thuyết khác, giữ nguyên nhánh gốc</td><td><code>fork_session</code>, lưu cả hai session ID</td></tr>
-                            <tr><td>đính ảnh, thêm message khi đang chạy, interrupt</td><td>Streaming input mode</td></tr>
-                            <tr><td>sửa lại theo kết quả test cho tới khi đạt</td><td>Evaluator-optimizer có retry limit</td></tr>
-                            <tr><td>một lượt review hay bỏ sót, cần độ tin cậy cao hơn</td><td>Parallelization voting</td></tr>
+                            <tr><td>duyệt trước khi sửa, rồi sửa không hỏi</td><td>Plan → <code>setPermissionMode</code> acceptEdits</td></tr>
+                            <tr><td>thử giả thuyết khác, giữ nhánh gốc</td><td><code>fork_session</code>, lưu cả hai ID</td></tr>
+                            <tr><td>đính ảnh, thêm message, interrupt</td><td>Streaming input mode</td></tr>
+                            <tr><td>sửa theo kết quả test tới khi đạt</td><td>Evaluator-optimizer có retry limit</td></tr>
+                            <tr><td>review hay bỏ sót, cần tin cậy hơn</td><td>Parallelization voting</td></tr>
                             <tr><td>tự xác nhận luôn đồng ý</td><td>Call review riêng + checklist</td></tr>
-                            <tr><td>task dừng giữa chừng, câu trả lời báo sẽ tra tiếp</td><td>Loop theo <code>stop_reason == tool_use</code></td></tr>
-                            <tr><td>tool call phụ thuộc kết quả tool kia</td><td><code>disable_parallel_tool_use</code> trong <code>tool_choice</code></td></tr>
-                            <tr><td>stop_reason max_tokens + tool_use bị cắt</td><td>Không chạy; retry với max_tokens cao hơn</td></tr>
-                            <tr><td>hàng trăm kết quả tool, chỉ cần vài cái</td><td>Programmatic tool calling (<code>allowed_callers</code>)</td></tr>
-                            <tr><td>liên kết từng nhận định với URL nguồn</td><td>Block <code>search_result</code> + bật citation</td></tr>
-                            <tr><td>tác vụ thanh toán, chỉ được thực hiện một lần</td><td>Idempotency key do ứng dụng quản lý</td></tr>
+                            <tr><td>dừng giữa chừng, "sẽ tra tiếp"</td><td>Loop theo <code>stop_reason == tool_use</code></td></tr>
+                            <tr><td>tool phụ thuộc kết quả tool kia</td><td><code>disable_parallel_tool_use</code> trong <code>tool_choice</code></td></tr>
+                            <tr><td>max_tokens + tool_use bị cắt</td><td>Không chạy; retry max_tokens cao hơn</td></tr>
+                            <tr><td>hàng trăm kết quả tool, cần vài cái</td><td>Programmatic tool calling</td></tr>
+                            <tr><td>gắn nhận định với URL nguồn</td><td><code>search_result</code> + bật citation</td></tr>
+                            <tr><td>thanh toán chỉ một lần</td><td>Idempotency key do app quản lý</td></tr>
                             <tr><td><code>url_not_allowed</code></td><td>Đưa URL vào user message</td></tr>
-                            <tr><td>pip install fail trong code execution</td><td>Không có internet; dùng thư viện cài sẵn + <code>container_upload</code></td></tr>
-                            <tr><td>remote MCP, không muốn viết MCP client, chỉ vài tool</td><td>MCP connector + <code>mcp_toolset</code> allowlist</td></tr>
-                            <tr><td>nhiều văn phòng, load balancer, identity provider</td><td>Streamable HTTP + MCP OAuth + validate Origin</td></tr>
-                            <tr><td>token dùng chung, chuyển tiếp token xuống downstream</td><td>Token ngắn hạn theo user, có audience, cấm passthrough</td></tr>
-                            <tr><td>server cần API key của user giữa lúc tool chạy</td><td>URL mode elicitation</td></tr>
+                            <tr><td>pip install fail trong code execution</td><td>Thư viện sẵn + <code>container_upload</code></td></tr>
+                            <tr><td>remote MCP, không viết client, vài tool</td><td>MCP connector + <code>mcp_toolset</code></td></tr>
+                            <tr><td>nhiều văn phòng, load balancer, IdP</td><td>Streamable HTTP + OAuth + validate Origin</td></tr>
+                            <tr><td>chuyển tiếp token xuống downstream</td><td>Token theo user, có audience, cấm passthrough</td></tr>
+                            <tr><td>cần API key của user khi tool chạy</td><td>URL mode elicitation</td></tr>
                             <tr><td>chỉ chạy khi developer gõ lệnh</td><td><code>disable-model-invocation: true</code></td></tr>
-                            <tr><td>đọc hàng trăm file, giữ context chính sạch</td><td><code>context: fork</code></td></tr>
+                            <tr><td>đọc hàng trăm file, context sạch</td><td><code>context: fork</code></td></tr>
                             <tr><td>chặn trước khi file thay đổi</td><td>PreToolUse hook</td></tr>
-                            <tr><td>hoàn tác cả code lẫn hội thoại</td><td><code>/rewind</code> + git cho file do Bash sửa</td></tr>
-                            <tr><td>@claude trong PR comment</td><td><code>/install-github-app</code> hoặc claude-code-action + GitHub Secret</td></tr>
-                            <tr><td>một lệnh cài, nhận bản cập nhật, nhiều team</td><td>Plugin trong marketplace</td></tr>
-                            <tr><td>request đầu tiên sau deploy/im lặng bị chậm</td><td>Pre-warm cache với <code>max_tokens: 0</code> + breakpoint tường minh</td></tr>
-                            <tr><td>cache read lịch sử thấp dù tools/system không đổi</td><td>Đừng đổi <code>tool_choice</code> giữa chừng</td></tr>
+                            <tr><td>hoàn tác code lẫn hội thoại</td><td><code>/rewind</code> + git cho file Bash sửa</td></tr>
+                            <tr><td>@claude trong PR comment</td><td><code>/install-github-app</code> + GitHub Secret</td></tr>
+                            <tr><td>một lệnh cài, cập nhật, nhiều team</td><td>Plugin trong marketplace</td></tr>
+                            <tr><td>request đầu sau deploy bị chậm</td><td>Pre-warm <code>max_tokens: 0</code> + breakpoint tường minh</td></tr>
+                            <tr><td>cache read thấp dù tools/system không đổi</td><td>Đừng đổi <code>tool_choice</code></td></tr>
                             <tr><td>thinking blocks cannot be modified</td><td>Gửi lại assistant turn nguyên vẹn</td></tr>
-                            <tr><td>không cần kết quả ngay, chi phí là chính</td><td>Message Batches API</td></tr>
-                            <tr><td>529 làm đầy worker trên trang tương tác</td><td>Circuit breaker + giảm <code>max_retries</code> + fallback</td></tr>
+                            <tr><td>không cần ngay, chi phí là chính</td><td>Message Batches API</td></tr>
+                            <tr><td>529 làm đầy worker trang tương tác</td><td>Circuit breaker + giảm retry + fallback</td></tr>
                             <tr><td>"specified workspace API usage limits"</td><td>Nâng/bỏ spend limit trong Console</td></tr>
                             <tr><td>báo cáo luôn đúng 20 mục</td><td>Auto-pagination</td></tr>
-                            <tr><td>SDK cũ báo unexpected keyword argument</td><td><code>extra_body</code></td></tr>
-                            <tr><td>bảng giới hạn model hardcode bị lỗi thời</td><td>Models API: <code>capabilities</code>, <code>max_input_tokens</code></td></tr>
-                            <tr><td>embeddings endpoint</td><td>Không tồn tại; dùng Voyage AI</td></tr>
-                            <tr><td>Zero Data Retention + Files API</td><td>Không ZDR; gửi inline base64</td></tr>
-                            <tr><td>"accurately", "quickly" bị chê không test được</td><td>Bộ mẫu có nhãn + ngưỡng; latency p95 ở tải đỉnh</td></tr>
-                            <tr><td>danh sách cụm từ cấm cụ thể</td><td>Kiểm tra tất định trước khi xuất bản</td></tr>
+                            <tr><td>SDK cũ: unexpected keyword argument</td><td><code>extra_body</code></td></tr>
+                            <tr><td>bảng giới hạn model hardcode lỗi thời</td><td>Models API <code>capabilities</code></td></tr>
+                            <tr><td>embeddings endpoint</td><td>Không có; dùng Voyage AI</td></tr>
+                            <tr><td>ZDR + Files API</td><td>Không ZDR; gửi inline base64</td></tr>
+                            <tr><td>"accurately", "quickly" không test được</td><td>Bộ có nhãn + ngưỡng; p95 tải đỉnh</td></tr>
+                            <tr><td>danh sách cụm từ cấm cụ thể</td><td>Kiểm tra tất định trước xuất bản</td></tr>
                         </tbody>
                     </table>
                 </div>
 
                 <h3 id="ks-13">13. Mẹo làm bài thi</h3>
                 <ul>
-                    <li><strong>Ưu tiên cơ chế được enforce hơn lời dặn trong prompt.</strong> Khi đề đòi "bảo đảm",
-                        "không phụ thuộc Claude nhận ra", "at most once", "chặn trước", đáp án gần như luôn là code ứng
-                        dụng, hook, sandbox hay kiểm tra tất định — không phải một câu trong system prompt hay CLAUDE.md.
-                        <span class="knowledge-qref">Q15, Q43, Q44, Q46</span></li>
-                    <li><strong>Đề hỏi cấu hình API thì tìm đúng tên tham số và đúng vị trí đặt nó.</strong> Đáp án sai
-                        hay bịa ra tham số top-level nghe hợp lý (<code>parallel_tool_calls</code>) hoặc đặt dữ liệu sai chỗ
-                        (URL trong assistant turn, tham số trong system prompt). <span class="knowledge-qref">Q9, Q12, Q32</span></li>
-                    <li><strong>Phòng ngừa thắng phát hiện sau.</strong> Audit sau khi xuất bản, review shell history
-                        cuối ngày, Stop hook, sample buổi tối đều là "phát hiện quá muộn".
-                        <span class="knowledge-qref">Q2, Q43, Q44, Q46</span></li>
-                    <li><strong>Giữ nguyên context thay vì tóm tắt rồi mở session mới.</strong> Đáp án "dán tóm tắt
-                        ngắn vào session mới" luôn mất chi tiết; đáp án đúng thường là đổi mode trong cùng session, fork,
-                        hoặc ghi trạng thái ra git/file tiến độ. <span class="knowledge-qref">Q1, Q3, Q38</span></li>
-                    <li><strong>Câu "Select two" thường là hai mảnh bổ trợ nhau.</strong> Plan mode + đổi sang
-                        acceptEdits; sandbox mạng + chặn credential; form mode + URL mode; kiểm tra stop_reason + retry;
-                        bỏ temperature + đổi tool_choice. <span class="knowledge-qref">Q1, Q43, Q51, Q48, Q33</span></li>
-                    <li><strong>Đọc kỹ thông báo lỗi trong đề.</strong> Mã HTTP giống nhau có thể có nguyên nhân khác
-                        nhau; message thường nêu thẳng nguyên nhân. <span class="knowledge-qref">Q11, Q26</span></li>
-                    <li><strong>Đo trước, đổi kiến trúc sau.</strong> Thử effort trên model hiện tại trước khi thêm
-                        model thứ hai; đo độ nhất quán trước khi mở support case; eval riêng trước khi promote model.
-                        <span class="knowledge-qref">Q29, Q34, Q35</span></li>
-                    <li><strong>Đề nêu thứ tự ưu tiên thì bám vào đó.</strong> "Chi phí là chính, chờ được" → batch;
-                        "phản hồi trong một giây" → không batch; "chưa xếp hạng ưu tiên" → định nghĩa tiêu chí trước.
-                        <span class="knowledge-qref">Q13, Q14, Q28, Q37</span></li>
+                    <li><strong>Enforce thắng lời dặn</strong>: "bảo đảm", "chặn trước" → code, hook, sandbox, không phải prompt <span class="knowledge-qref">Q15, Q43, Q44, Q46</span></li>
+                    <li><strong>Đúng tên tham số, đúng vị trí</strong>: cảnh giác tham số top-level bịa ra <span class="knowledge-qref">Q9, Q12, Q32</span></li>
+                    <li><strong>Phòng ngừa thắng phát hiện sau</strong>: audit, Stop hook, review cuối ngày đều quá muộn <span class="knowledge-qref">Q2, Q43, Q44, Q46</span></li>
+                    <li><strong>Giữ context</strong>: đổi mode, fork, file tiến độ thay vì tóm tắt sang session mới <span class="knowledge-qref">Q1, Q3, Q38</span></li>
+                    <li><strong>"Select two"</strong>: thường là hai mảnh bổ trợ nhau (plan + acceptEdits, form + URL mode) <span class="knowledge-qref">Q1, Q43, Q51, Q48, Q33</span></li>
+                    <li><strong>Đọc kỹ message lỗi</strong>: cùng mã HTTP, nguyên nhân khác nhau <span class="knowledge-qref">Q11, Q26</span></li>
+                    <li><strong>Đo trước, đổi kiến trúc sau</strong>: thử effort, đo nhất quán, eval riêng trước <span class="knowledge-qref">Q29, Q34, Q35</span></li>
+                    <li><strong>Bám thứ tự ưu tiên của đề</strong>: chờ được → batch; một giây → không batch <span class="knowledge-qref">Q13, Q14, Q28, Q37</span></li>
                 </ul>
 
                 <h3 id="ks-14">14. Bẫy thường gặp</h3>
                 <ul>
-                    <li class="knowledge-key"><strong>Temperature 0 không làm output hoàn toàn deterministic</strong>, và
-                        cũng không phải giá trị mặc định — trên Claude Opus 5.5 nó vẫn trả 400.
-                        <span class="knowledge-qref">Q29, Q33</span></li>
-                    <li class="knowledge-key"><strong>/rewind không khôi phục file do Bash sửa</strong>; <code>/clear</code>
-                        không hoàn tác file nào. <span class="knowledge-qref">Q25</span></li>
-                    <li class="knowledge-key"><strong>Exit code 2 trong PostToolUse không hoàn tác thao tác ghi</strong>;
-                        chỉ PreToolUse chặn được. <span class="knowledge-qref">Q46</span></li>
-                    <li class="knowledge-key"><strong>Thinking tính vào <code>max_tokens</code> và tính phí như output
-                        token</strong>, nên <code>budget_tokens</code> phải nhỏ hơn <code>max_tokens</code> và ước tính chi
-                        phí phải gồm thinking. <span class="knowledge-qref">Q30</span></li>
-                    <li><strong><code>idempotentHint</code> chỉ là thông tin</strong>, không chặn gọi trùng.
-                        <span class="knowledge-qref">Q15</span></li>
-                    <li><strong><code>disable_parallel_tool_use</code> nằm trong <code>tool_choice</code></strong>, không có
-                        tham số top-level. <span class="knowledge-qref">Q12</span></li>
-                    <li><strong>Web fetch không chấp nhận URL chỉ có trong system prompt hoặc output của Claude.</strong>
-                        <span class="knowledge-qref">Q9</span></li>
-                    <li><strong>Automatic caching trong request warm-up gắn breakpoint vào message giữ chỗ</strong>, nên
-                        request thật không hit cache. <span class="knowledge-qref">Q10</span></li>
-                    <li><strong>Đổi thứ tự tool definitions cũng làm mất toàn bộ cache.</strong>
-                        <span class="knowledge-qref">Q36</span></li>
-                    <li><strong>Gửi lại theo lịch ban đêm không được giá batch</strong> — giảm giá đến từ endpoint Message
-                        Batches. <span class="knowledge-qref">Q13</span></li>
-                    <li><strong>400 không phải lúc nào cũng là payload lỗi</strong>; spend limit cũng trả 400.
-                        <span class="knowledge-qref">Q26</span></li>
-                    <li><strong>Tăng <code>max_tokens</code> không giúp đọc thêm input</strong>; nó chỉ giới hạn output.
-                        <span class="knowledge-qref">Q53</span></li>
-                    <li><strong><code>user-invocable: false</code> làm điều ngược lại</strong> với "chỉ chạy khi người gõ
-                        lệnh". <span class="knowledge-qref">Q22</span></li>
-                    <li><strong>MCP connector không nối stdio server cục bộ và không hỗ trợ resources/prompts.</strong>
-                        <span class="knowledge-qref">Q20</span></li>
-                    <li><strong>Form mode elicitation bị cấm cho API key, mật khẩu, token.</strong>
-                        <span class="knowledge-qref">Q51</span></li>
-                    <li><strong>Gửi ảnh độ phân giải đầy đủ không cho thêm chi tiết</strong> vì ảnh vẫn bị downscale.
-                        <span class="knowledge-qref">Q8</span></li>
+                    <li class="knowledge-key"><strong>Temperature 0</strong>: không deterministic, không phải mặc định, trên Opus 5.5 trả 400 <span class="knowledge-qref">Q29, Q33</span></li>
+                    <li class="knowledge-key"><strong>/rewind</strong>: không khôi phục file Bash sửa; <code>/clear</code> không hoàn tác gì <span class="knowledge-qref">Q25</span></li>
+                    <li class="knowledge-key"><strong>PostToolUse exit 2</strong>: không hoàn tác ghi file; chỉ PreToolUse chặn được <span class="knowledge-qref">Q46</span></li>
+                    <li class="knowledge-key"><strong>Thinking</strong>: tính vào <code>max_tokens</code> và phí output <span class="knowledge-qref">Q30</span></li>
+                    <li><strong><code>idempotentHint</code></strong>: chỉ thông tin, không chặn gọi trùng <span class="knowledge-qref">Q15</span></li>
+                    <li><strong><code>disable_parallel_tool_use</code></strong>: nằm trong <code>tool_choice</code>, không top-level <span class="knowledge-qref">Q12</span></li>
+                    <li><strong>Web fetch</strong>: từ chối URL chỉ có trong system prompt hoặc output Claude <span class="knowledge-qref">Q9</span></li>
+                    <li><strong>Automatic caching khi warm-up</strong>: breakpoint rơi vào message giữ chỗ, request thật trượt <span class="knowledge-qref">Q10</span></li>
+                    <li><strong>Đổi thứ tự tool</strong>: mất toàn bộ cache <span class="knowledge-qref">Q36</span></li>
+                    <li><strong>Gửi ban đêm</strong>: không được giá batch; giảm giá từ endpoint <span class="knowledge-qref">Q13</span></li>
+                    <li><strong>400</strong>: không luôn là payload lỗi; spend limit cũng 400 <span class="knowledge-qref">Q26</span></li>
+                    <li><strong>Tăng <code>max_tokens</code></strong>: không đọc thêm input, chỉ giới hạn output <span class="knowledge-qref">Q53</span></li>
+                    <li><strong><code>user-invocable: false</code></strong>: ngược với "chỉ người gõ lệnh" <span class="knowledge-qref">Q22</span></li>
+                    <li><strong>MCP connector</strong>: không stdio, không resources/prompts <span class="knowledge-qref">Q20</span></li>
+                    <li><strong>Form mode</strong>: cấm cho API key, mật khẩu, token <span class="knowledge-qref">Q51</span></li>
+                    <li><strong>Ảnh full-res</strong>: vẫn bị downscale, không thêm chi tiết <span class="knowledge-qref">Q8</span></li>
                 </ul>
 
                 <h3 id="ks-15">15. Chủ đề hỏi lặp lại</h3>
                 <ul>
-                    <li><strong>Enforcement ở tầng ứng dụng/hạ tầng thay vì lời dặn trong prompt</strong> — hỏi 5 lần
-                        <span class="knowledge-qref">Q15, Q43, Q44, Q45, Q46</span></li>
-                    <li><strong>Workflow pattern: chaining, routing, voting, evaluator-optimizer</strong> — hỏi 3 lần
-                        <span class="knowledge-qref">Q5, Q6, Q41</span></li>
-                    <li><strong>Extended/adaptive thinking và các ràng buộc của nó</strong> — hỏi 3 lần
-                        <span class="knowledge-qref">Q11, Q30, Q33</span></li>
-                    <li><strong>Bảo mật và xác thực MCP (OAuth, token, elicitation, transport)</strong> — hỏi 4 lần
-                        <span class="knowledge-qref">Q20, Q47, Q50, Q51</span></li>
-                    <li><strong>Eval riêng cho task và tiêu chí đo được</strong> — hỏi 5 lần
-                        <span class="knowledge-qref">Q18, Q28, Q35, Q37, Q39</span></li>
-                    <li><strong>Error type, retry và độ bền khi gọi API</strong> — hỏi 4 lần
-                        <span class="knowledge-qref">Q14, Q15, Q26, Q27</span></li>
-                    <li><strong>Prompt caching: pre-warm và các yếu tố làm mất cache</strong> — hỏi 2 lần
-                        <span class="knowledge-qref">Q10, Q36</span></li>
-                    <li><strong>Agentic loop và xử lý <code>stop_reason</code></strong> — hỏi 2 lần
-                        <span class="knowledge-qref">Q7, Q48</span></li>
-                    <li><strong>Giữ trọn context qua session (đổi mode, fork, file tiến độ)</strong> — hỏi 3 lần
-                        <span class="knowledge-qref">Q1, Q3, Q38</span></li>
-                    <li><strong>Message Batches: khi nào dùng, khi nào không</strong> — hỏi 3 lần
-                        <span class="knowledge-qref">Q10, Q13, Q14</span></li>
-                    <li><strong>Chọn model/effort theo workload và chi phí</strong> — hỏi 3 lần
-                        <span class="knowledge-qref">Q23, Q28, Q34</span></li>
-                    <li><strong>Tính năng nào đủ điều kiện ZDR</strong> — xuất hiện trong 1 câu nhưng chạm 3 tính năng
-                        (Files API, MCP connector, prompt caching) <span class="knowledge-qref">Q19</span></li>
+                    <li><strong>Enforcement tầng app/hạ tầng</strong> — 5 lần <span class="knowledge-qref">Q15, Q43, Q44, Q45, Q46</span></li>
+                    <li><strong>Workflow pattern</strong> — 3 lần <span class="knowledge-qref">Q5, Q6, Q41</span></li>
+                    <li><strong>Extended/adaptive thinking</strong> — 3 lần <span class="knowledge-qref">Q11, Q30, Q33</span></li>
+                    <li><strong>Bảo mật &amp; xác thực MCP</strong> — 4 lần <span class="knowledge-qref">Q20, Q47, Q50, Q51</span></li>
+                    <li><strong>Eval riêng, tiêu chí đo được</strong> — 5 lần <span class="knowledge-qref">Q18, Q28, Q35, Q37, Q39</span></li>
+                    <li><strong>Error type &amp; retry</strong> — 4 lần <span class="knowledge-qref">Q14, Q15, Q26, Q27</span></li>
+                    <li><strong>Prompt caching</strong> — 2 lần <span class="knowledge-qref">Q10, Q36</span></li>
+                    <li><strong>Agentic loop &amp; <code>stop_reason</code></strong> — 2 lần <span class="knowledge-qref">Q7, Q48</span></li>
+                    <li><strong>Giữ context qua session</strong> — 3 lần <span class="knowledge-qref">Q1, Q3, Q38</span></li>
+                    <li><strong>Message Batches</strong> — 3 lần <span class="knowledge-qref">Q10, Q13, Q14</span></li>
+                    <li><strong>Chọn model/effort</strong> — 3 lần <span class="knowledge-qref">Q23, Q28, Q34</span></li>
+                    <li><strong>ZDR theo tính năng</strong> — 1 câu, 3 tính năng <span class="knowledge-qref">Q19</span></li>
                 </ul>
 
                 <h3 id="ks-16">16. Danh sách viết tắt &amp; giải thích thuật ngữ</h3>
-                <p class="knowledge-intro">
-                    Tổng hợp các chữ viết tắt và thuật ngữ thường gặp trong câu hỏi, đáp án và phần giải thích của Quiz 4,
-                    gom theo nhóm để tra nhanh khi gặp trong đề.
-                </p>
 
                 <h4>API, model &amp; tham số</h4>
                 <div class="knowledge-table-wrap">
                     <table class="knowledge-table">
                         <thead><tr><th>Viết tắt</th><th>Tên đầy đủ</th><th>Giải thích</th></tr></thead>
                         <tbody>
-                            <tr><td>API</td><td>Application Programming Interface</td><td>Giao diện lập trình; ở đây chủ yếu là Messages API của Claude</td></tr>
-                            <tr><td>SDK</td><td>Software Development Kit</td><td>Thư viện chính thức (Python, TypeScript) bọc API, có sẵn retry, timeout, pagination</td></tr>
+                            <tr><td>API</td><td>Application Programming Interface</td><td>Giao diện lập trình, chủ yếu Messages API</td></tr>
+                            <tr><td>SDK</td><td>Software Development Kit</td><td>Thư viện chính thức, có retry, pagination</td></tr>
                             <tr><td>LLM</td><td>Large Language Model</td><td>Mô hình ngôn ngữ lớn như Claude</td></tr>
-                            <tr><td>max_tokens</td><td>—</td><td>Trần số token output của một lượt, gồm cả thinking</td></tr>
-                            <tr><td>budget_tokens</td><td>—</td><td>Ngân sách thinking trong manual extended thinking, tối thiểu 1.024 và nhỏ hơn max_tokens</td></tr>
-                            <tr><td>Effort</td><td>—</td><td>Tham số đổi capability lấy tốc độ và chi phí trong cùng một model</td></tr>
-                            <tr><td>Temperature</td><td>—</td><td>Tham số lấy mẫu; thấp thì ít ngẫu nhiên hơn nhưng không hoàn toàn deterministic</td></tr>
-                            <tr><td>stop_reason</td><td>—</td><td>Lý do response dừng: <code>end_turn</code>, <code>tool_use</code>, <code>max_tokens</code>…</td></tr>
-                            <tr><td>Models API</td><td>—</td><td>Endpoint trả về giới hạn token và capabilities của từng model</td></tr>
-                            <tr><td>Message Batches API</td><td>—</td><td>Endpoint xử lý bất đồng bộ lô lớn với giá 50%</td></tr>
-                            <tr><td>custom_id</td><td>—</td><td>ID do bạn đặt cho mỗi request trong batch để khớp kết quả</td></tr>
-                            <tr><td>Spend limit</td><td>—</td><td>Giới hạn chi tiêu tự đặt trong Console; chạm thì request trả 400</td></tr>
-                            <tr><td>Snapshot</td><td>—</td><td>Phiên bản model cố định gắn với một model ID</td></tr>
-                            <tr><td>Circuit breaker</td><td>—</td><td>Ngắt gọi dịch vụ sau nhiều lỗi liên tiếp, trả fallback, thử lại sau một khoảng</td></tr>
-                            <tr><td>Backpressure</td><td>—</td><td>Cơ chế làm producer chậm lại theo tốc độ consumer</td></tr>
-                            <tr><td>Idempotency key</td><td>—</td><td>Khóa duy nhất cho mỗi thao tác dự định, giúp retry không thực hiện lặp</td></tr>
+                            <tr><td>max_tokens</td><td>—</td><td>Trần token output, gồm cả thinking</td></tr>
+                            <tr><td>budget_tokens</td><td>—</td><td>Ngân sách thinking, ≥ 1.024, &lt; max_tokens</td></tr>
+                            <tr><td>Effort</td><td>—</td><td>Đổi capability lấy tốc độ, cùng model</td></tr>
+                            <tr><td>Temperature</td><td>—</td><td>Tham số lấy mẫu, không bảo đảm deterministic</td></tr>
+                            <tr><td>stop_reason</td><td>—</td><td>Lý do dừng: <code>end_turn</code>, <code>tool_use</code>, <code>max_tokens</code></td></tr>
+                            <tr><td>Models API</td><td>—</td><td>Trả giới hạn token và capabilities</td></tr>
+                            <tr><td>Message Batches API</td><td>—</td><td>Xử lý lô bất đồng bộ, giá 50%</td></tr>
+                            <tr><td>custom_id</td><td>—</td><td>ID tự đặt để khớp kết quả batch</td></tr>
+                            <tr><td>Spend limit</td><td>—</td><td>Giới hạn chi tiêu tự đặt; chạm thì 400</td></tr>
+                            <tr><td>Snapshot</td><td>—</td><td>Phiên bản model cố định theo ID</td></tr>
+                            <tr><td>Circuit breaker</td><td>—</td><td>Ngắt gọi sau nhiều lỗi, trả fallback</td></tr>
+                            <tr><td>Backpressure</td><td>—</td><td>Làm producer chậm theo consumer</td></tr>
+                            <tr><td>Idempotency key</td><td>—</td><td>Khóa duy nhất để retry không lặp thao tác</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1902,20 +1630,20 @@
                     <table class="knowledge-table">
                         <thead><tr><th>Viết tắt</th><th>Tên đầy đủ</th><th>Giải thích</th></tr></thead>
                         <tbody>
-                            <tr><td>Tool use</td><td>—</td><td>Claude yêu cầu gọi hàm do ứng dụng (client tool) hoặc Anthropic (server tool) thực thi</td></tr>
-                            <tr><td>tool_choice</td><td>—</td><td>Điều khiển cách Claude dùng tool: <code>auto</code>, <code>any</code>, <code>tool</code>, <code>none</code></td></tr>
-                            <tr><td>Strict tool use</td><td>—</td><td>Bảo đảm argument của tool khớp schema</td></tr>
-                            <tr><td>Structured outputs</td><td>—</td><td>Tính năng ép output khớp schema JSON</td></tr>
-                            <tr><td>Programmatic tool calling</td><td>—</td><td>Claude viết code gọi tool trong code execution, kết quả trung gian không vào context</td></tr>
-                            <tr><td>Tool search</td><td>—</td><td>Nạp định nghĩa tool theo nhu cầu (deferred loading) cho catalog lớn</td></tr>
-                            <tr><td>Web fetch / web search</td><td>—</td><td>Server tool tải nội dung một URL / tìm kiếm web</td></tr>
-                            <tr><td>Code execution</td><td>—</td><td>Server tool chạy code trong container cách ly, không có internet</td></tr>
-                            <tr><td>Extended thinking</td><td>—</td><td>Claude suy luận trong block <code>thinking</code> trước khi trả lời</td></tr>
-                            <tr><td>Adaptive thinking</td><td>—</td><td>Mode thinking <code>"type": "adaptive"</code>; trên Claude Opus 5.5 thinking luôn bật và đây là mode duy nhất</td></tr>
-                            <tr><td>redacted_thinking</td><td>—</td><td>Loại block thinking thứ hai; ứng dụng lọc block theo type phải giữ cả hai loại và gửi lại nguyên vẹn</td></tr>
-                            <tr><td>Prompt caching</td><td>—</td><td>Cache phần prefix lặp lại để giảm chi phí và độ trễ</td></tr>
-                            <tr><td>TTL</td><td>Time To Live</td><td>Thời gian cache entry còn hiệu lực</td></tr>
-                            <tr><td>Breakpoint</td><td>—</td><td>Điểm đánh dấu cuối phần prompt cần cache</td></tr>
+                            <tr><td>Tool use</td><td>—</td><td>Claude gọi client tool hoặc server tool</td></tr>
+                            <tr><td>tool_choice</td><td>—</td><td><code>auto</code>, <code>any</code>, <code>tool</code>, <code>none</code></td></tr>
+                            <tr><td>Strict tool use</td><td>—</td><td>Argument tool bảo đảm khớp schema</td></tr>
+                            <tr><td>Structured outputs</td><td>—</td><td>Ép output khớp schema JSON</td></tr>
+                            <tr><td>Programmatic tool calling</td><td>—</td><td>Claude viết code gọi tool, lọc kết quả</td></tr>
+                            <tr><td>Tool search</td><td>—</td><td>Nạp định nghĩa tool theo nhu cầu</td></tr>
+                            <tr><td>Web fetch / web search</td><td>—</td><td>Server tool tải URL / tìm web</td></tr>
+                            <tr><td>Code execution</td><td>—</td><td>Container cách ly, không internet</td></tr>
+                            <tr><td>Extended thinking</td><td>—</td><td>Suy luận trong block <code>thinking</code></td></tr>
+                            <tr><td>Adaptive thinking</td><td>—</td><td>Mode duy nhất trên Claude Opus 5.5</td></tr>
+                            <tr><td>redacted_thinking</td><td>—</td><td>Block thinking thứ hai, gửi lại nguyên vẹn</td></tr>
+                            <tr><td>Prompt caching</td><td>—</td><td>Cache prefix lặp, giảm chi phí và độ trễ</td></tr>
+                            <tr><td>TTL</td><td>Time To Live</td><td>Thời gian cache còn hiệu lực</td></tr>
+                            <tr><td>Breakpoint</td><td>—</td><td>Điểm đánh dấu cuối phần cần cache</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1925,20 +1653,20 @@
                     <table class="knowledge-table">
                         <thead><tr><th>Viết tắt</th><th>Tên đầy đủ</th><th>Giải thích</th></tr></thead>
                         <tbody>
-                            <tr><td>MCP</td><td>Model Context Protocol</td><td>Giao thức chuẩn để ứng dụng AI kết nối tool và dữ liệu bên ngoài</td></tr>
-                            <tr><td>stdio</td><td>Standard input/output</td><td>Transport MCP cục bộ: client khởi chạy process server và nói chuyện qua stdin/stdout</td></tr>
-                            <tr><td>Streamable HTTP</td><td>—</td><td>Transport MCP từ xa qua HTTP POST/GET trên một endpoint</td></tr>
-                            <tr><td>Elicitation</td><td>—</td><td>MCP server xin input của user khi đang chạy (form mode hoặc URL mode)</td></tr>
-                            <tr><td>Agent SDK</td><td>Claude Agent SDK</td><td>Bộ thư viện xây agent trên nền Claude Code (query, session, permission)</td></tr>
-                            <tr><td>Subagent</td><td>—</td><td>Agent con có context riêng, chỉ trả kết quả về agent chính</td></tr>
-                            <tr><td>Skill</td><td>—</td><td>Gói chỉ dẫn/quy trình Claude Code nạp khi cần, gọi bằng lệnh</td></tr>
-                            <tr><td>Hook</td><td>—</td><td>Lệnh shell chạy tại một sự kiện của Claude Code (PreToolUse, PostToolUse, Stop…)</td></tr>
-                            <tr><td>Plugin</td><td>—</td><td>Gói nhiều skill, subagent, hook, MCP server để cài một lần</td></tr>
-                            <tr><td>Marketplace</td><td>—</td><td>Danh mục plugin, thường đặt trong một git repo</td></tr>
-                            <tr><td>CLAUDE.md</td><td>—</td><td>File chỉ dẫn dự án nạp vào mọi session Claude Code</td></tr>
-                            <tr><td>Checkpoint</td><td>—</td><td>Ảnh chụp trạng thái mỗi prompt để <code>/rewind</code></td></tr>
-                            <tr><td>Sandbox</td><td>—</td><td>Ranh giới cấp hệ điều hành giới hạn file và mạng cho lệnh Bash</td></tr>
-                            <tr><td>CI</td><td>Continuous Integration</td><td>Chạy tự động trong pipeline, ví dụ GitHub Actions</td></tr>
+                            <tr><td>MCP</td><td>Model Context Protocol</td><td>Giao thức nối AI với tool, dữ liệu ngoài</td></tr>
+                            <tr><td>stdio</td><td>Standard input/output</td><td>Transport cục bộ, client tự chạy server</td></tr>
+                            <tr><td>Streamable HTTP</td><td>—</td><td>Transport từ xa qua HTTP POST/GET</td></tr>
+                            <tr><td>Elicitation</td><td>—</td><td>Server xin input user (form/URL mode)</td></tr>
+                            <tr><td>Agent SDK</td><td>Claude Agent SDK</td><td>Thư viện xây agent: query, session, permission</td></tr>
+                            <tr><td>Subagent</td><td>—</td><td>Agent con context riêng, trả kết quả</td></tr>
+                            <tr><td>Skill</td><td>—</td><td>Gói chỉ dẫn nạp khi cần</td></tr>
+                            <tr><td>Hook</td><td>—</td><td>Lệnh shell chạy theo sự kiện</td></tr>
+                            <tr><td>Plugin</td><td>—</td><td>Gói skill, subagent, hook, MCP</td></tr>
+                            <tr><td>Marketplace</td><td>—</td><td>Danh mục plugin trong git repo</td></tr>
+                            <tr><td>CLAUDE.md</td><td>—</td><td>Chỉ dẫn dự án nạp mọi session</td></tr>
+                            <tr><td>Checkpoint</td><td>—</td><td>Ảnh chụp mỗi prompt cho <code>/rewind</code></td></tr>
+                            <tr><td>Sandbox</td><td>—</td><td>Ranh giới OS giới hạn file, mạng của Bash</td></tr>
+                            <tr><td>CI</td><td>Continuous Integration</td><td>Chạy tự động trong pipeline</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1948,21 +1676,21 @@
                     <table class="knowledge-table">
                         <thead><tr><th>Viết tắt</th><th>Tên đầy đủ</th><th>Giải thích</th></tr></thead>
                         <tbody>
-                            <tr><td>ZDR</td><td>Zero Data Retention</td><td>Thỏa thuận không lưu dữ liệu; tính đủ điều kiện theo từng tính năng</td></tr>
-                            <tr><td>OAuth</td><td>Open Authorization</td><td>Chuẩn ủy quyền cấp access token có scope và thời hạn</td></tr>
-                            <tr><td>Audience</td><td>—</td><td>Claim trong token cho biết token được cấp cho dịch vụ nào</td></tr>
-                            <tr><td>Token passthrough</td><td>—</td><td>Chuyển tiếp token của client xuống dịch vụ khác; bị spec MCP cấm</td></tr>
-                            <tr><td>Confused deputy</td><td>—</td><td>Dịch vụ có quyền bị lừa thực hiện hành động thay cho bên không có quyền</td></tr>
-                            <tr><td>DNS rebinding</td><td>—</td><td>Kiểu tấn công mà spec MCP yêu cầu chống bằng cách validate header Origin</td></tr>
-                            <tr><td>Prompt injection</td><td>—</td><td>Chỉ dẫn độc hại giấu trong nội dung không tin cậy (issue, trang web)</td></tr>
-                            <tr><td>RAG</td><td>Retrieval-Augmented Generation</td><td>Truy xuất tài liệu liên quan rồi đưa vào prompt để trả lời</td></tr>
-                            <tr><td>Embedding</td><td>—</td><td>Vector số biểu diễn ý nghĩa, dùng cho semantic search</td></tr>
+                            <tr><td>ZDR</td><td>Zero Data Retention</td><td>Không lưu dữ liệu, xét theo tính năng</td></tr>
+                            <tr><td>OAuth</td><td>Open Authorization</td><td>Cấp access token có scope, thời hạn</td></tr>
+                            <tr><td>Audience</td><td>—</td><td>Token được cấp cho dịch vụ nào</td></tr>
+                            <tr><td>Token passthrough</td><td>—</td><td>Chuyển tiếp token client; MCP cấm</td></tr>
+                            <tr><td>Confused deputy</td><td>—</td><td>Dịch vụ có quyền bị lừa làm thay</td></tr>
+                            <tr><td>DNS rebinding</td><td>—</td><td>Tấn công; chống bằng validate Origin</td></tr>
+                            <tr><td>Prompt injection</td><td>—</td><td>Chỉ dẫn độc giấu trong nội dung ngoài</td></tr>
+                            <tr><td>RAG</td><td>Retrieval-Augmented Generation</td><td>Truy xuất tài liệu rồi đưa vào prompt</td></tr>
+                            <tr><td>Embedding</td><td>—</td><td>Vector ý nghĩa cho semantic search</td></tr>
                             <tr><td>OCR</td><td>Optical Character Recognition</td><td>Nhận dạng chữ trong ảnh</td></tr>
-                            <tr><td>PDF</td><td>Portable Document Format</td><td>Định dạng tài liệu; gửi inline dạng base64 document block</td></tr>
-                            <tr><td>JSON</td><td>JavaScript Object Notation</td><td>Định dạng dữ liệu có cấu trúc dùng cho tool input và output máy đọc</td></tr>
-                            <tr><td>Eval</td><td>Evaluation</td><td>Bộ kiểm thử có tiêu chí đo được cho prompt/model</td></tr>
-                            <tr><td>p95</td><td>95th percentile</td><td>Giá trị mà 95% request nhanh hơn; tốt hơn trung bình để đặt giới hạn latency</td></tr>
-                            <tr><td>TTFT</td><td>Time To First Token</td><td>Thời gian đến khi token đầu tiên được trả về</td></tr>
+                            <tr><td>PDF</td><td>Portable Document Format</td><td>Gửi inline dạng base64 document block</td></tr>
+                            <tr><td>JSON</td><td>JavaScript Object Notation</td><td>Dữ liệu có cấu trúc cho tool, output</td></tr>
+                            <tr><td>Eval</td><td>Evaluation</td><td>Bộ kiểm thử có tiêu chí đo được</td></tr>
+                            <tr><td>p95</td><td>95th percentile</td><td>95% request nhanh hơn giá trị này</td></tr>
+                            <tr><td>TTFT</td><td>Time To First Token</td><td>Thời gian tới token đầu tiên</td></tr>
                         </tbody>
                     </table>
                 </div>
