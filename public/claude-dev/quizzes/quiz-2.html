@@ -767,10 +767,32 @@
             margin: 4px 0;
         }
 
+        /* Sits under its answer box, aligned with the answer text. */
         .option-vi {
-            margin-top: 6px;
+            margin: 0 16px 0 46px;
             font-size: 13px;
             line-height: 1.6;
+        }
+
+        .option-vi-btn {
+            flex: none;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-muted);
+            font-family: inherit;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .option-vi-btn:hover,
+        .option-vi-btn[aria-pressed="true"] {
+            color: var(--accent-light);
+            border-color: var(--accent);
+            background: var(--accent-glow);
         }
 
         .question-text-vi[hidden],
@@ -2121,8 +2143,8 @@
                 return `
                         <div class="question-lable">
                             <input type="${inputType}" id="${oid}" name="answer" value="${i}" />
-                            <label for="${oid}">${item.text}${vi ? `<div class="option-vi" hidden>${vi.answers[item.origIdx] || ""}</div>` : ""}</label>
-                        </div>`;
+                            <label for="${oid}">${item.text}</label>${vi ? `<button type="button" class="option-vi-btn" onclick="toggleOptionVi(this)" aria-pressed="false" title="Dịch đáp án">VI</button>` : ""}
+                        </div>${vi ? `<div class="option-vi" hidden>${vi.answers[item.origIdx] || ""}</div>` : ""}`;
             }).join("");
 
             const multiHint = isMultiAnswer ? `<span class="multi-answer-hint">select ${correctAnswerIndices.length}</span>` : '';
@@ -2382,12 +2404,20 @@
             }).join("");
         }
 
-        // Shows or hides the Vietnamese question and option text for one question.
+        // Shows or hides the Vietnamese question and every option translation for one question.
         function toggleQuestionVi(btn) {
             const show = btn.getAttribute("aria-pressed") !== "true";
+            const form = btn.closest("form");
             btn.setAttribute("aria-pressed", String(show));
-            btn.closest("form").querySelectorAll(".question-text-vi, .option-vi")
-                .forEach(el => { el.hidden = !show; });
+            form.querySelectorAll(".question-text-vi, .option-vi").forEach(el => { el.hidden = !show; });
+            form.querySelectorAll(".option-vi-btn").forEach(b => b.setAttribute("aria-pressed", String(show)));
+        }
+
+        // Shows or hides the translation of a single answer option.
+        function toggleOptionVi(btn) {
+            const show = btn.getAttribute("aria-pressed") !== "true";
+            btn.setAttribute("aria-pressed", String(show));
+            btn.closest(".question-lable").nextElementSibling.hidden = !show;
         }
 
         function renderExplanation(questionId) {
