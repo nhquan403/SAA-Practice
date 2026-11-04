@@ -749,6 +749,12 @@
             background: var(--accent-glow);
         }
 
+        /* Exam mode hides explanation buttons until submit because they reveal
+           the answer; a translation does not, so keep it available. */
+        body.exam-mode:not(.exam-submitted) .single-question-container .explanation-btn.question-vi-btn {
+            display: inline-block;
+        }
+
         .question-text-vi,
         .option-vi {
             color: var(--text-secondary);
@@ -767,10 +773,32 @@
             margin: 4px 0;
         }
 
+        /* Sits under its answer box, aligned with the answer text. */
         .option-vi {
-            margin-top: 6px;
+            margin: 0 16px 0 46px;
             font-size: 13px;
             line-height: 1.6;
+        }
+
+        .option-vi-btn {
+            flex: none;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-muted);
+            font-family: inherit;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .option-vi-btn:hover,
+        .option-vi-btn[aria-pressed="true"] {
+            color: var(--accent-light);
+            border-color: var(--accent);
+            background: var(--accent-glow);
         }
 
         .question-text-vi[hidden],
@@ -2067,8 +2095,8 @@
                 return `
                         <div class="question-lable">
                             <input type="${inputType}" id="${oid}" name="answer" value="${i}" />
-                            <label for="${oid}">${item.text}${vi ? `<div class="option-vi" hidden>${vi.answers[item.origIdx] || ""}</div>` : ""}</label>
-                        </div>`;
+                            <label for="${oid}">${item.text}</label>${vi ? `<button type="button" class="option-vi-btn" onclick="toggleOptionVi(this)" aria-pressed="false" title="Dịch đáp án">VI</button>` : ""}
+                        </div>${vi ? `<div class="option-vi" hidden>${vi.answers[item.origIdx] || ""}</div>` : ""}`;
             }).join("");
 
             const multiHint = isMultiAnswer ? `<span class="multi-answer-hint">select ${correctAnswerIndices.length}</span>` : '';
@@ -2080,7 +2108,7 @@
                     <form id="q-refnum-${refNum}" data-correct-answer="${shuffledCorrectIndex}" data-correct-answers="${shuffledCorrectIndices.join(',')}" data-is-multi="${isMultiAnswer}" data-question-id="${id}" class="single-question-container" onsubmit="submitButtonListener(event)">
                         <div class="question-header">
                             <span class="question-number">Question ${num}${refNum ? ` <span class="question-refcode" title="Mã tham chiếu cố định — dùng để tra trong bảng tổng hợp bên dưới">Q${refNum}</span>` : ''} ${multiHint}</span>
-                            <span class="question-tools">${vi ? `<button type="button" onclick="toggleQuestionVi(this)" class="explanation-btn" aria-pressed="false">🇻🇳 Dịch</button>` : ''}${explanation ? `<button type="button" onclick="renderExplanation('${id}')" class="explanation-btn">💡 Explanation</button>` : ''}</span>
+                            <span class="question-tools">${vi ? `<button type="button" onclick="toggleQuestionVi(this)" class="explanation-btn question-vi-btn" aria-pressed="false">🇻🇳 Dịch</button>` : ''}${explanation ? `<button type="button" onclick="renderExplanation('${id}')" class="explanation-btn">💡 Explanation</button>` : ''}</span>
                         </div>
                         <div class="question-text">${question}</div>
                         ${vi ? `<div class="question-text-vi" hidden>${vi.question}</div>` : ""}
@@ -2328,12 +2356,20 @@
             }).join("");
         }
 
-        // Shows or hides the Vietnamese question and option text for one question.
+        // Shows or hides the Vietnamese question and every option translation for one question.
         function toggleQuestionVi(btn) {
             const show = btn.getAttribute("aria-pressed") !== "true";
+            const form = btn.closest("form");
             btn.setAttribute("aria-pressed", String(show));
-            btn.closest("form").querySelectorAll(".question-text-vi, .option-vi")
-                .forEach(el => { el.hidden = !show; });
+            form.querySelectorAll(".question-text-vi, .option-vi").forEach(el => { el.hidden = !show; });
+            form.querySelectorAll(".option-vi-btn").forEach(b => b.setAttribute("aria-pressed", String(show)));
+        }
+
+        // Shows or hides the translation of a single answer option.
+        function toggleOptionVi(btn) {
+            const show = btn.getAttribute("aria-pressed") !== "true";
+            btn.setAttribute("aria-pressed", String(show));
+            btn.closest(".question-lable").nextElementSibling.hidden = !show;
         }
 
         function renderExplanation(questionId) {

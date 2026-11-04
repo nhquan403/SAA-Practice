@@ -749,6 +749,12 @@
             background: var(--accent-glow);
         }
 
+        /* Exam mode hides explanation buttons until submit because they reveal
+           the answer; a translation does not, so keep it available. */
+        body.exam-mode:not(.exam-submitted) .single-question-container .explanation-btn.question-vi-btn {
+            display: inline-block;
+        }
+
         .question-text-vi,
         .option-vi {
             color: var(--text-secondary);
@@ -2156,7 +2162,7 @@
                     <form id="q-refnum-${refNum}" data-correct-answer="${shuffledCorrectIndex}" data-correct-answers="${shuffledCorrectIndices.join(',')}" data-is-multi="${isMultiAnswer}" data-question-id="${id}" class="single-question-container" onsubmit="submitButtonListener(event)">
                         <div class="question-header">
                             <span class="question-number">Question ${num}${refNum ? ` <span class="question-refcode" title="Mã tham chiếu cố định — dùng để tra trong bảng tổng hợp bên dưới">Q${refNum}</span>` : ''} ${multiHint}</span>
-                            <span class="question-tools">${vi ? `<button type="button" onclick="toggleQuestionVi(this)" class="explanation-btn" aria-pressed="false">🇻🇳 Dịch</button>` : ''}${explanation ? `<button type="button" onclick="renderExplanation('${id}')" class="explanation-btn">💡 Explanation</button>` : ''}</span>
+                            <span class="question-tools">${vi ? `<button type="button" onclick="toggleQuestionVi(this)" class="explanation-btn question-vi-btn" aria-pressed="false">🇻🇳 Dịch</button>` : ''}${explanation ? `<button type="button" onclick="renderExplanation('${id}')" class="explanation-btn">💡 Explanation</button>` : ''}</span>
                         </div>
                         <div class="question-text">${question}</div>
                         ${vi ? `<div class="question-text-vi" hidden>${vi.question}</div>` : ""}
