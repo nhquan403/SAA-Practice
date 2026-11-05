@@ -31,15 +31,37 @@ const ALL_TABS = COURSES.flatMap((c) =>
   c.tabs.map((t) => ({ ...t, course: c.id, key: `${c.id}:${t.id}` })),
 )
 
-const FIRST_KEY = ALL_TABS[0].key
+const TAB_STATE_KEY = 'practice-app-tabs'
+
+// Mobile browsers discard background tabs and reload them on return; restore
+// the course and tab the reader was on. Unknown keys (e.g. a removed tab) fall
+// back to the defaults.
+function readSavedTabs() {
+  const defaults = {
+    courseId: COURSES[0].id,
+    activeByCourse: Object.fromEntries(COURSES.map((c) => [c.id, `${c.id}:${c.tabs[0].id}`])),
+  }
+  try {
+    const saved = JSON.parse(localStorage.getItem(TAB_STATE_KEY))
+    const validKey = (key) => ALL_TABS.some((t) => t.key === key)
+    if (!saved || !COURSES.some((c) => c.id === saved.courseId)) return defaults
+    for (const c of COURSES) {
+      const key = saved.activeByCourse?.[c.id]
+      if (validKey(key) && key.startsWith(`${c.id}:`)) defaults.activeByCourse[c.id] = key
+    }
+    defaults.courseId = saved.courseId
+  } catch {
+    // Unreadable or blocked storage: start from the defaults.
+  }
+  return defaults
+}
 
 export default function App() {
-  const [courseId, setCourseId] = useState(COURSES[0].id)
+  const [initial] = useState(readSavedTabs)
+  const [courseId, setCourseId] = useState(initial.courseId)
   // Last tab opened in each course, so switching course and back returns to it.
-  const [activeByCourse, setActiveByCourse] = useState(() =>
-    Object.fromEntries(COURSES.map((c) => [c.id, `${c.id}:${c.tabs[0].id}`])),
-  )
-  const [loaded, setLoaded] = useState(() => new Set([FIRST_KEY]))
+  const [activeByCourse, setActiveByCourse] = useState(initial.activeByCourse)
+  const [loaded, setLoaded] = useState(() => new Set([initial.activeByCourse[initial.courseId]]))
 
   const course = COURSES.find((c) => c.id === courseId)
   const activeKey = activeByCourse[courseId]
@@ -47,6 +69,14 @@ export default function App() {
   useEffect(() => {
     document.title = course.title
   }, [course])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(TAB_STATE_KEY, JSON.stringify({ courseId, activeByCourse }))
+    } catch {
+      // Storage full or blocked: the tab just isn't remembered.
+    }
+  }, [courseId, activeByCourse])
 
   // Keep `selectTab` the only writer of the active tab. Activating a tab
   // without also marking it loaded would render an empty stage with no error.
