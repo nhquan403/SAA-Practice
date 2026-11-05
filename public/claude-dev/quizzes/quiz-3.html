@@ -2465,11 +2465,12 @@
                     .filter(n => n !== undefined).sort((a, b) => a - b);
                 renderExamResults(correct.size, incorrect.size, wrongRefNums);
             }
-            (s.viQuestions || []).forEach(qid => {
+            // Pages without translations have no toggle functions and save no open ones.
+            if (typeof toggleQuestionVi === "function") (s.viQuestions || []).forEach(qid => {
                 const btn = formById[qid] && formById[qid].querySelector(".question-vi-btn");
                 if (btn) toggleQuestionVi(btn);
             });
-            Object.entries(s.viOptions || {}).forEach(([qid, indexes]) => {
+            if (typeof toggleOptionVi === "function") Object.entries(s.viOptions || {}).forEach(([qid, indexes]) => {
                 const buttons = formById[qid] ? formById[qid].querySelectorAll(".option-vi-btn") : [];
                 indexes.forEach(i => {
                     if (buttons[i] && buttons[i].getAttribute("aria-pressed") !== "true") toggleOptionVi(buttons[i]);

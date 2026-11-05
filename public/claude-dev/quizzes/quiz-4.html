@@ -749,6 +749,12 @@
             background: var(--accent-glow);
         }
 
+        /* Exam mode hides explanation buttons until submit because they reveal
+           the answer; a translation does not, so keep it available. */
+        body.exam-mode:not(.exam-submitted) .single-question-container .explanation-btn.question-vi-btn {
+            display: inline-block;
+        }
+
         .question-text-vi,
         .option-vi {
             color: var(--text-secondary);
@@ -767,10 +773,32 @@
             margin: 4px 0;
         }
 
+        /* Sits under its answer box, aligned with the answer text. */
         .option-vi {
-            margin-top: 6px;
+            margin: 0 16px 0 46px;
             font-size: 13px;
             line-height: 1.6;
+        }
+
+        .option-vi-btn {
+            flex: none;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-muted);
+            font-family: inherit;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .option-vi-btn:hover,
+        .option-vi-btn[aria-pressed="true"] {
+            color: var(--accent-light);
+            border-color: var(--accent);
+            background: var(--accent-glow);
         }
 
         .question-text-vi[hidden],
@@ -1246,6 +1274,7 @@
         <section id="mode-toggle-container">
             <button type="button" id="mode-practice-btn" class="mode-btn mode-btn-active" aria-pressed="true">📝 Luyện tập</button>
             <button type="button" id="mode-exam-btn" class="mode-btn" aria-pressed="false">⏱️ Thi thử</button>
+            <button type="button" id="quiz-reset-btn" class="mode-btn" title="Xoá bài đang làm và xáo đề mới">🔄 Làm lại</button>
         </section>
 
         <section id="quiz-container"></section>
@@ -2072,6 +2101,10 @@
         let totalNumberOfQuestions = 0;
         let examMode = false;
         const refNumByQuestionId = {};
+        const answerOrderById = {};
+        const gradedIds = new Set();
+        let savedQuizState = null;
+        let questionFingerprint = null;
         const quizTitle = quizData.quiz_title;
         const quizDescription = quizData.quiz_description;
         const questionData = quizData.questions;
@@ -2094,15 +2127,24 @@
             // can be cross-referenced against the Q<n> labels in the study summary panels below.
             questionData.forEach((q, idx) => { q.__refNum = idx + 1; });
 
-            // Shuffle questions
-            for (let i = questionData.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [questionData[i], questionData[j]] = [questionData[j], questionData[i]];
+            // Restore the saved question order, or shuffle for a fresh attempt.
+            const fingerprint = questionData.map(q => String(q.id)).join(",");
+            savedQuizState = readSavedQuizState(fingerprint);
+            if (savedQuizState) {
+                const position = new Map(savedQuizState.order.map((id, i) => [id, i]));
+                questionData.sort((a, b) => position.get(String(a.id)) - position.get(String(b.id)));
+            } else {
+                for (let i = questionData.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [questionData[i], questionData[j]] = [questionData[j], questionData[i]];
+                }
             }
 
             questionData.map(formatSingleQuestionData).forEach((q, idx) => {
                 renderSingleQuestion(q, idx + 1);
             });
+            if (savedQuizState) applySavedQuizState(savedQuizState);
+            questionFingerprint = fingerprint;
             updateScore();
             updateExamSubmitCount();
             renderExamHistory();
@@ -2156,11 +2198,17 @@
             }
             // Shuffle answers — track where correct answer ends up
             // Create index array and shuffle that
-            const indexedAnswers = answers.map((text, origIdx) => ({ text, origIdx }));
-            for (let i = indexedAnswers.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [indexedAnswers[i], indexedAnswers[j]] = [indexedAnswers[j], indexedAnswers[i]];
+            let indexedAnswers = answers.map((text, origIdx) => ({ text, origIdx }));
+            const savedAnswerOrder = savedQuizState && savedQuizState.answers[id];
+            if (savedAnswerOrder && savedAnswerOrder.length === answers.length) {
+                indexedAnswers = savedAnswerOrder.map(origIdx => indexedAnswers[origIdx]);
+            } else {
+                for (let i = indexedAnswers.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [indexedAnswers[i], indexedAnswers[j]] = [indexedAnswers[j], indexedAnswers[i]];
+                }
             }
+            answerOrderById[id] = indexedAnswers.map(a => a.origIdx);
 
             // Find shuffled positions of correct answers
             const shuffledCorrectIndices = correctAnswerIndices.map(ci => indexedAnswers.findIndex(a => a.origIdx === ci));
@@ -2194,8 +2242,8 @@
                 return `
                         <div class="question-lable">
                             <input type="${inputType}" id="${oid}" name="answer" value="${i}" />
-                            <label for="${oid}">${item.text}${vi ? `<div class="option-vi" hidden>${vi.answers[item.origIdx] || ""}</div>` : ""}</label>
-                        </div>`;
+                            <label for="${oid}">${item.text}</label>${vi ? `<button type="button" class="option-vi-btn" onclick="toggleOptionVi(this)" aria-pressed="false" title="Dịch đáp án">VI</button>` : ""}
+                        </div>${vi ? `<div class="option-vi" hidden>${vi.answers[item.origIdx] || ""}</div>` : ""}`;
             }).join("");
 
             const multiHint = isMultiAnswer ? `<span class="multi-answer-hint">select ${correctAnswerIndices.length}</span>` : '';
@@ -2207,7 +2255,7 @@
                     <form id="q-refnum-${refNum}" data-correct-answer="${shuffledCorrectIndex}" data-correct-answers="${shuffledCorrectIndices.join(',')}" data-is-multi="${isMultiAnswer}" data-question-id="${id}" class="single-question-container" onsubmit="submitButtonListener(event)">
                         <div class="question-header">
                             <span class="question-number">Question ${num}${refNum ? ` <span class="question-refcode" title="Mã tham chiếu cố định — dùng để tra trong bảng tổng hợp bên dưới">Q${refNum}</span>` : ''} ${multiHint}</span>
-                            <span class="question-tools">${vi ? `<button type="button" onclick="toggleQuestionVi(this)" class="explanation-btn" aria-pressed="false">🇻🇳 Dịch</button>` : ''}${explanation ? `<button type="button" onclick="renderExplanation('${id}')" class="explanation-btn">💡 Explanation</button>` : ''}</span>
+                            <span class="question-tools">${vi ? `<button type="button" onclick="toggleQuestionVi(this)" class="explanation-btn question-vi-btn" aria-pressed="false">🇻🇳 Dịch</button>` : ''}${explanation ? `<button type="button" onclick="renderExplanation('${id}')" class="explanation-btn">💡 Explanation</button>` : ''}</span>
                         </div>
                         <div class="question-text">${question}</div>
                         ${vi ? `<div class="question-text-vi" hidden>${vi.question}</div>` : ""}
@@ -2302,6 +2350,7 @@
             }
 
             gradeQuestion(form);
+            gradedIds.add(form.dataset.questionId);
             updateScore();
         };
 
@@ -2455,13 +2504,127 @@
             }).join("");
         }
 
-        // Shows or hides the Vietnamese question and option text for one question.
+        // Shows or hides the Vietnamese question and every option translation for one question.
         function toggleQuestionVi(btn) {
             const show = btn.getAttribute("aria-pressed") !== "true";
+            const form = btn.closest("form");
             btn.setAttribute("aria-pressed", String(show));
-            btn.closest("form").querySelectorAll(".question-text-vi, .option-vi")
-                .forEach(el => { el.hidden = !show; });
+            form.querySelectorAll(".question-text-vi, .option-vi").forEach(el => { el.hidden = !show; });
+            form.querySelectorAll(".option-vi-btn").forEach(b => b.setAttribute("aria-pressed", String(show)));
         }
+
+        // Shows or hides the translation of a single answer option.
+        function toggleOptionVi(btn) {
+            const show = btn.getAttribute("aria-pressed") !== "true";
+            btn.setAttribute("aria-pressed", String(show));
+            btn.closest(".question-lable").nextElementSibling.hidden = !show;
+        }
+
+        // ── Saved progress ──
+        // Mobile browsers discard background tabs, which reloads the page. Keep
+        // everything a reader has done in localStorage and rebuild it on load:
+        // question and answer order (both shuffled), selections, graded answers,
+        // mode, open translations and scroll position.
+        const QUIZ_STATE_KEY = "claude-dev-quiz-4-state";
+
+        function readSavedQuizState(fingerprint) {
+            try {
+                const s = JSON.parse(localStorage.getItem(QUIZ_STATE_KEY));
+                return s && s.fp === fingerprint ? s : null;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function saveQuizState() {
+            if (!questionFingerprint) return; // page not rendered yet
+            const forms = Array.from(document.querySelectorAll(".single-question-container"));
+            const pressedIndexes = (form, selector) => Array.from(form.querySelectorAll(selector))
+                .map((b, i) => (b.getAttribute("aria-pressed") === "true" ? i : -1)).filter(i => i >= 0);
+            const state = {
+                fp: questionFingerprint,
+                order: questionData.map(q => String(q.id)),
+                answers: answerOrderById,
+                selected: Object.fromEntries(forms.map(f => [f.dataset.questionId,
+                    Array.from(f.querySelectorAll("input:checked")).map(i => i.value)])),
+                graded: Array.from(gradedIds),
+                exam: examMode,
+                examSubmitted: document.body.classList.contains("exam-submitted"),
+                viQuestions: forms.filter(f => f.querySelector('.question-vi-btn[aria-pressed="true"]'))
+                    .map(f => f.dataset.questionId),
+                viOptions: Object.fromEntries(forms.map(f => [f.dataset.questionId, pressedIndexes(f, ".option-vi-btn")])
+                    .filter(([, list]) => list.length)),
+                scrollY: window.scrollY,
+            };
+            try {
+                localStorage.setItem(QUIZ_STATE_KEY, JSON.stringify(state));
+            } catch (e) {
+                // Storage full or blocked (private mode): progress just isn't kept.
+            }
+        }
+
+        function applySavedQuizState(s) {
+            const formById = {};
+            document.querySelectorAll(".single-question-container").forEach(f => { formById[f.dataset.questionId] = f; });
+            Object.entries(s.selected || {}).forEach(([qid, values]) => {
+                const form = formById[qid];
+                if (form) values.forEach(v => {
+                    const input = form.querySelector(`input[value="${v}"]`);
+                    if (input) input.checked = true;
+                });
+            });
+            if (s.exam) {
+                examMode = true;
+                document.body.classList.add("exam-mode");
+                document.getElementById("mode-practice-btn").classList.remove("mode-btn-active");
+                document.getElementById("mode-practice-btn").setAttribute("aria-pressed", "false");
+                document.getElementById("mode-exam-btn").classList.add("mode-btn-active");
+                document.getElementById("mode-exam-btn").setAttribute("aria-pressed", "true");
+            }
+            (s.graded || []).forEach(qid => {
+                if (formById[qid]) { gradeQuestion(formById[qid]); gradedIds.add(qid); }
+            });
+            if (s.exam && s.examSubmitted) {
+                Object.values(formById).forEach(gradeQuestion);
+                document.body.classList.add("exam-submitted");
+                document.getElementById("exam-submit-btn").disabled = true;
+                const wrongRefNums = Array.from(incorrect).map(qid => refNumByQuestionId[qid])
+                    .filter(n => n !== undefined).sort((a, b) => a - b);
+                renderExamResults(correct.size, incorrect.size, wrongRefNums);
+            }
+            // Pages without translations have no toggle functions and save no open ones.
+            if (typeof toggleQuestionVi === "function") (s.viQuestions || []).forEach(qid => {
+                const btn = formById[qid] && formById[qid].querySelector(".question-vi-btn");
+                if (btn) toggleQuestionVi(btn);
+            });
+            if (typeof toggleOptionVi === "function") Object.entries(s.viOptions || {}).forEach(([qid, indexes]) => {
+                const buttons = formById[qid] ? formById[qid].querySelectorAll(".option-vi-btn") : [];
+                indexes.forEach(i => {
+                    if (buttons[i] && buttons[i].getAttribute("aria-pressed") !== "true") toggleOptionVi(buttons[i]);
+                });
+            });
+            // After renderExamResults' smooth scroll, put the reader back where they were.
+            setTimeout(() => window.scrollTo({ top: s.scrollY || 0, behavior: "instant" }), 0);
+        }
+
+        (function () {
+            let timer = null;
+            const saveSoon = () => { clearTimeout(timer); timer = setTimeout(saveQuizState, 300); };
+            ["change", "click"].forEach(type => document.addEventListener(type, saveSoon));
+            window.addEventListener("scroll", saveSoon, { passive: true });
+            // A discarded tab gets no further events, so save as soon as it is hidden.
+            document.addEventListener("visibilitychange", () => {
+                if (document.visibilityState === "hidden") saveQuizState();
+            });
+            window.addEventListener("pagehide", saveQuizState);
+
+            document.getElementById("quiz-reset-btn").addEventListener("click", () => {
+                if (!confirm("Xoá bài đang làm và xáo đề mới?")) return;
+                try { localStorage.removeItem(QUIZ_STATE_KEY); } catch (e) { /* nothing saved */ }
+                questionFingerprint = null; // stop the pagehide save from writing it back
+                location.reload();
+            });
+        })();
 
         function renderExplanation(questionId) {
             const original = explanationMap[questionId] || "No explanation available.";
@@ -2496,6 +2659,7 @@
             function resetSession() {
                 correct.clear();
                 incorrect.clear();
+                gradedIds.clear();
                 document.querySelectorAll(
                     '.single-question-container input[type="radio"], .single-question-container input[type="checkbox"]'
                 ).forEach(input => { input.checked = false; });
