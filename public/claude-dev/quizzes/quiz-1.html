@@ -1339,6 +1339,18 @@
             padding: 14px 20px;
         }
 
+        /* Score bar: an item never wraps mid-label. While an exam is in
+           progress only the answered count means anything, so show just that;
+           once submitted, the score returns and the count goes. */
+        #score-stats-container > div {
+            white-space: nowrap;
+        }
+
+        body.exam-mode:not(.exam-submitted) #score-stats-container > div:not(#exam-progress-stat),
+        body.exam-submitted #exam-progress-stat {
+            display: none;
+        }
+
         @media (max-width: 480px) {
             #quiz-title {
                 font-size: 17px;
