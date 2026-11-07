@@ -33,6 +33,19 @@ const ALL_TABS = COURSES.flatMap((c) =>
 
 const TAB_STATE_KEY = 'practice-app-tabs'
 
+// Only the Claude course pages read this key; writing it from here reaches
+// their already-open frames through the storage event.
+const THEME_KEY = 'claude-dev-theme'
+const THEMED_COURSE = 'claude'
+
+function readSavedTheme() {
+  try {
+    return localStorage.getItem(THEME_KEY) === 'light' ? 'light' : 'dark'
+  } catch {
+    return 'dark'
+  }
+}
+
 // Mobile browsers discard background tabs and reload them on return; restore
 // the course and tab the reader was on. Unknown keys (e.g. a removed tab) fall
 // back to the defaults.
@@ -63,8 +76,21 @@ export default function App() {
   const [activeByCourse, setActiveByCourse] = useState(initial.activeByCourse)
   const [loaded, setLoaded] = useState(() => new Set([initial.activeByCourse[initial.courseId]]))
 
+  const [theme, setTheme] = useState(readSavedTheme)
+
   const course = COURSES.find((c) => c.id === courseId)
   const activeKey = activeByCourse[courseId]
+  const themed = courseId === THEMED_COURSE
+
+  function toggleTheme() {
+    const next = theme === 'dark' ? 'light' : 'dark'
+    setTheme(next)
+    try {
+      localStorage.setItem(THEME_KEY, next)
+    } catch {
+      // Storage blocked: the open frames keep their current theme.
+    }
+  }
 
   useEffect(() => {
     document.title = course.title
@@ -90,7 +116,7 @@ export default function App() {
   }
 
   return (
-    <div className="app">
+    <div className="app" data-theme={themed ? theme : 'dark'}>
       <div className="tabs tabs-courses" role="group" aria-label="Khoá học">
         {COURSES.map((c) => (
           <button
@@ -103,6 +129,16 @@ export default function App() {
             {c.label}
           </button>
         ))}
+        {themed && (
+          <button
+            type="button"
+            className="tab tab-course tab-theme"
+            aria-pressed={theme === 'light'}
+            onClick={toggleTheme}
+          >
+            {theme === 'dark' ? '☀️ Sáng' : '🌙 Tối'}
+          </button>
+        )}
       </div>
 
       <div className="tabs" role="group" aria-label="Quizzes và tài liệu">

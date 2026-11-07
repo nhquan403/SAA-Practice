@@ -5,6 +5,18 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+        // Theme chosen from the app bar; without a choice the page follows the system.
+        (function () {
+            const KEY = "claude-dev-theme";
+            const apply = value => {
+                if (value === "light" || value === "dark") document.documentElement.dataset.theme = value;
+                else delete document.documentElement.dataset.theme;
+            };
+            try { apply(localStorage.getItem(KEY)); } catch (e) { /* storage blocked: keep the default */ }
+            window.addEventListener("storage", e => { if (e.key === KEY) apply(e.newValue); });
+        })();
+    </script>
 <title>Claude Developer Reference Map</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">

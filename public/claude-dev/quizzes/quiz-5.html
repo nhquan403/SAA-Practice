@@ -5,6 +5,17 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+        (function () {
+            const KEY = "claude-dev-theme";
+            const apply = value => {
+                if (value === "light" || value === "dark") document.documentElement.dataset.theme = value;
+                else delete document.documentElement.dataset.theme;
+            };
+            try { apply(localStorage.getItem(KEY)); } catch (e) { /* storage blocked: keep the default */ }
+            window.addEventListener("storage", e => { if (e.key === KEY) apply(e.newValue); });
+        })();
+    </script>
     <title>Quiz</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1251,6 +1262,43 @@
             }
         }
 
+
+        /* ── Light theme (chosen from the app bar; dark is the default) ── */
+        :root[data-theme="light"] {
+            color-scheme: light;
+            --bg-primary: #f5f6fa;
+            --bg-card: #ffffff;
+            --bg-card-hover: #f1f2f7;
+            --bg-input: #f7f8fb;
+            --border: rgba(20, 24, 40, 0.10);
+            --border-hover: rgba(20, 24, 40, 0.20);
+            --text-primary: #1b1d2a;
+            --text-secondary: #4a4f66;
+            --text-muted: #6e7389;
+            --accent-glow: rgba(99, 102, 241, 0.12);
+            --accent-light: #4f46e5;
+            --success: #059669;
+            --success-bg: rgba(16, 185, 129, 0.10);
+            --success-border: rgba(5, 150, 105, 0.40);
+            --danger: #dc2626;
+            --danger-bg: rgba(239, 68, 68, 0.08);
+            --danger-border: rgba(220, 38, 38, 0.35);
+            --warning: #b45309;
+        }
+
+        :root[data-theme="light"] #score-stats-container {
+            background: rgba(255, 255, 255, 0.85);
+        }
+
+        :root[data-theme="light"] #quiz-title {
+            background: linear-gradient(135deg, #1b1d2a, #4a4f66);
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+
+        :root[data-theme="light"] .question-refcode {
+            background: rgba(20, 24, 40, 0.05);
+        }
     </style>
 </head>
 
