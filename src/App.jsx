@@ -96,6 +96,14 @@ export default function App() {
     document.title = course.title
   }, [course])
 
+  // Match the tab bar's background (--bg-card) for each shell theme.
+  const shellTheme = themed ? theme : 'dark'
+  useEffect(() => {
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute('content', shellTheme === 'light' ? '#ffffff' : '#12121a')
+  }, [shellTheme])
+
   useEffect(() => {
     try {
       localStorage.setItem(TAB_STATE_KEY, JSON.stringify({ courseId, activeByCourse }))
@@ -116,7 +124,7 @@ export default function App() {
   }
 
   return (
-    <div className="app" data-theme={themed ? theme : 'dark'}>
+    <div className="app" data-theme={shellTheme}>
       <div className="tabs tabs-courses" role="group" aria-label="Khoá học">
         {COURSES.map((c) => (
           <button
