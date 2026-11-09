@@ -1203,6 +1203,7 @@
         <section id="mode-toggle-container">
             <button type="button" id="mode-practice-btn" class="mode-btn mode-btn-active" aria-pressed="true">📝 Luyện tập</button>
             <button type="button" id="mode-exam-btn" class="mode-btn" aria-pressed="false">⏱️ Thi thử</button>
+            <button type="button" id="quiz-reset-btn" class="mode-btn" title="Xoá bài đang làm và xáo đề mới">🔄 Làm lại</button>
         </section>
 
         <section id="quiz-container"></section>
@@ -2178,6 +2179,10 @@
         let totalNumberOfQuestions = 0;
         let examMode = false;
         const refNumByQuestionId = {};
+        const answerOrderById = {};
+        const gradedIds = new Set();
+        let savedQuizState = null;
+        let questionFingerprint = null;
         const quizTitle = quizData.quiz_title;
         const quizDescription = quizData.quiz_description;
         const questionData = quizData.questions;
@@ -2200,15 +2205,24 @@
             // can be cross-referenced against the Q<n> labels in the study summary panels below.
             questionData.forEach((q, idx) => { q.__refNum = idx + 1; });
 
-            // Shuffle questions
-            for (let i = questionData.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [questionData[i], questionData[j]] = [questionData[j], questionData[i]];
+            // Restore the saved question order, or shuffle for a fresh attempt.
+            const fingerprint = questionData.map(q => String(q.id)).join(",");
+            savedQuizState = readSavedQuizState(fingerprint);
+            if (savedQuizState) {
+                const position = new Map(savedQuizState.order.map((id, i) => [id, i]));
+                questionData.sort((a, b) => position.get(String(a.id)) - position.get(String(b.id)));
+            } else {
+                for (let i = questionData.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [questionData[i], questionData[j]] = [questionData[j], questionData[i]];
+                }
             }
 
             questionData.map(formatSingleQuestionData).forEach((q, idx) => {
                 renderSingleQuestion(q, idx + 1);
             });
+            if (savedQuizState) applySavedQuizState(savedQuizState);
+            questionFingerprint = fingerprint;
             updateScore();
             updateExamSubmitCount();
             renderExamHistory();
@@ -2262,11 +2276,17 @@
             }
             // Shuffle answers — track where correct answer ends up
             // Create index array and shuffle that
-            const indexedAnswers = answers.map((text, origIdx) => ({ text, origIdx }));
-            for (let i = indexedAnswers.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [indexedAnswers[i], indexedAnswers[j]] = [indexedAnswers[j], indexedAnswers[i]];
+            let indexedAnswers = answers.map((text, origIdx) => ({ text, origIdx }));
+            const savedAnswerOrder = savedQuizState && savedQuizState.answers[id];
+            if (savedAnswerOrder && savedAnswerOrder.length === answers.length) {
+                indexedAnswers = savedAnswerOrder.map(origIdx => indexedAnswers[origIdx]);
+            } else {
+                for (let i = indexedAnswers.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [indexedAnswers[i], indexedAnswers[j]] = [indexedAnswers[j], indexedAnswers[i]];
+                }
             }
+            answerOrderById[id] = indexedAnswers.map(a => a.origIdx);
 
             // Find shuffled positions of correct answers
             const shuffledCorrectIndices = correctAnswerIndices.map(ci => indexedAnswers.findIndex(a => a.origIdx === ci));
@@ -2406,6 +2426,7 @@
             }
 
             gradeQuestion(form);
+            gradedIds.add(form.dataset.questionId);
             updateScore();
         };
 
@@ -2559,6 +2580,112 @@
             }).join("");
         }
 
+        // ── Saved progress ──
+        // Mobile browsers discard background tabs, which reloads the page. Keep
+        // everything a reader has done in localStorage and rebuild it on load:
+        // question and answer order (both shuffled), selections, graded answers,
+        // mode, open translations and scroll position.
+        const QUIZ_STATE_KEY = "saa-quiz-5-state";
+
+        function readSavedQuizState(fingerprint) {
+            try {
+                const s = JSON.parse(localStorage.getItem(QUIZ_STATE_KEY));
+                return s && s.fp === fingerprint ? s : null;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function saveQuizState() {
+            if (!questionFingerprint) return; // page not rendered yet
+            const forms = Array.from(document.querySelectorAll(".single-question-container"));
+            const pressedIndexes = (form, selector) => Array.from(form.querySelectorAll(selector))
+                .map((b, i) => (b.getAttribute("aria-pressed") === "true" ? i : -1)).filter(i => i >= 0);
+            const state = {
+                fp: questionFingerprint,
+                order: questionData.map(q => String(q.id)),
+                answers: answerOrderById,
+                selected: Object.fromEntries(forms.map(f => [f.dataset.questionId,
+                    Array.from(f.querySelectorAll("input:checked")).map(i => i.value)])),
+                graded: Array.from(gradedIds),
+                exam: examMode,
+                examSubmitted: document.body.classList.contains("exam-submitted"),
+                viQuestions: forms.filter(f => f.querySelector('.question-vi-btn[aria-pressed="true"]'))
+                    .map(f => f.dataset.questionId),
+                viOptions: Object.fromEntries(forms.map(f => [f.dataset.questionId, pressedIndexes(f, ".option-vi-btn")])
+                    .filter(([, list]) => list.length)),
+                scrollY: window.scrollY,
+            };
+            try {
+                localStorage.setItem(QUIZ_STATE_KEY, JSON.stringify(state));
+            } catch (e) {
+                // Storage full or blocked (private mode): progress just isn't kept.
+            }
+        }
+
+        function applySavedQuizState(s) {
+            const formById = {};
+            document.querySelectorAll(".single-question-container").forEach(f => { formById[f.dataset.questionId] = f; });
+            Object.entries(s.selected || {}).forEach(([qid, values]) => {
+                const form = formById[qid];
+                if (form) values.forEach(v => {
+                    const input = form.querySelector(`input[value="${v}"]`);
+                    if (input) input.checked = true;
+                });
+            });
+            if (s.exam) {
+                examMode = true;
+                document.body.classList.add("exam-mode");
+                document.getElementById("mode-practice-btn").classList.remove("mode-btn-active");
+                document.getElementById("mode-practice-btn").setAttribute("aria-pressed", "false");
+                document.getElementById("mode-exam-btn").classList.add("mode-btn-active");
+                document.getElementById("mode-exam-btn").setAttribute("aria-pressed", "true");
+            }
+            (s.graded || []).forEach(qid => {
+                if (formById[qid]) { gradeQuestion(formById[qid]); gradedIds.add(qid); }
+            });
+            if (s.exam && s.examSubmitted) {
+                Object.values(formById).forEach(gradeQuestion);
+                document.body.classList.add("exam-submitted");
+                document.getElementById("exam-submit-btn").disabled = true;
+                const wrongRefNums = Array.from(incorrect).map(qid => refNumByQuestionId[qid])
+                    .filter(n => n !== undefined).sort((a, b) => a - b);
+                renderExamResults(correct.size, incorrect.size, wrongRefNums);
+            }
+            // Pages without translations have no toggle functions and save no open ones.
+            if (typeof toggleQuestionVi === "function") (s.viQuestions || []).forEach(qid => {
+                const btn = formById[qid] && formById[qid].querySelector(".question-vi-btn");
+                if (btn) toggleQuestionVi(btn);
+            });
+            if (typeof toggleOptionVi === "function") Object.entries(s.viOptions || {}).forEach(([qid, indexes]) => {
+                const buttons = formById[qid] ? formById[qid].querySelectorAll(".option-vi-btn") : [];
+                indexes.forEach(i => {
+                    if (buttons[i] && buttons[i].getAttribute("aria-pressed") !== "true") toggleOptionVi(buttons[i]);
+                });
+            });
+            // After renderExamResults' smooth scroll, put the reader back where they were.
+            setTimeout(() => window.scrollTo({ top: s.scrollY || 0, behavior: "instant" }), 0);
+        }
+
+        (function () {
+            let timer = null;
+            const saveSoon = () => { clearTimeout(timer); timer = setTimeout(saveQuizState, 300); };
+            ["change", "click"].forEach(type => document.addEventListener(type, saveSoon));
+            window.addEventListener("scroll", saveSoon, { passive: true });
+            // A discarded tab gets no further events, so save as soon as it is hidden.
+            document.addEventListener("visibilitychange", () => {
+                if (document.visibilityState === "hidden") saveQuizState();
+            });
+            window.addEventListener("pagehide", saveQuizState);
+
+            document.getElementById("quiz-reset-btn").addEventListener("click", () => {
+                if (!confirm("Xoá bài đang làm và xáo đề mới?")) return;
+                try { localStorage.removeItem(QUIZ_STATE_KEY); } catch (e) { /* nothing saved */ }
+                questionFingerprint = null; // stop the pagehide save from writing it back
+                location.reload();
+            });
+        })();
+
         function renderExplanation(questionId) {
             modalTextElement.innerHTML = explanationMap[questionId] || "No explanation available.";
             dialog.showModal();
@@ -2576,6 +2703,7 @@
             function resetSession() {
                 correct.clear();
                 incorrect.clear();
+                gradedIds.clear();
                 document.querySelectorAll(
                     '.single-question-container input[type="radio"], .single-question-container input[type="checkbox"]'
                 ).forEach(input => { input.checked = false; });

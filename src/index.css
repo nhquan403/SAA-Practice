@@ -32,13 +32,29 @@ body {
   display: flex;
   flex-direction: column;
   height: 100%;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+/* Light shell for the Claude course, matching its light quiz pages. */
+.app[data-theme='light'] {
+  color-scheme: light;
+  --bg-primary: #f5f6fa;
+  --bg-card: #ffffff;
+  --border: rgba(20, 24, 40, 0.1);
+  --text-primary: #1b1d2a;
+  --text-secondary: #4a4f66;
+}
+
+.tab-theme {
+  margin-left: auto;
 }
 
 .tabs {
   flex: 0 0 auto;
   display: flex;
-  gap: 8px;
-  padding: 10px 16px;
+  gap: 6px;
+  padding: 8px 12px;
   background: var(--bg-card);
   border-bottom: 1px solid var(--border);
   overflow-x: auto;
@@ -46,13 +62,13 @@ body {
 
 .tab {
   flex: 0 0 auto;
-  padding: 8px 18px;
+  padding: 6px 14px;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: transparent;
   color: var(--text-secondary);
   font: inherit;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
@@ -85,8 +101,8 @@ body {
 }
 
 .tab-course {
-  padding: 6px 14px;
-  font-size: 13px;
+  padding: 4px 12px;
+  font-size: 12px;
 }
 
 .tab-course-active,

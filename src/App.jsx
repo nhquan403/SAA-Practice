@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 
-function quizTabs(dir) {
-  return [1, 2, 3, 4, 5, 6].map((n) => ({
-    id: n,
-    label: `Quiz ${n}`,
-    src: `${dir}quizzes/quiz-${n}.html`,
+function quizTabs(dir, count = 6) {
+  return Array.from({ length: count }, (_, i) => ({
+    id: i + 1,
+    label: `Quiz ${i + 1}`,
+    src: `${dir}quizzes/quiz-${i + 1}.html`,
   }))
 }
 
@@ -24,6 +24,15 @@ const COURSES = [
       { id: 'ref', label: '📘 Tài liệu', src: 'claude-dev/reference.html' },
     ],
   },
+  {
+    id: 'ccar',
+    label: 'Claude Architect',
+    title: 'Claude Architect Pro Practice',
+    tabs: [
+      ...quizTabs('claude-architect/', 3),
+      { id: 'ref', label: '📘 Tài liệu', src: 'claude-architect/reference.html' },
+    ],
+  },
 ]
 
 // Every tab of every course in one fixed order; `key` is unique across courses.
@@ -31,22 +40,86 @@ const ALL_TABS = COURSES.flatMap((c) =>
   c.tabs.map((t) => ({ ...t, course: c.id, key: `${c.id}:${t.id}` })),
 )
 
-const FIRST_KEY = ALL_TABS[0].key
+const TAB_STATE_KEY = 'practice-app-tabs'
+
+// Only the Claude courses' pages read this key (they share one theme); writing
+// it from here reaches their already-open frames through the storage event.
+const THEME_KEY = 'claude-dev-theme'
+const THEMED_COURSES = new Set(['claude', 'ccar'])
+
+function readSavedTheme() {
+  try {
+    return localStorage.getItem(THEME_KEY) === 'light' ? 'light' : 'dark'
+  } catch {
+    return 'dark'
+  }
+}
+
+// Mobile browsers discard background tabs and reload them on return; restore
+// the course and tab the reader was on. Unknown keys (e.g. a removed tab) fall
+// back to the defaults.
+function readSavedTabs() {
+  const defaults = {
+    courseId: COURSES[0].id,
+    activeByCourse: Object.fromEntries(COURSES.map((c) => [c.id, `${c.id}:${c.tabs[0].id}`])),
+  }
+  try {
+    const saved = JSON.parse(localStorage.getItem(TAB_STATE_KEY))
+    const validKey = (key) => ALL_TABS.some((t) => t.key === key)
+    if (!saved || !COURSES.some((c) => c.id === saved.courseId)) return defaults
+    for (const c of COURSES) {
+      const key = saved.activeByCourse?.[c.id]
+      if (validKey(key) && key.startsWith(`${c.id}:`)) defaults.activeByCourse[c.id] = key
+    }
+    defaults.courseId = saved.courseId
+  } catch {
+    // Unreadable or blocked storage: start from the defaults.
+  }
+  return defaults
+}
 
 export default function App() {
-  const [courseId, setCourseId] = useState(COURSES[0].id)
+  const [initial] = useState(readSavedTabs)
+  const [courseId, setCourseId] = useState(initial.courseId)
   // Last tab opened in each course, so switching course and back returns to it.
-  const [activeByCourse, setActiveByCourse] = useState(() =>
-    Object.fromEntries(COURSES.map((c) => [c.id, `${c.id}:${c.tabs[0].id}`])),
-  )
-  const [loaded, setLoaded] = useState(() => new Set([FIRST_KEY]))
+  const [activeByCourse, setActiveByCourse] = useState(initial.activeByCourse)
+  const [loaded, setLoaded] = useState(() => new Set([initial.activeByCourse[initial.courseId]]))
+
+  const [theme, setTheme] = useState(readSavedTheme)
 
   const course = COURSES.find((c) => c.id === courseId)
   const activeKey = activeByCourse[courseId]
+  const themed = THEMED_COURSES.has(courseId)
+
+  function toggleTheme() {
+    const next = theme === 'dark' ? 'light' : 'dark'
+    setTheme(next)
+    try {
+      localStorage.setItem(THEME_KEY, next)
+    } catch {
+      // Storage blocked: the open frames keep their current theme.
+    }
+  }
 
   useEffect(() => {
     document.title = course.title
   }, [course])
+
+  // Match the tab bar's background (--bg-card) for each shell theme.
+  const shellTheme = themed ? theme : 'dark'
+  useEffect(() => {
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute('content', shellTheme === 'light' ? '#ffffff' : '#12121a')
+  }, [shellTheme])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(TAB_STATE_KEY, JSON.stringify({ courseId, activeByCourse }))
+    } catch {
+      // Storage full or blocked: the tab just isn't remembered.
+    }
+  }, [courseId, activeByCourse])
 
   // Keep `selectTab` the only writer of the active tab. Activating a tab
   // without also marking it loaded would render an empty stage with no error.
@@ -60,7 +133,7 @@ export default function App() {
   }
 
   return (
-    <div className="app">
+    <div className="app" data-theme={shellTheme}>
       <div className="tabs tabs-courses" role="group" aria-label="Khoá học">
         {COURSES.map((c) => (
           <button
@@ -73,6 +146,16 @@ export default function App() {
             {c.label}
           </button>
         ))}
+        {themed && (
+          <button
+            type="button"
+            className="tab tab-course tab-theme"
+            aria-pressed={theme === 'light'}
+            onClick={toggleTheme}
+          >
+            {theme === 'dark' ? '☀️ Sáng' : '🌙 Tối'}
+          </button>
+        )}
       </div>
 
       <div className="tabs" role="group" aria-label="Quizzes và tài liệu">
