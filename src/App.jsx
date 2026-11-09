@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 
-function quizTabs(dir) {
-  return [1, 2, 3, 4, 5, 6].map((n) => ({
-    id: n,
-    label: `Quiz ${n}`,
-    src: `${dir}quizzes/quiz-${n}.html`,
+function quizTabs(dir, count = 6) {
+  return Array.from({ length: count }, (_, i) => ({
+    id: i + 1,
+    label: `Quiz ${i + 1}`,
+    src: `${dir}quizzes/quiz-${i + 1}.html`,
   }))
 }
 
@@ -24,6 +24,15 @@ const COURSES = [
       { id: 'ref', label: '📘 Tài liệu', src: 'claude-dev/reference.html' },
     ],
   },
+  {
+    id: 'ccar',
+    label: 'Claude Architect',
+    title: 'Claude Architect Pro Practice',
+    tabs: [
+      ...quizTabs('claude-architect/', 3),
+      { id: 'ref', label: '📘 Tài liệu', src: 'claude-architect/reference.html' },
+    ],
+  },
 ]
 
 // Every tab of every course in one fixed order; `key` is unique across courses.
@@ -33,10 +42,10 @@ const ALL_TABS = COURSES.flatMap((c) =>
 
 const TAB_STATE_KEY = 'practice-app-tabs'
 
-// Only the Claude course pages read this key; writing it from here reaches
-// their already-open frames through the storage event.
+// Only the Claude courses' pages read this key (they share one theme); writing
+// it from here reaches their already-open frames through the storage event.
 const THEME_KEY = 'claude-dev-theme'
-const THEMED_COURSE = 'claude'
+const THEMED_COURSES = new Set(['claude', 'ccar'])
 
 function readSavedTheme() {
   try {
@@ -80,7 +89,7 @@ export default function App() {
 
   const course = COURSES.find((c) => c.id === courseId)
   const activeKey = activeByCourse[courseId]
-  const themed = courseId === THEMED_COURSE
+  const themed = THEMED_COURSES.has(courseId)
 
   function toggleTheme() {
     const next = theme === 'dark' ? 'light' : 'dark'
