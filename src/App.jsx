@@ -26,11 +26,20 @@ const COURSES = [
   },
   {
     id: 'ccar',
-    label: 'Claude Architect',
+    label: 'Architect Pro',
     title: 'Claude Architect Pro Practice',
     tabs: [
       ...quizTabs('claude-architect/', 3),
       { id: 'ref', label: '📘 Tài liệu', src: 'claude-architect/reference.html' },
+    ],
+  },
+  {
+    id: 'ccarf',
+    label: 'Architect Foundations',
+    title: 'Claude Architect Foundations Practice',
+    tabs: [
+      ...quizTabs('claude-architect-foundations/'),
+      { id: 'ref', label: '📘 Tài liệu', src: 'claude-architect-foundations/reference.html' },
     ],
   },
 ]
@@ -45,7 +54,7 @@ const TAB_STATE_KEY = 'practice-app-tabs'
 // Only the Claude courses' pages read this key (they share one theme); writing
 // it from here reaches their already-open frames through the storage event.
 const THEME_KEY = 'claude-dev-theme'
-const THEMED_COURSES = new Set(['claude', 'ccar'])
+const THEMED_COURSES = new Set(['claude', 'ccar', 'ccarf'])
 
 function readSavedTheme() {
   try {
