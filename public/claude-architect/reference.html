@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+        // Theme chosen from the app bar; without a choice the page follows the system.
+        (function () {
+            const KEY = "claude-dev-theme";
+            const apply = value => {
+                if (value === "light" || value === "dark") document.documentElement.dataset.theme = value;
+                else delete document.documentElement.dataset.theme;
+            };
+            try { apply(localStorage.getItem(KEY)); } catch (e) { /* storage blocked: keep the default */ }
+            window.addEventListener("storage", e => { if (e.key === KEY) apply(e.newValue); });
+        })();
+    </script>
+<title>Claude Architect Pro Reference Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f6f4; --surface:#ffffff; --surface-alt:#eef2ee; --text:#182029; --muted:#5c6670;
+  --border:#dbe1dc; --accent:#1f6f78; --accent-ink:#0f4a51; --accent-soft:#e4f1f1;
+  --warn:#a15a1f; --warn-soft:#f7ecdf; --warn-border:#e3c49a;
+  --good:#3c7a4e; --good-soft:#e9f3ea;
+  --code-bg:#eef1f5; --code-text:#2c3b45; --mark-bg:#fff1b8;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#111820; --surface:#172029; --surface-alt:#1c2630; --text:#dce4ea; --muted:#8fa0ab;
+    --border:#2b3742; --accent:#5fc2bd; --accent-ink:#bfeae6; --accent-soft:#173936;
+    --warn:#e2a465; --warn-soft:#3a2a17; --warn-border:#5a4322;
+    --good:#79c98d; --good-soft:#1c3322;
+    --code-bg:#1b242e; --code-text:#c9d6de; --mark-bg:#4a3d14;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#111820; --surface:#172029; --surface-alt:#1c2630; --text:#dce4ea; --muted:#8fa0ab;
+  --border:#2b3742; --accent:#5fc2bd; --accent-ink:#bfeae6; --accent-soft:#173936;
+  --warn:#e2a465; --warn-soft:#3a2a17; --warn-border:#5a4322;
+  --good:#79c98d; --good-soft:#1c3322;
+  --code-bg:#1b242e; --code-text:#c9d6de; --mark-bg:#4a3d14;
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg); color:var(--text); margin:0;
+  font-family:"IBM Plex Sans", -apple-system, "Segoe UI", sans-serif;
+  font-size:15.5px; line-height:1.6;
+}
+h1,h2,h3,h4{font-family:"IBM Plex Sans", sans-serif; text-wrap:balance; color:var(--text); margin:0}
+code, .mono, .src, .num-cell, th, td.mono-col{font-family:"IBM Plex Mono", ui-monospace, monospace}
+
+a{color:var(--accent-ink)}
+
+.shell{display:flex; max-width:1320px; margin:0 auto; align-items:flex-start; padding:0 20px}
+.rail{
+  position:sticky; top:0; align-self:flex-start; width:252px; flex:0 0 252px;
+  height:100dvh; overflow-y:auto; padding:22px 14px 22px 4px; border-right:1px solid var(--border);
+  scrollbar-width:thin;
+}
+.rail-brand{display:flex; align-items:baseline; gap:8px; padding:2px 10px 14px; border-bottom:1px solid var(--border); margin-bottom:12px}
+.rail-brand .mark{font-family:"IBM Plex Mono"; font-size:12px; color:var(--accent-ink); background:var(--accent-soft); padding:2px 6px; border-radius:4px}
+.rail-brand strong{font-size:14px; letter-spacing:.01em}
+
+.search-wrap{padding:0 10px 14px}
+#filter{
+  width:100%; padding:9px 11px; border-radius:8px; border:1px solid var(--border);
+  background:var(--surface); color:var(--text); font-size:13.5px; font-family:inherit;
+}
+#filter:focus{outline:2px solid var(--accent); outline-offset:1px}
+.filter-status{font-size:11.5px; color:var(--muted); padding:6px 10px 0; min-height:16px}
+
+.rail nav{display:flex; flex-direction:column; gap:1px}
+.rail-group{font-size:10.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); padding:14px 10px 4px}
+.rail nav a{
+  display:block; padding:6px 10px; border-radius:6px; color:var(--muted); text-decoration:none; font-size:13px;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.rail nav a:hover{background:var(--surface-alt); color:var(--text)}
+.rail nav a.active{background:var(--accent-soft); color:var(--accent-ink); font-weight:600}
+.rail nav a .n{font-family:"IBM Plex Mono"; font-size:11px; opacity:.7; margin-right:5px}
+
+main{flex:1 1 auto; min-width:0; padding:36px 28px 90px; max-width:960px}
+
+.hero{padding-bottom:28px; border-bottom:1px solid var(--border); margin-bottom:32px}
+.hero .eyebrow{font-size:12px; text-transform:uppercase; letter-spacing:.1em; color:var(--accent-ink); font-weight:600; margin-bottom:10px}
+.hero h1{font-size:32px; font-weight:700; letter-spacing:-.01em; margin-bottom:10px}
+.hero p{color:var(--muted); max-width:64ch; font-size:15px}
+.hero .stats{display:flex; gap:22px; flex-wrap:wrap; margin-top:18px}
+.hero .stat{display:flex; flex-direction:column; gap:2px}
+.hero .stat b{font-size:20px; font-variant-numeric:tabular-nums; color:var(--text)}
+.hero .stat span{font-size:11.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em}
+.howto{background:var(--surface-alt); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:18px; font-size:13.5px; color:var(--muted)}
+.howto b{color:var(--text)}
+
+section.mod{margin-bottom:46px; scroll-margin-top:20px}
+.mod-head{display:flex; align-items:baseline; gap:10px; margin-bottom:6px}
+.mod-head .n{font-family:"IBM Plex Mono"; font-size:13px; color:var(--accent-ink); background:var(--accent-soft); padding:2px 7px; border-radius:5px}
+.mod-head h2{font-size:21px; font-weight:700}
+.mod-desc{color:var(--muted); font-size:13.5px; margin:2px 0 16px; max-width:70ch}
+
+table.ref{width:100%; border-collapse:collapse; font-size:13.8px}
+table.ref th{
+  text-align:left; font-size:10.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted);
+  border-bottom:1px solid var(--border); padding:0 10px 8px; font-weight:600;
+}
+table.ref td{padding:10px 10px; border-bottom:1px solid var(--border); vertical-align:top}
+table.ref tr:last-child td{border-bottom:none}
+table.ref td.concept{font-weight:650; white-space:nowrap; width:15%}
+table.ref td.usecase{color:var(--muted); width:48%}
+table.ref td.src{width:20%}
+.wrap-tbl{overflow-x:auto}
+table.ref tr.hidden{display:none}
+
+.src{display:flex; flex-wrap:wrap; gap:4px; min-width:0}
+.src .tag{
+  font-size:11px; padding:1px 6px; border-radius:4px; background:var(--code-bg); color:var(--code-text);
+  border:1px solid var(--border); white-space:nowrap;
+}
+
+mark{background:var(--mark-bg); color:inherit; border-radius:2px}
+
+.traps{display:flex; flex-direction:column; gap:0}
+.trap{
+  display:flex; gap:12px; padding:13px 4px 13px 14px; border-left:3px solid var(--warn);
+  background:var(--warn-soft); border-radius:0 8px 8px 0; margin-bottom:8px;
+}
+.trap .t-body{flex:1}
+.trap .t-body b{color:var(--text)}
+.trap .t-body p{margin:3px 0 0; color:var(--muted); font-size:13.6px}
+.trap .src{flex:0 0 auto; align-items:flex-start; padding-top:1px}
+
+.tips-grid{display:grid; grid-template-columns:1fr 1fr; gap:28px}
+@media (max-width:760px){.tips-grid{grid-template-columns:1fr}}
+
+ol.examtips{margin:0; padding-left:0; list-style:none; counter-reset:tip}
+ol.examtips li{
+  counter-increment:tip; display:flex; gap:12px; padding:11px 0; border-bottom:1px solid var(--border);
+}
+ol.examtips li:last-child{border-bottom:none}
+ol.examtips li::before{
+  content:counter(tip); font-family:"IBM Plex Mono"; font-size:12px; color:var(--accent-ink);
+  background:var(--accent-soft); width:22px; height:22px; border-radius:50%; display:flex; align-items:center;
+  justify-content:center; flex:0 0 auto; margin-top:1px;
+}
+ol.examtips li span{font-size:14px}
+ol.examtips li b{color:var(--text)}
+
+.kw-table td:first-child{color:var(--text); font-size:13.4px}
+.kw-table td:last-child{font-weight:600; color:var(--accent-ink); font-size:13.4px}
+
+details.gloss{margin-top:8px; border:1px solid var(--border); border-radius:10px; background:var(--surface); overflow:hidden}
+details.gloss summary{
+  cursor:pointer; padding:14px 16px; font-weight:650; list-style:none; display:flex; align-items:center; gap:8px;
+}
+details.gloss summary::-webkit-details-marker{display:none}
+details.gloss summary::before{content:"▸"; color:var(--accent-ink); transition:transform .15s}
+details.gloss[open] summary::before{transform:rotate(90deg)}
+details.gloss .gloss-body{padding:0 16px 16px}
+.gloss-grid{columns:2; column-gap:24px}
+@media (max-width:700px){.gloss-grid{columns:1}}
+.gloss-item{break-inside:avoid; padding:6px 0; border-bottom:1px dashed var(--border); font-size:13px}
+.gloss-item b{font-family:"IBM Plex Mono"; color:var(--accent-ink); font-size:12.5px}
+.gloss-item span{color:var(--muted)}
+
+footer.page-foot{color:var(--muted); font-size:12.5px; padding-top:30px; border-top:1px solid var(--border); margin-top:50px}
+
+.scroll-bottom-btn{
+  position:fixed; right:18px; bottom:18px; z-index:20; width:36px; height:36px; border-radius:50%;
+  border:1px solid var(--border); background:var(--surface); color:var(--accent-ink);
+  display:flex; align-items:center; justify-content:center; cursor:pointer;
+  box-shadow:0 2px 8px rgba(0,0,0,.12); font-size:15px; line-height:1;
+  opacity:0; transform:translateY(4px); pointer-events:none;
+  transition:opacity .15s ease, transform .15s ease, background .15s ease;
+}
+.scroll-bottom-btn:hover{background:var(--accent-soft)}
+.scroll-bottom-btn:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.scroll-bottom-btn.visible{opacity:1; transform:translateY(0); pointer-events:auto}
+@media (max-width:880px){ .scroll-bottom-btn{right:14px; bottom:14px} }
+
+.rail-toggle{display:none}
+@media (max-width:880px){
+  .shell{flex-direction:column; align-items:stretch; padding:0}
+  .rail{
+    position:sticky; top:0; z-index:5; width:100%; flex:1 1 auto; height:auto; max-height:none;
+    border-right:none; border-bottom:1px solid var(--border); background:var(--bg); padding:12px 16px;
+  }
+  .rail-brand{display:none}
+  .rail nav{display:none}
+  .rail.open nav{display:flex; max-height:60vh; overflow-y:auto; margin-top:8px}
+  .rail-toggle{
+    display:flex; justify-content:space-between; align-items:center; width:100%; background:none; border:none;
+    color:var(--text); font-family:inherit; font-size:14px; font-weight:600; padding:4px 0; cursor:pointer;
+  }
+  .search-wrap{padding:8px 0 0}
+  main{padding:24px 16px 60px}
+  .hero h1{font-size:26px}
+  .tips-grid{gap:18px}
+
+  /* Reference tables become stacked cards instead of a squeezed, horizontally
+     scrolling grid — the 3-column layout has no room on a phone screen. */
+  .wrap-tbl{overflow-x:visible}
+  table.ref{border:1px solid var(--border); border-radius:10px; overflow:hidden}
+  table.ref thead{display:none}
+  table.ref, table.ref tbody, table.ref tr, table.ref td{display:block; width:auto}
+  table.ref tr{padding:12px 14px; border-bottom:1px solid var(--border)}
+  table.ref tr:last-child{border-bottom:none}
+  table.ref td{padding:0; border-bottom:none; white-space:normal !important}
+  table.ref td + td{margin-top:8px}
+  table.ref td.concept, table.ref td.usecase, table.ref td.src{width:auto}
+  table.ref td.concept{font-size:15px}
+  table.ref td.usecase{font-size:13.8px}
+  table.ref td.src{display:flex; flex-wrap:wrap; gap:4px; font-size:13.8px}
+  table.ref:not(.kw-table) td::before{
+    display:block; font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin-bottom:3px;
+  }
+  table.ref:not(.kw-table) td:nth-of-type(2)::before{content:"Là gì / Use case"}
+  table.ref:not(.kw-table) td:nth-of-type(3)::before{content:"Nguồn"}
+  .kw-table tr{padding:10px 14px}
+  .kw-table td + td{margin-top:4px}
+
+  .trap{flex-direction:column; gap:8px}
+  .trap .src{padding-top:0}
+}
+
+@media print{
+  :root{
+    --bg:#ffffff; --surface:#ffffff; --surface-alt:#f2f3f1; --text:#182029; --muted:#5c6670;
+    --border:#c9cfca; --accent:#1f6f78; --accent-ink:#0f4a51; --accent-soft:#e4f1f1;
+    --warn:#a15a1f; --warn-soft:#f7ecdf; --warn-border:#e3c49a;
+    --good:#3c7a4e; --good-soft:#e9f3ea;
+    --code-bg:#eef1f5; --code-text:#2c3b45; --mark-bg:#fff1b8;
+  }
+  @page{ size:A4 landscape; margin:14mm 12mm; }
+  html{scroll-behavior:auto}
+  body{font-size:11.5px}
+  .rail{display:none}
+  .shell{display:block; max-width:none; padding:0}
+  main{max-width:none; padding:0}
+  section.mod, .trap, table.ref tr{break-inside:avoid}
+  .mod-head{break-after:avoid}
+  a{color:var(--text); text-decoration:none}
+  .howto{break-inside:avoid}
+  details.gloss .gloss-body{display:block !important}
+  details.gloss summary::before{content:"▾"}
+  .tips-grid{grid-template-columns:1fr 1fr}
+  .scroll-bottom-btn{display:none}
+}
+</style>
+</head>
+
+<body>
+<div class="shell">
+  <aside class="rail" id="rail">
+    <button class="rail-toggle" id="railToggle" aria-expanded="false">
+      <span>☰ Mục lục &amp; tìm kiếm</span><span aria-hidden="true">▾</span>
+    </button>
+    <div class="rail-brand"><span class="mark">CCAR</span><strong>Bản đồ ôn tập</strong></div>
+    <div class="search-wrap">
+      <input id="filter" type="text" placeholder="Tìm khái niệm, bẫy, từ khóa…" autocomplete="off">
+      <div class="filter-status" id="filterStatus"></div>
+    </div>
+    <nav id="tocNav">
+      <div class="rail-group">Kiến thức theo chủ đề</div>
+      <a href="#m1"><span class="n">01</span>Chọn pattern: workflow, agent &amp; subagent</a>
+      <a href="#m2"><span class="n">02</span>Prompt engineering &amp; chẩn đoán lỗi</a>
+      <a href="#m3"><span class="n">03</span>Context window &amp; quản lý context</a>
+      <a href="#m4"><span class="n">04</span>Prompt caching</a>
+      <a href="#m5"><span class="n">05</span>RAG, chunking &amp; embedding</a>
+      <a href="#m6"><span class="n">06</span>Tool use &amp; tool catalogue</a>
+      <a href="#m7"><span class="n">07</span>Tích hợp: MCP, direct API &amp; A2A</a>
+      <a href="#m8"><span class="n">08</span>Claude Code: CLAUDE.md, settings, skill &amp; hook</a>
+      <a href="#m9"><span class="n">09</span>Model tier, effort &amp; chi phí</a>
+      <a href="#m10"><span class="n">10</span>API: stop_reason, streaming, batch &amp; retry</a>
+      <a href="#m11"><span class="n">11</span>Guardrails, bảo mật &amp; credential</a>
+      <a href="#m12"><span class="n">12</span>Human-in-the-loop &amp; oversight</a>
+      <a href="#m13"><span class="n">13</span>Tuân thủ, privacy &amp; AI có trách nhiệm</a>
+      <a href="#m14"><span class="n">14</span>Evaluation, success criteria &amp; A/B test</a>
+      <a href="#m15"><span class="n">15</span>Observability &amp; monitoring</a>
+      <a href="#m16"><span class="n">16</span>Discovery, stakeholder &amp; vòng đời</a>
+      <div class="rail-group">Bẫy &amp; ghi nhớ</div>
+      <a href="#traps"><span class="n">⚠</span>Kiến thức bẫy</a>
+      <a href="#remember"><span class="n">★</span>Cần nhớ &amp; mẹo học</a>
+      <a href="#gloss"><span class="n">§</span>Viết tắt &amp; thuật ngữ</a>
+    </nav>
+  </aside>
+
+  <main>
+    <div class="hero">
+      <div class="eyebrow">Tổng hợp chéo 3 quiz · Claude Certified Architect – Professional (CCAR-P)</div>
+      <h1>Bản đồ kiến thức Claude Architect</h1>
+      <p>Gộp và khử trùng lặp phần "Kiến thức cần nhớ" của 3 quiz (3 × 63 = 189 câu gốc) thành một tài liệu theo chủ đề. Mỗi mục ghi nguồn quiz·câu để tra ngược.</p>
+      <div class="stats">
+        <div class="stat"><b>16</b><span>Chủ đề</span></div>
+        <div class="stat"><b>188</b><span>Khái niệm</span></div>
+        <div class="stat"><b>29</b><span>Kiến thức bẫy</span></div>
+        <div class="stat"><b>3</b><span>Quiz nguồn</span></div>
+      </div>
+      <div class="howto"><b>Cách đọc mã nguồn:</b> mỗi thẻ như <span class="mono">2·Q21</span> nghĩa là <b>Quiz 2, câu Q21</b> (mã tham chiếu ổn định trong app, không đổi khi đề bị xáo trộn thứ tự). Gõ vào ô tìm kiếm bên trái để lọc theo tên khái niệm, tham số, từ khóa hoặc bất cứ chữ nào trên trang.</div>
+    </div>
+
+    <!-- ============ 1. CHỌN PATTERN: WORKFLOW, AGENT & SUBAGENT ============ -->
+    <section class="mod" id="m1">
+      <div class="mod-head"><span class="n">01</span><h2>Chọn pattern: workflow, agent &amp; subagent</h2></div>
+      <p class="mod-desc">Chọn mẫu đơn giản nhất đủ dùng; mỗi bậc phức tạp hơn phải có lý do trong đề.</p>
+      <div class="wrap-tbl"><table class="ref">
+        <thead><tr><th>Khái niệm</th><th>Là gì / Use case phổ biến</th><th>Xuất hiện trong quiz</th></tr></thead>
+        <tbody>
+          <tr><td class="concept">Augmented LLM (một call)</td><td class="usecase">Một biến đổi, yêu cầu ổn định → một call kèm context → đề "requirements are stable", "catalog note".</td><td class="src"><span class="tag">3·Q10</span></td></tr>
+          <tr><td class="concept">Giữ một call khi đang đạt</td><td class="usecase">Đạt quality và latency thì giữ; chỉ tách khi cần quan sát, kiểm soát → đề "đề xuất tách 5 call".</td><td class="src"><span class="tag">2·Q9</span></td></tr>
+          <tr><td class="concept">Workflow vs agent</td><td class="usecase">Workflow theo code path định trước; agent tự điều hướng khi bước không đoán trước → task cố định chọn workflow.</td><td class="src"><span class="tag">1·Q7,Q18</span></td></tr>
+          <tr><td class="concept">Prompt chaining</td><td class="usecase">Bước cố định, output trước vào bước sau, có điểm dừng duyệt → đề "duyệt từng bước", draft → review → refine.</td><td class="src"><span class="tag">1·Q55,Q56</span><span class="tag">2·Q25,Q60,Q63</span></td></tr>
+          <tr><td class="concept">Chia chain theo subtask</td><td class="usecase">extract → eligibility → merit → draft, mỗi bước xử lý cả hồ sơ; không chia theo kích thước chunk.</td><td class="src"><span class="tag">3·Q49</span></td></tr>
+          <tr><td class="concept">Một call quá tải</td><td class="usecase">Bỏ sót subtask, suy luận nông dần → chia nhỏ, chain call, truyền structured output.</td><td class="src"><span class="tag">1·Q56</span></td></tr>
+          <tr><td class="concept">Self-correction thành call riêng</td><td class="usecase">Log/eval từng stage, rẽ nhánh theo verdict; tốn token hơn, không đảm bảo đúng.</td><td class="src"><span class="tag">2·Q25</span></td></tr>
+          <tr><td class="concept">Routing</td><td class="usecase">Phân loại trước, mỗi category prompt/tool/model riêng → đề "tune một loại làm hỏng loại khác".</td><td class="src"><span class="tag">2·Q29,Q60</span></td></tr>
+          <tr><td class="concept">Parallel – sectioning</td><td class="usecase">Subtask độc lập, biết trước, chạy song song → đề "giảm latency", "4 check độc lập, turnaround".</td><td class="src"><span class="tag">1·Q18,Q28</span><span class="tag">3·Q48</span></td></tr>
+          <tr><td class="concept">Parallel – voting</td><td class="usecase">Chạy cùng task nhiều lần để tăng tin cậy, không chia việc → đề "phán quyết không nhất quán".</td><td class="src"><span class="tag">1·Q18,Q28</span><span class="tag">2·Q1</span><span class="tag">3·Q48</span></td></tr>
+          <tr><td class="concept">Parallel lãng phí</td><td class="usecase">Chạy mọi handler cho input đã phân loại được là lãng phí → chọn routing.</td><td class="src"><span class="tag">2·Q29,Q60,Q63</span></td></tr>
+          <tr><td class="concept">Orchestrator-workers</td><td class="usecase">Subtask chỉ lộ ra lúc chạy → đề "số file không biết trước"; việc cố định thì là overhead.</td><td class="src"><span class="tag">1·Q39</span><span class="tag">2·Q63</span><span class="tag">3·Q10,Q48</span></td></tr>
+          <tr><td class="concept">Evaluator-optimizer</td><td class="usecase">Rubric rõ + sửa theo critique tốt hơn đo được; giới hạn số vòng → đề "bản nháp đầu hay hụt".</td><td class="src"><span class="tag">1·Q7</span><span class="tag">2·Q1</span></td></tr>
+          <tr><td class="concept">Agent tự trị có giới hạn</td><td class="usecase">Số bước không biết trước → cap iteration + checkpoint người duyệt → đề "keep iterating", "lặp mãi tốn tiền".</td><td class="src"><span class="tag">3·Q1,Q41</span></td></tr>
+          <tr><td class="concept">Chia việc LLM vs code</td><td class="usecase">LLM hiểu văn bản tự do, soạn thư; code làm số học, rule khớp cố định.</td><td class="src"><span class="tag">1·Q62</span></td></tr>
+          <tr><td class="concept">Khi nào dùng subagent</td><td class="usecase">Việc song song độc lập hoặc khám phá rộng, chỉ trả tóm tắt; bước tuần tự phụ thuộc thì làm trực tiếp.</td><td class="src"><span class="tag">1·Q46</span><span class="tag">2·Q24,Q48</span><span class="tag">3·Q44,Q62</span></td></tr>
+          <tr><td class="concept">Subagent không thừa kế history</td><td class="usecase">Chép toàn bộ history vào subagent là mất lợi ích cô lập, tốn token gấp đôi.</td><td class="src"><span class="tag">3·Q44,Q62</span></td></tr>
+          <tr><td class="concept">Messages API vs Managed Agents</td><td class="usecase">Messages API khi cần loop tùy biến, kiểm soát chi tiết; Managed Agents cho task dài, bất đồng bộ.</td><td class="src"><span class="tag">3·Q18</span></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- ============ 2. PROMPT ENGINEERING & CHẨN ĐOÁN LỖI ============ -->
+    <section class="mod" id="m2">
+      <div class="mod-head"><span class="n">02</span><h2>Prompt engineering &amp; chẩn đoán lỗi</h2></div>
+      <p class="mod-desc">Phân loại lỗi trước (prompt, hallucination, model), rồi mới chọn cách sửa.</p>
+      <div class="wrap-tbl"><table class="ref">
+        <thead><tr><th>Khái niệm</th><th>Là gì / Use case phổ biến</th><th>Xuất hiện trong quiz</th></tr></thead>
+        <tbody>
+          <tr><td class="concept">Few-shot (multishot)</td><td class="usecase">3–5 ví dụ sát use case, đa dạng, phủ edge case, bọc trong <code>&lt;example&gt;</code>; một ví dụ là quá hẹp.</td><td class="src"><span class="tag">1·Q1</span></td></tr>
+          <tr><td class="concept">Ví dụ gần giống hệt nhau</td><td class="usecase">Model bắt chước cả chi tiết ngẫu nhiên → đa dạng hóa ví dụ.</td><td class="src"><span class="tag">1·Q1</span></td></tr>
+          <tr><td class="concept">XML tag</td><td class="usecase">Bọc instructions, context, examples, input riêng → đề "Claude làm theo text trong ví dụ".</td><td class="src"><span class="tag">3·Q6</span></td></tr>
+          <tr><td class="concept">Rule ≠ data</td><td class="usecase">Bọc input người dùng trong thẻ riêng, ghi rõ là dữ liệu → đề "chỉ dẫn trong tin nhắn khách ghi đè".</td><td class="src"><span class="tag">1·Q3</span></td></tr>
+          <tr><td class="concept">Trust hierarchy</td><td class="usecase">System prompt có quyền chỉ dẫn, tool result là dữ liệu → chuyển chỉ dẫn từ tool output vào system prompt.</td><td class="src"><span class="tag">3·Q19</span></td></tr>
+          <tr><td class="concept">Tách suy luận khỏi kết luận</td><td class="usecase">Reasoning và verdict ở hai thẻ riêng → giữ độ chính xác CoT, parser vẫn đọc được.</td><td class="src"><span class="tag">1·Q35</span></td></tr>
+          <tr><td class="concept">Nêu lý do của rule</td><td class="usecase">"Output được đọc bằng TTS" giúp tổng quát hóa; liệt kê ký hiệu cấm là whack-a-mole.</td><td class="src"><span class="tag">1·Q50</span><span class="tag">2·Q8</span></td></tr>
+          <tr><td class="concept">Over-prompting sau migration</td><td class="usecase">Model mới nghe system prompt hơn → đổi "CRITICAL: You MUST" thành "Use this tool when...".</td><td class="src"><span class="tag">2·Q53</span></td></tr>
+          <tr><td class="concept">Nhấn mạnh in hoa</td><td class="usecase">Chỉ đổi độ nổi bật, không đổi phạm vi; chồng lệnh cấm đối nghịch tạo mâu thuẫn.</td><td class="src"><span class="tag">2·Q8,Q53</span></td></tr>
+          <tr><td class="concept">Chỉ dẫn mâu thuẫn</td><td class="usecase">Lúc ngắn lúc dài, model không đổi → audit system prompt nhiều người sửa.</td><td class="src"><span class="tag">2·Q50</span></td></tr>
+          <tr><td class="concept">Prefill</td><td class="usecase">4.6+ trả 400 → structured outputs hoặc nêu format trong system prompt.</td><td class="src"><span class="tag">3·Q9</span></td></tr>
+          <tr><td class="concept">Ba loại lỗi, ba cách sửa</td><td class="usecase">Prompt failure → sửa chỉ dẫn; hallucination → grounding; model mismatch → model mạnh hơn/tách task.</td><td class="src"><span class="tag">1·Q59</span><span class="tag">2·Q50,Q59</span></td></tr>
+          <tr><td class="concept">Chẩn đoán trước khi sửa</td><td class="usecase">Đọc mẫu output lỗi cạnh input để phân loại rồi mới chọn remedy.</td><td class="src"><span class="tag">2·Q33,Q59</span></td></tr>
+          <tr><td class="concept">Hallucination</td><td class="usecase">Chỉ trả lời từ tool result, cho phép "không tìm thấy"; grounding chỉ giảm → đề "bịa số đăng ký".</td><td class="src"><span class="tag">1·Q58</span><span class="tag">2·Q45</span><span class="tag">3·Q58</span></td></tr>
+          <tr><td class="concept">Temperature</td><td class="usecase">Chỉ đổi độ ngẫu nhiên, không đổi grounding, format, độ sâu suy luận → gần như luôn là đáp án nhiễu.</td><td class="src"><span class="tag">1·Q3,Q35,Q58</span><span class="tag">2·Q10,Q43,Q45,Q57</span><span class="tag">3·Q9,Q20,Q47,Q58</span></td></tr>
+          <tr><td class="concept">Prompt leak</td><td class="usecase">System prompt có thể lộ; chống leak làm giảm chất lượng → bí mật để sau tool/server.</td><td class="src"><span class="tag">3·Q11</span></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- ============ 3. CONTEXT WINDOW & QUẢN LÝ CONTEXT ============ -->
+    <section class="mod" id="m3">
+      <div class="mod-head"><span class="n">03</span><h2>Context window &amp; quản lý context</h2></div>
+      <p class="mod-desc">Muốn bớt context thì phải gửi ít token hơn; bảo model "bỏ qua" không gỡ token nào.</p>
+      <div class="wrap-tbl"><table class="ref">
+        <thead><tr><th>Khái niệm</th><th>Là gì / Use case phổ biến</th><th>Xuất hiện trong quiz</th></tr></thead>
+        <tbody>
+          <tr><td class="concept">Messages API stateless</td><td class="usecase">Mỗi request gửi lại toàn bộ history; window lớn, caching, thinking không làm server nhớ.</td><td class="src"><span class="tag">1·Q40</span><span class="tag">2·Q5,Q56</span></td></tr>
+          <tr><td class="concept">Context rot</td><td class="usecase">Token càng nhiều, accuracy/recall càng giảm dù chưa chạm giới hạn → "vừa window" không có nghĩa là không hại.</td><td class="src"><span class="tag">1·Q14</span></td></tr>
+          <tr><td class="concept">Bảo bỏ qua ≠ gỡ khỏi context</td><td class="usecase">Token vẫn chiếm window, vẫn gây context rot → sửa cấu hình nạp, không sửa lời dặn.</td><td class="src"><span class="tag">3·Q16,Q22,Q31</span></td></tr>
+          <tr><td class="concept">Prompt too long</td><td class="usecase">Gửi ít token hơn: retrieval, compaction, context editing; thêm breakpoint/TTL 1 giờ không giúp.</td><td class="src"><span class="tag">1·Q13</span></td></tr>
+          <tr><td class="concept">Server-side compaction</td><td class="usecase">Tóm tắt lượt cũ để hội thoại chạy tiếp quá giới hạn mà giữ quyết định.</td><td class="src"><span class="tag">2·Q23,Q51</span></td></tr>
+          <tr><td class="concept">Context editing / tool result clearing</td><td class="usecase">Server xóa tool result cũ, giữ nguyên message → đề "tool result cũ đầy window".</td><td class="src"><span class="tag">2·Q23,Q51</span><span class="tag">3·Q16</span></td></tr>
+          <tr><td class="concept"><code>/clear</code> trong Claude Code</td><td class="usecase">Đổi sang việc không liên quan → context mới; khám phá rộng giao subagent.</td><td class="src"><span class="tag">2·Q24</span></td></tr>
+          <tr><td class="concept"><code>max_tokens</code></td><td class="usecase">Trần độ dài một response; không mở rộng window, không giữ history.</td><td class="src"><span class="tag">2·Q23,Q24,Q54</span></td></tr>
+          <tr><td class="concept">Token counting API</td><td class="usecase">Đếm input trước khi gửi, miễn phí → đề "prompt too long, phát hiện trước"; ~4 ký tự/token sai gần ngưỡng.</td><td class="src"><span class="tag">3·Q42</span></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- ============ 4. PROMPT CACHING ============ -->
+    <section class="mod" id="m4">
+      <div class="mod-head"><span class="n">04</span><h2>Prompt caching</h2></div>
+      <p class="mod-desc">Caching chỉ giảm chi phí và độ trễ của prefix lặp; không giảm token trong window.</p>
+      <div class="wrap-tbl"><table class="ref">
+        <thead><tr><th>Khái niệm</th><th>Là gì / Use case phổ biến</th><th>Xuất hiện trong quiz</th></tr></thead>
+        <tbody>
+          <tr><td class="concept">Caching ≠ tiết kiệm window</td><td class="usecase">Token cache vẫn tính đủ vào window, attention như nhau → đề "cache cả prefix thay vì load theo nhu cầu".</td><td class="src"><span class="tag">1·Q13,Q46</span><span class="tag">2·Q41,Q51,Q56</span><span class="tag">3·Q8,Q16</span></td></tr>
+          <tr><td class="concept">Prefix lặp lại lớn</td><td class="usecase">Nội dung ổn định lên đầu rồi cache → giảm cả TTFT lẫn chi phí input.</td><td class="src"><span class="tag">1·Q33</span></td></tr>
+          <tr><td class="concept">Cache + nạp theo nhu cầu</td><td class="usecase">Cache rule chung, chỉ nạp guide cần cho request; cache không xóa token thừa.</td><td class="src"><span class="tag">1·Q37</span><span class="tag">2·Q41</span></td></tr>
+          <tr><td class="concept">Thứ tự prefix</td><td class="usecase">tools → system → messages; sửa tool làm miss mọi segment sau → chốt tool definitions trước.</td><td class="src"><span class="tag">2·Q18</span></td></tr>
+          <tr><td class="concept">Điều kiện cache hit</td><td class="usecase">Prefix giống 100% tới breakpoint, không so khớp tương tự, còn trong lifetime.</td><td class="src"><span class="tag">2·Q46</span></td></tr>
+          <tr><td class="concept">Cache được mọi tầng</td><td class="usecase">Tools, system, user và assistant turn đều cache được, không chỉ system.</td><td class="src"><span class="tag">2·Q41,Q46</span></td></tr>
+          <tr><td class="concept">Cache pre-warming</td><td class="usecase">Gửi warm-up trước khi traffic trở lại; TTL 5 phút/1 giờ; breakpoint không kéo dài TTL.</td><td class="src"><span class="tag">3·Q35</span></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- ============ 5. RAG, CHUNKING & EMBEDDING ============ -->
+    <section class="mod" id="m5">
+      <div class="mod-head"><span class="n">05</span><h2>RAG, chunking &amp; embedding</h2></div>
+      <p class="mod-desc">Hỏi lỗi nằm ở tầng nào: input, index, retrieval hay ranking — sửa đúng tầng đó.</p>
+      <div class="wrap-tbl"><table class="ref">
+        <thead><tr><th>Khái niệm</th><th>Là gì / Use case phổ biến</th><th>Xuất hiện trong quiz</th></tr></thead>
+        <tbody>
+          <tr><td class="concept">Corpus nhỏ, ít đổi</td><td class="usecase">Vài trăm trang → đưa nguyên vào prompt + cache prefix; chưa cần RAG.</td><td class="src"><span class="tag">1·Q19</span></td></tr>
+          <tr><td class="concept">Thang retrieval</td><td class="usecase">Full context → chunk vector search → hybrid BM25 + embedding + rerank; leo khi dữ liệu buộc.</td><td class="src"><span class="tag">1·Q19</span></td></tr>
+          <tr><td class="concept">Metadata filter</td><td class="usecase">Lọc theo thuộc tính phân loại trước khi xếp hạng → đề "tài liệu gần giống, khác mẫu/loại".</td><td class="src"><span class="tag">1·Q38</span></td></tr>
+          <tr><td class="concept">RAG thời gian thực</td><td class="usecase">Cắt passage không liên quan + giảm effort cho câu đơn giản sau khi eval.</td><td class="src"><span class="tag">1·Q51</span></td></tr>
+          <tr><td class="concept">Contextual Retrieval</td><td class="usecase">Thêm 50–100 token ngữ cảnh mỗi chunk trước embed và BM25 → đề "chunk không biết công ty/kỳ nào".</td><td class="src"><span class="tag">2·Q7</span></td></tr>
+          <tr><td class="concept">Embedding dilution</td><td class="usecase">Một vector cho cả tài liệu nhiều chủ đề hoặc chunk lớn → chia chunk theo chủ đề.</td><td class="src"><span class="tag">2·Q17</span><span class="tag">3·Q13,Q21</span></td></tr>
+          <tr><td class="concept">Chunk overlap</td><td class="usecase">Chunk cố định cắt giữa điều khoản → thêm overlap để đoạn qua ranh giới nằm nguyên.</td><td class="src"><span class="tag">3·Q13</span></td></tr>
+          <tr><td class="concept">Small-to-big</td><td class="usecase">Khớp chunk nhỏ, đưa parent section cho model → đề "tìm đúng đoạn nhưng trả lời nông".</td><td class="src"><span class="tag">3·Q21</span></td></tr>
+          <tr><td class="concept">Đổi embedding model</td><td class="usecase">Vector khác model khác không gian → re-embed toàn bộ corpus → đề "tài liệu cũ tụt hạng".</td><td class="src"><span class="tag">2·Q34</span></td></tr>
+          <tr><td class="concept">Embedding chuyên ngành</td><td class="usecase">Thuật ngữ pháp lý biểu diễn kém → model như <code>voyage-law-2</code>, re-index toàn bộ.</td><td class="src"><span class="tag">3·Q57</span></td></tr>
+          <tr><td class="concept">Hybrid BM25 + embedding</td><td class="usecase">Identifier chính xác (số hiệu, citation) → thêm BM25 lexical.</td><td class="src"><span class="tag">3·Q57</span></td></tr>
+          <tr><td class="concept">Reranker</td><td class="usecase">Recall ổn, thứ tự sai → chấm lại 20 ứng viên, lấy top 5; đổi lại thêm latency.</td><td class="src"><span class="tag">2·Q39</span></td></tr>
+          <tr><td class="concept">Similarity score / threshold</td><td class="usecase">Không phải độ liên quan đã hiệu chỉnh; hạ threshold, lấy thêm chunk chỉ thêm nhiễu.</td><td class="src"><span class="tag">2·Q34,Q39</span><span class="tag">3·Q13,Q21,Q57</span></td></tr>
+          <tr><td class="concept">Sửa đúng tầng index</td><td class="usecase">Lỗi ở index thì sửa lúc index; làm giàu sau retrieval là quá muộn.</td><td class="src"><span class="tag">2·Q7,Q17</span></td></tr>
+          <tr><td class="concept">Tầng input</td><td class="usecase">Chuẩn hóa nguồn (scan, email, spreadsheet) về cấu trúc thống nhất + validate, flag input hỏng.</td><td class="src"><span class="tag">2·Q54</span></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- ============ 6. TOOL USE & TOOL CATALOGUE ============ -->
+    <section class="mod" id="m6">
+      <div class="mod-head"><span class="n">06</span><h2>Tool use &amp; tool catalogue</h2></div>
+      <p class="mod-desc">Claude chỉ yêu cầu tool, app thực thi; catalogue càng gọn, chọn tool càng chuẩn.</p>
+      <div class="wrap-tbl"><table class="ref">
+        <thead><tr><th>Khái niệm</th><th>Là gì / Use case phổ biến</th><th>Xuất hiện trong quiz</th></tr></thead>
+        <tbody>
+          <tr><td class="concept">Vòng tool use</td><td class="usecase"><code>tool_use</code> → app chạy → <code>tool_result</code>; chỉ server tool (web search, code execution) chạy ở Anthropic.</td><td class="src"><span class="tag">2·Q5</span></td></tr>
+          <tr><td class="concept">Người duyệt từ chối tool</td><td class="usecase">Trả <code>tool_result</code> báo bị từ chối để model đổi hướng; không bịa success, không xóa history.</td><td class="src"><span class="tag">2·Q15</span></td></tr>
+          <tr><td class="concept">Progressive discovery / tool search</td><td class="usecase">Catalogue lớn, mỗi request dùng ít tool → nạp theo nhu cầu → đề "60 tool, chỉ vài cái liên quan".</td><td class="src"><span class="tag">1·Q14</span><span class="tag">2·Q48</span></td></tr>
+          <tr><td class="concept">Discovery ≠ mặc định</td><td class="usecase">Ít tool, dùng mọi request, vừa context → nạp hết từ đầu; discovery chỉ thêm bước.</td><td class="src"><span class="tag">1·Q10</span></td></tr>
+          <tr><td class="concept">Tải tool lai</td><td class="usecase">Vài tool dùng thường nạp sẵn, đuôi dài discover on demand → đề "5 tool dùng nhiều".</td><td class="src"><span class="tag">3·Q8</span></td></tr>
+          <tr><td class="concept">Capability bloat</td><td class="usecase">Gộp tool trùng thành bộ nhỏ, gate đăng ký tool mới → đề "4 tool tìm chuyến bay", "15 thành 70".</td><td class="src"><span class="tag">1·Q22</span><span class="tag">2·Q52</span></td></tr>
+          <tr><td class="concept">Audit bloat</td><td class="usecase">Tìm tool không bao giờ được gọi + đo tỷ lệ window tool definitions chiếm.</td><td class="src"><span class="tag">1·Q27</span></td></tr>
+          <tr><td class="concept">Một tool/proxy free-text chung</td><td class="usecase">Anti-pattern: mất typed interface, khó validate, audit, che việc chọn tool.</td><td class="src"><span class="tag">1·Q22</span><span class="tag">2·Q48,Q52</span><span class="tag">3·Q31</span></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- ============ 7. TÍCH HỢP: MCP, DIRECT API & A2A ============ -->
+    <section class="mod" id="m7">
+      <div class="mod-head"><span class="n">07</span><h2>Tích hợp: MCP, direct API &amp; A2A</h2></div>
+      <p class="mod-desc">Đếm consumer và ranh giới tổ chức: một job tất định → API; nhiều app → MCP; hai tổ chức → A2A.</p>
+      <div class="wrap-tbl"><table class="ref">
+        <thead><tr><th>Khái niệm</th><th>Là gì / Use case phổ biến</th><th>Xuất hiện trong quiz</th></tr></thead>
+        <tbody>
+          <tr><td class="concept">Direct API</td><td class="usecase">Một team, một consumer, đường gọi tất định trong pipeline mình sở hữu → đề "job chuyển dữ liệu theo lịch".</td><td class="src"><span class="tag">1·Q6</span><span class="tag">2·Q55</span><span class="tag">3·Q3,Q17</span></td></tr>
+          <tr><td class="concept">MCP server</td><td class="usecase">Nhiều app hiện tại/tương lai dùng chung tool, team chủ quản bảo trì một chỗ → đề "current and future applications".</td><td class="src"><span class="tag">1·Q6,Q45</span><span class="tag">2·Q55</span><span class="tag">3·Q3,Q17</span></td></tr>
+          <tr><td class="concept">Agent-to-agent (A2A)</td><td class="usecase">Agent tự chủ của hai tổ chức thương lượng động → đề "without exposing internal systems".</td><td class="src"><span class="tag">1·Q6,Q45</span><span class="tag">3·Q3,Q17</span></td></tr>
+          <tr><td class="concept">MCP connector</td><td class="usecase">Chỉ tới server public qua HTTP; server stdio nội bộ cần MCP client chạy trong app.</td><td class="src"><span class="tag">1·Q45</span></td></tr>
+          <tr><td class="concept">MCP connector allowlist</td><td class="usecase">Chỉ bật tool cần dùng; mỗi definition tốn input token → đề "40 tools, uses five".</td><td class="src"><span class="tag">3·Q31</span></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- ============ 8. CLAUDE CODE: CLAUDE.MD, SETTINGS, SKILL & HOOK ============ -->
+    <section class="mod" id="m8">
+      <div class="mod-head"><span class="n">08</span><h2>Claude Code: CLAUDE.md, settings, skill &amp; hook</h2></div>
+      <p class="mod-desc">CLAUDE.md định hướng; hook và permission rule mới ép buộc.</p>
+      <div class="wrap-tbl"><table class="ref">
+        <thead><tr><th>Khái niệm</th><th>Là gì / Use case phổ biến</th><th>Xuất hiện trong quiz</th></tr></thead>
+        <tbody>
+          <tr><td class="concept">CLAUDE.md là advisory</td><td class="usecase">Định hướng, không ép; permission rule ép tool, không truyền chuẩn code.</td><td class="src"><span class="tag">2·Q11,Q35</span></td></tr>
+          <tr><td class="concept">Managed CLAUDE.md</td><td class="usecase">Thư mục policy OS qua MDM/Group Policy; mọi session, không opt-out → đề "mọi máy, không opt-out".</td><td class="src"><span class="tag">2·Q11</span></td></tr>
+          <tr><td class="concept">CLAUDE.md phình to</td><td class="usecase">Giữ rule áp dụng rộng; workflow thỉnh thoảng dùng chuyển sang skill → đề "CLAUDE.md dài, rule bị lờ".</td><td class="src"><span class="tag">3·Q22,Q54</span></td></tr>
+          <tr><td class="concept">Skill description</td><td class="usecase">Nêu làm gì và khi nào dùng; chỉ name + description nạp sẵn → đề "Skill hiếm được gọi".</td><td class="src"><span class="tag">3·Q28</span></td></tr>
+          <tr><td class="concept">Phạm vi subagent</td><td class="usecase">Chung commit <code>.claude/agents/</code>; cá nhân <code>~/.claude/agents/</code>; project thắng khi trùng tên.</td><td class="src"><span class="tag">3·Q30</span></td></tr>
+          <tr><td class="concept">Settings theo scope</td><td class="usecase">Managed trên mọi scope; project local riêng máy, git ignore, đè shared project.</td><td class="src"><span class="tag">3·Q60</span></td></tr>
+          <tr><td class="concept">MCP project scope</td><td class="usecase"><code>.mcp.json</code> commit vào repo, hỗ trợ <code>${VAR}</code>, hỏi duyệt trước khi dùng; user/local scope dễ drift.</td><td class="src"><span class="tag">2·Q35</span></td></tr>
+          <tr><td class="concept">Hook <code>PostToolUse</code></td><td class="usecase">Matcher <code>Edit|Write</code> chạy formatter sau mỗi edit thành công; không phủ lệnh Bash.</td><td class="src"><span class="tag">1·Q2</span></td></tr>
+          <tr><td class="concept">Permission deny rule</td><td class="usecase">Client ép buộc, deny xét trước allow; đặt trong project settings đã commit.</td><td class="src"><span class="tag">1·Q31</span></td></tr>
+          <tr><td class="concept">Check chạy được</td><td class="usecase">Cho test suite để Claude Code lặp tới khi pass, giảm giám sát tay.</td><td class="src"><span class="tag">1·Q44</span></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- ============ 9. MODEL TIER, EFFORT & CHI PHÍ ============ -->
+    <section class="mod" id="m9">
+      <div class="mod-head"><span class="n">09</span><h2>Model tier, effort &amp; chi phí</h2></div>
+      <p class="mod-desc">Đòn rẻ trước: effort trước tier, rút output trước đổi model, chọn tier rẻ nhất đạt chuẩn.</p>
+      <div class="wrap-tbl"><table class="ref">
+        <thead><tr><th>Khái niệm</th><th>Là gì / Use case phổ biến</th><th>Xuất hiện trong quiz</th></tr></thead>
+        <tbody>
+          <tr><td class="concept">Capability-first</td><td class="usecase">Suy luận phức tạp bắt đầu bằng standard-tier mạnh; lên frontier chỉ khi eval cho thấy thiếu.</td><td class="src"><span class="tag">2·Q6</span></td></tr>
+          <tr><td class="concept">Tăng effort trước khi đổi tier</td><td class="usecase">Effort điều độ sâu thinking, tool call, tự kiểm → đề "hụt sát target, frontier đắt gấp đôi".</td><td class="src"><span class="tag">2·Q10</span></td></tr>
+          <tr><td class="concept">Chọn tier theo eval</td><td class="usecase">Model rẻ nhất đạt chuẩn chất lượng, eval liên tục; so cost per completed task.</td><td class="src"><span class="tag">1·Q43</span></td></tr>
+          <tr><td class="concept">Ràng buộc thật của workload</td><td class="usecase">Job đêm dư latency → accuracy là ràng buộc, lên tier mạnh hơn.</td><td class="src"><span class="tag">1·Q25</span></td></tr>
+          <tr><td class="concept">Model mismatch</td><td class="usecase">Prompt đã tinh chỉnh kỹ vẫn suy luận nông → thử tier mạnh hơn và so kết quả.</td><td class="src"><span class="tag">1·Q59</span></td></tr>
+          <tr><td class="concept">Latency, cost do model quyết</td><td class="usecase">Sửa prompt hai sprint không đổi → thử tier rẻ hơn, chạy lại eval.</td><td class="src"><span class="tag">3·Q47</span></td></tr>
+          <tr><td class="concept">Routing theo độ khó</td><td class="usecase">Câu dễ sang Haiku/đường nhanh; thinking hoặc model mạnh chỉ cho nhánh khó.</td><td class="src"><span class="tag">2·Q13,Q47</span><span class="tag">3·Q40</span></td></tr>
+          <tr><td class="concept">Pipeline nhiều stage</td><td class="usecase">Screening khối lượng lớn dùng tier nhanh rẻ, adjudication quan trọng dùng tier mạnh.</td><td class="src"><span class="tag">2·Q13</span></td></tr>
+          <tr><td class="concept">Chia traffic ngẫu nhiên giữa tier</td><td class="usecase">Anti-pattern: hành vi không đoán được, không debug được.</td><td class="src"><span class="tag">2·Q6,Q10</span></td></tr>
+          <tr><td class="concept">Vision + tool use mọi tier</td><td class="usecase">Tier khác nhau ở suy luận, tốc độ, giá → eval tier nhỏ trước.</td><td class="src"><span class="tag">3·Q56</span></td></tr>
+          <tr><td class="concept">Model ID cố định</td><td class="usecase">Weights không đổi theo ID; nâng cấp là sự kiện migration có chủ đích.</td><td class="src"><span class="tag">3·Q20</span></td></tr>
+          <tr><td class="concept">Output đắt hơn input</td><td class="usecase">Output sinh tuần tự, giá cao → chỉ trả label → đề "vài đoạn giải thích trước label".</td><td class="src"><span class="tag">2·Q43</span></td></tr>
+          <tr><td class="concept">Thinking / CoT theo task</td><td class="usecase">Áp khi có lợi đo được: extraction đơn giản bỏ, phân tích fraud giữ.</td><td class="src"><span class="tag">2·Q47,Q57</span></td></tr>
+          <tr><td class="concept">Thinking token</td><td class="usecase">Tính như output, đếm vào <code>max_tokens</code>; streaming không rút ngắn pha thinking.</td><td class="src"><span class="tag">2·Q47,Q57</span></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- ============ 10. API: STOP_REASON, STREAMING, BATCH & RETRY ============ -->
+    <section class="mod" id="m10">
+      <div class="mod-head"><span class="n">10</span><h2>API: stop_reason, streaming, batch &amp; retry</h2></div>
+      <p class="mod-desc">HTTP 200 chưa chắc output đủ; mỗi cơ chế giải đúng một vấn đề.</p>
+      <div class="wrap-tbl"><table class="ref">
+        <thead><tr><th>Khái niệm</th><th>Là gì / Use case phổ biến</th><th>Xuất hiện trong quiz</th></tr></thead>
+        <tbody>
+          <tr><td class="concept"><code>stop_reason</code></td><td class="usecase"><code>max_tokens</code> = cắt ở trần output; kiểm trước khi forward → đề "cụt giữa câu, HTTP 200".</td><td class="src"><span class="tag">2·Q33</span><span class="tag">3·Q50</span></td></tr>
+          <tr><td class="concept">Input vượt context window</td><td class="usecase">API trả 400, không tự cắt → đếm token trước hoặc gửi ít hơn.</td><td class="src"><span class="tag">3·Q42</span></td></tr>
+          <tr><td class="concept">Streaming</td><td class="usecase">Token đầu đến sớm, giảm perceived latency; không giảm token, không rút ngắn thinking.</td><td class="src"><span class="tag">2·Q47,Q51</span><span class="tag">3·Q63</span></td></tr>
+          <tr><td class="concept">Lỗi giữa stream</td><td class="usecase">HTTP 200 rồi error event trong stream → xử lý và log event → đề "dashboard 200 OK, user thấy cắt".</td><td class="src"><span class="tag">1·Q20</span></td></tr>
+          <tr><td class="concept">Message Batches API</td><td class="usecase">Giảm 50%, tới 24 giờ, request độc lập → đề "nightly report", "250.000 tài liệu, không ai chờ".</td><td class="src"><span class="tag">1·Q41</span><span class="tag">2·Q32,Q43</span><span class="tag">3·Q32,Q59</span></td></tr>
+          <tr><td class="concept">Giới hạn của batch</td><td class="usecase">Không cho SLA tương tác, streaming, lượt phụ thuộc; không ZDR.</td><td class="src"><span class="tag">1·Q51,Q57</span><span class="tag">3·Q59</span></td></tr>
+          <tr><td class="concept">Retry một tầng</td><td class="usecase">SDK retry 2 lần, exponential backoff, theo <code>retry-after</code> → bỏ vòng retry tức thì của app.</td><td class="src"><span class="tag">3·Q61</span></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- ============ 11. GUARDRAILS, BẢO MẬT & CREDENTIAL ============ -->
+    <section class="mod" id="m11">
+      <div class="mod-head"><span class="n">11</span><h2>Guardrails, bảo mật &amp; credential</h2></div>
+      <p class="mod-desc">Bất biến đặt vào cơ chế tất định ngoài model; phòng ngừa thắng phát hiện.</p>
+      <div class="wrap-tbl"><table class="ref">
+        <thead><tr><th>Khái niệm</th><th>Là gì / Use case phổ biến</th><th>Xuất hiện trong quiz</th></tr></thead>
+        <tbody>
+          <tr><td class="concept">Hướng dẫn ≠ ép buộc</td><td class="usecase">Prompt/CLAUDE.md là advisory; bất biến đặt vào hook, permission, code → đề "thỉnh thoảng bỏ qua rule".</td><td class="src"><span class="tag">1·Q2,Q9,Q26,Q31</span></td></tr>
+          <tr><td class="concept">Least privilege tại tầng thực thi</td><td class="usecase">Tài khoản DB read-only chặn UPDATE dù bị prompt injection.</td><td class="src"><span class="tag">1·Q26</span></td></tr>
+          <tr><td class="concept">Least privilege lúc mint credential</td><td class="usecase">Thu hẹp rule WIF chỉ còn inference scope; endpoint admin trả 403.</td><td class="src"><span class="tag">2·Q2</span></td></tr>
+          <tr><td class="concept">Workload identity federation</td><td class="usecase">Đổi identity nền tảng lấy credential ngắn hạn → đề "Kubernetes, key dùng chung".</td><td class="src"><span class="tag">1·Q15</span><span class="tag">2·Q2</span></td></tr>
+          <tr><td class="concept">App Attest</td><td class="usecase">App iOS/macOS gọi thẳng Claude nhận token ngắn hạn theo workspace, không nhúng key.</td><td class="src"><span class="tag">1·Q48</span></td></tr>
+          <tr><td class="concept">Cô lập theo app</td><td class="usecase">Mỗi app một workspace, key scope theo workspace, spend/rate limit riêng.</td><td class="src"><span class="tag">2·Q58</span></td></tr>
+          <tr><td class="concept">TTL ngắn, rotate, log</td><td class="usecase">Chỉ thu hẹp cửa sổ hoặc phát hiện sau, không bỏ quyền thừa.</td><td class="src"><span class="tag">2·Q2,Q58</span></td></tr>
+          <tr><td class="concept">Disable vs delete API key</td><td class="usecase">Disable đảo ngược được cho triage; delete vĩnh viễn; expiration cố định khi tạo.</td><td class="src"><span class="tag">3·Q33</span></td></tr>
+          <tr><td class="concept">Output filter</td><td class="usecase">Chặn nội dung bí mật trước khi tới user; không bắt được bản diễn đạt lại.</td><td class="src"><span class="tag">1·Q9</span></td></tr>
+          <tr><td class="concept">Guardrail tuyệt đối</td><td class="usecase">Filter inline trên đường giao + fail closed, timeout coi như từ chối → đề "never" + filter timeout.</td><td class="src"><span class="tag">2·Q30</span></td></tr>
+          <tr><td class="concept">Input screening</td><td class="usecase">Classifier chặn jailbreak trước model khi tool chạy giữa lượt.</td><td class="src"><span class="tag">3·Q52</span></td></tr>
+          <tr><td class="concept">Indirect prompt injection</td><td class="usecase">Red-team chỉ dẫn độc trong email bên ngoài mà agent đọc và có tool.</td><td class="src"><span class="tag">1·Q63</span></td></tr>
+          <tr><td class="concept">Agent có shell + input không tin cậy</td><td class="usecase">Người xác nhận lệnh phá hủy + sandbox filesystem/network.</td><td class="src"><span class="tag">2·Q12</span></td></tr>
+          <tr><td class="concept">Aggregate limit / circuit breaker</td><td class="usecase">Cap mỗi giao dịch không chặn số lượng → limit tổng trong hệ thống → đề "hàng nghìn lần".</td><td class="src"><span class="tag">3·Q12</span></td></tr>
+          <tr><td class="concept">Ngăn chặn vs phát hiện</td><td class="usecase">Log, audit, đối soát, review sau chỉ phát hiện → đề "trước khi", "never" thì loại.</td><td class="src"><span class="tag">1·Q8,Q15,Q26</span><span class="tag">2·Q2,Q12,Q28,Q30,Q58</span><span class="tag">3·Q5,Q12,Q52</span></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- ============ 12. HUMAN-IN-THE-LOOP & OVERSIGHT ============ -->
+    <section class="mod" id="m12">
+      <div class="mod-head"><span class="n">12</span><h2>Human-in-the-loop &amp; oversight</h2></div>
+      <p class="mod-desc">Mức kiểm soát của người theo khả năng đảo ngược, phạm vi tác động và trách nhiệm.</p>
+      <div class="wrap-tbl"><table class="ref">
+        <thead><tr><th>Khái niệm</th><th>Là gì / Use case phổ biến</th><th>Xuất hiện trong quiz</th></tr></thead>
+        <tbody>
+          <tr><td class="concept">Gate phê duyệt ở app</td><td class="usecase">Claude chỉ phát tool request, app thực thi → duyệt trước khi chạy.</td><td class="src"><span class="tag">1·Q8</span></td></tr>
+          <tr><td class="concept">Duyệt có ý nghĩa</td><td class="usecase">Hiện argument, đích, tác động; chỉ tên tool thì duyệt thành đóng dấu.</td><td class="src"><span class="tag">1·Q34</span></td></tr>
+          <tr><td class="concept">Gate theo đảo ngược + phạm vi</td><td class="usecase">Push, restart production cần xác nhận; sửa scratch, chạy test tự do.</td><td class="src"><span class="tag">2·Q16</span></td></tr>
+          <tr><td class="concept">Approval gate fail closed</td><td class="usecase">Không có người duyệt = từ chối → đề "không có reviewer ban đêm".</td><td class="src"><span class="tag">3·Q5</span></td></tr>
+          <tr><td class="concept">Oversight theo profile hành động</td><td class="usecase">Nhiều, rủi ro thấp, đảo ngược được → review mẫu ngẫu nhiên định kỳ.</td><td class="src"><span class="tag">3·Q14</span></td></tr>
+          <tr><td class="concept">Draft-and-review</td><td class="usecase">Claude soạn đề xuất, người có tên duyệt → giữ accountability.</td><td class="src"><span class="tag">3·Q37,Q58</span></td></tr>
+          <tr><td class="concept">Hallucination còn sót</td><td class="usecase">Grounding, citation chỉ giảm → giữ người duyệt output rủi ro cao.</td><td class="src"><span class="tag">2·Q45</span><span class="tag">3·Q58</span></td></tr>
+          <tr><td class="concept">Điểm dừng giữa các bước</td><td class="usecase">Prompt chaining tạo chỗ duyệt; extended thinking/subagent thì không.</td><td class="src"><span class="tag">1·Q55</span></td></tr>
+          <tr><td class="concept">Validate output tại ranh giới</td><td class="usecase">Kiểm hoàn chỉnh + schema trước handoff, retry hoặc gắn cờ.</td><td class="src"><span class="tag">1·Q5</span></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- ============ 13. TUÂN THỦ, PRIVACY & AI CÓ TRÁCH NHIỆM ============ -->
+    <section class="mod" id="m13">
+      <div class="mod-head"><span class="n">13</span><h2>Tuân thủ, privacy &amp; AI có trách nhiệm</h2></div>
+      <p class="mod-desc">Kiểm từng tính năng, từng môi trường; công bằng đo bằng outcome theo nhóm.</p>
+      <div class="wrap-tbl"><table class="ref">
+        <thead><tr><th>Khái niệm</th><th>Là gì / Use case phổ biến</th><th>Xuất hiện trong quiz</th></tr></thead>
+        <tbody>
+          <tr><td class="concept">GDPR erasure</td><td class="usecase">Xóa lan khắp log, retrieval index, analytics store; cần data lineage theo data subject.</td><td class="src"><span class="tag">1·Q12</span></td></tr>
+          <tr><td class="concept">Retention ≠ erasure</td><td class="usecase">Hết hạn tự động vẫn là đã lưu; erasure thực hiện ngay cho từng người.</td><td class="src"><span class="tag">1·Q12,Q57</span></td></tr>
+          <tr><td class="concept">ZDR theo từng tính năng</td><td class="usecase">Batch, Agent Skills lưu theo chính sách chuẩn → kiểm từng feature trước khi dùng.</td><td class="src"><span class="tag">1·Q57</span></td></tr>
+          <tr><td class="concept">HIPAA + structured outputs</td><td class="usecase">PHI chỉ trong message content, không trong schema (cache 24 giờ, ZDR không phủ).</td><td class="src"><span class="tag">2·Q4</span></td></tr>
+          <tr><td class="concept">FedRAMP / authorization</td><td class="usecase">Gắn với môi trường hosting → chọn platform đã cấp phép trước khi dữ liệu chảy qua.</td><td class="src"><span class="tag">2·Q28</span></td></tr>
+          <tr><td class="concept">Quyết định tự động hệ trọng</td><td class="usecase">Giải thích có ý nghĩa, cho khiếu nại, đường người xem xét → GDPR Article 22.</td><td class="src"><span class="tag">1·Q29</span><span class="tag">3·Q39</span></td></tr>
+          <tr><td class="concept">Transparency</td><td class="usecase">Công bố là AI + nêu giới hạn; version string, log nội bộ không phải transparency.</td><td class="src"><span class="tag">2·Q3</span></td></tr>
+          <tr><td class="concept">Fairness &amp; proxy variable</td><td class="usecase">Bỏ thuộc tính bảo vệ chưa đủ → đo kết quả theo nhóm nhân khẩu.</td><td class="src"><span class="tag">1·Q21</span></td></tr>
+          <tr><td class="concept">Khớp lịch sử ≠ công bằng</td><td class="usecase">94% agreement đo trung thành với quyết định có thể thiên lệch → audit + so outcome theo nhóm.</td><td class="src"><span class="tag">3·Q2</span></td></tr>
+          <tr><td class="concept">Bias từ base model</td><td class="usecase">Vẫn giảm ở tầng ứng dụng (prompt, ví dụ đa phương ngữ) rồi đo lại gap.</td><td class="src"><span class="tag">3·Q29</span></td></tr>
+          <tr><td class="concept">Fairness là vòng đời</td><td class="usecase">Theo dõi outcome theo nhóm + chạy lại eval khi model, prompt, data đổi.</td><td class="src"><span class="tag">2·Q20</span></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- ============ 14. EVALUATION, SUCCESS CRITERIA & A/B TEST ============ -->
+    <section class="mod" id="m14">
+      <div class="mod-head"><span class="n">14</span><h2>Evaluation, success criteria &amp; A/B test</h2></div>
+      <p class="mod-desc">Đo trước, đổi sau: tiêu chí đo được, eval set độc lập, một biến mỗi lần.</p>
+      <div class="wrap-tbl"><table class="ref">
+        <thead><tr><th>Khái niệm</th><th>Là gì / Use case phổ biến</th><th>Xuất hiện trong quiz</th></tr></thead>
+        <tbody>
+          <tr><td class="concept">Success criteria</td><td class="usecase">Cụ thể, đo được, có ngưỡng, phương pháp, tập test → ví dụ "&lt; 0,1% bị flag".</td><td class="src"><span class="tag">1·Q16</span></td></tr>
+          <tr><td class="concept">Tiêu chí đa chiều</td><td class="usecase">Mỗi yêu cầu (accuracy, latency, cost) một metric + threshold riêng, không gộp composite.</td><td class="src"><span class="tag">2·Q26,Q49</span></td></tr>
+          <tr><td class="concept">Ngưỡng achievable</td><td class="usecase">Không đặt 100%; dựa baseline/benchmark + đường escalate cho lỗi còn lại.</td><td class="src"><span class="tag">3·Q53</span></td></tr>
+          <tr><td class="concept">Metric hữu ích</td><td class="usecase">p95 &lt; 2 giây trên query đại diện; chi phí trung bình mỗi request hoàn tất.</td><td class="src"><span class="tag">3·Q38</span></td></tr>
+          <tr><td class="concept">Security metric</td><td class="usecase">Tỷ lệ injection thành công trên bộ adversarial; toxicity là safety, khác security.</td><td class="src"><span class="tag">2·Q37</span></td></tr>
+          <tr><td class="concept">Grading hỗn hợp</td><td class="usecase">Code kiểm field tất định; LLM-judge có rubric hiệu chuẩn với người cho tone.</td><td class="src"><span class="tag">1·Q11</span></td></tr>
+          <tr><td class="concept">LLM grader</td><td class="usecase">Suy luận trước rồi xuất verdict dạng category/thang 1–5 để tổng hợp được.</td><td class="src"><span class="tag">2·Q21</span></td></tr>
+          <tr><td class="concept">Grader khác model</td><td class="usecase">Grader cùng model gây bias hệ thống; lấy trung bình chỉ giảm variance.</td><td class="src"><span class="tag">3·Q27</span></td></tr>
+          <tr><td class="concept">Số lượng case</td><td class="usecase">1.500 case tự động mạnh hơn 50 case chấm tay.</td><td class="src"><span class="tag">1·Q17</span></td></tr>
+          <tr><td class="concept">Data leakage</td><td class="usecase">Eval dùng lại few-shot trong prompt → điểm ~100% → thay bằng held-out case.</td><td class="src"><span class="tag">3·Q23</span></td></tr>
+          <tr><td class="concept">Eval trước khi sửa prompt</td><td class="usecase">Success criteria + eval set để so các phiên bản prompt.</td><td class="src"><span class="tag">3·Q46</span></td></tr>
+          <tr><td class="concept">Một biến mỗi thử nghiệm</td><td class="usecase">Đổi prompt + model cùng lúc thì không quy được nguyên nhân.</td><td class="src"><span class="tag">1·Q42</span></td></tr>
+          <tr><td class="concept">A/B test</td><td class="usecase">Định trước cỡ mẫu, significance; chia traffic ngẫu nhiên đồng thời, không so trước/sau theo tuần.</td><td class="src"><span class="tag">1·Q53</span><span class="tag">3·Q25</span></td></tr>
+          <tr><td class="concept">A/B hội thoại nhiều lượt</td><td class="usecase">Random theo conversation/user, không theo message.</td><td class="src"><span class="tag">2·Q22</span></td></tr>
+          <tr><td class="concept">Guardrail metric</td><td class="usecase">Thắng primary metric vẫn phải kiểm safety, cost, latency trước rollout.</td><td class="src"><span class="tag">2·Q44</span></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- ============ 15. OBSERVABILITY & MONITORING ============ -->
+    <section class="mod" id="m15">
+      <div class="mod-head"><span class="n">15</span><h2>Observability &amp; monitoring</h2></div>
+      <p class="mod-desc">Trace liên kết từng bước, metric tách theo workflow, eval tự động trên mẫu production.</p>
+      <div class="wrap-tbl"><table class="ref">
+        <thead><tr><th>Khái niệm</th><th>Là gì / Use case phổ biến</th><th>Xuất hiện trong quiz</th></tr></thead>
+        <tbody>
+          <tr><td class="concept">Trace từng bước</td><td class="usecase">Input, output, tool result mỗi bước mỗi request → quy lỗi về đúng bước.</td><td class="src"><span class="tag">1·Q30</span></td></tr>
+          <tr><td class="concept">Correlation ID</td><td class="usecase">Truyền qua mọi subagent, tool call; SDK có <code>parent_tool_use_id</code> → đề "không biết bước nào lỗi".</td><td class="src"><span class="tag">3·Q24</span></td></tr>
+          <tr><td class="concept">Hai tầng telemetry</td><td class="usecase">Metric/trace rẻ cho mọi session; full payload chỉ lấy mẫu + khi lỗi.</td><td class="src"><span class="tag">3·Q26</span></td></tr>
+          <tr><td class="concept">Metric ≠ log/event</td><td class="usecase">Metric là tổng theo thời gian; xem từng prompt, tool → bật <code>OTEL_LOGS_EXPORTER</code>.</td><td class="src"><span class="tag">3·Q45</span></td></tr>
+          <tr><td class="concept">Tail latency</td><td class="usecase">Mean che phần chậm → p95, p99 tách theo loại request → đề "mean đẹp, user báo chậm".</td><td class="src"><span class="tag">3·Q55</span></td></tr>
+          <tr><td class="concept">Staging replay</td><td class="usecase">Agent không tất định, phụ thuộc dữ liệu live → thường không tái hiện được.</td><td class="src"><span class="tag">3·Q24,Q26</span></td></tr>
+          <tr><td class="concept">Giám sát chất lượng</td><td class="usecase">Eval tự động trên mẫu production; latency/token/lỗi không bắt được hồi quy.</td><td class="src"><span class="tag">1·Q47</span></td></tr>
+          <tr><td class="concept">Aggregate che lỗi cục bộ</td><td class="usecase">Tách metric theo workflow, tool; per-tool error/retry rate + alert là tín hiệu sớm.</td><td class="src"><span class="tag">2·Q38,Q62</span></td></tr>
+          <tr><td class="concept">Token/latency dashboard</td><td class="usecase">Tín hiệu chi phí, vận hành, không phải độ đúng; complaint là tín hiệu trễ.</td><td class="src"><span class="tag">2·Q40,Q62</span></td></tr>
+          <tr><td class="concept">Feedback loop</td><td class="usecase">Lấy mẫu output production vào eval set có nhãn + ghi nhận sửa/override của user.</td><td class="src"><span class="tag">2·Q40</span></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- ============ 16. DISCOVERY, STAKEHOLDER & VÒNG ĐỜI ============ -->
+    <section class="mod" id="m16">
+      <div class="mod-head"><span class="n">16</span><h2>Discovery, stakeholder &amp; vòng đời</h2></div>
+      <p class="mod-desc">Đáp án đúng đo được, có baseline, thống nhất trước, minh bạch và ghi thành tài liệu.</p>
+      <div class="wrap-tbl"><table class="ref">
+        <thead><tr><th>Khái niệm</th><th>Là gì / Use case phổ biến</th><th>Xuất hiện trong quiz</th></tr></thead>
+        <tbody>
+          <tr><td class="concept">Discovery</td><td class="usecase">Quan sát người làm thật; quy trình, khối lượng, điểm đau + dữ liệu, pháp lý, quyền truy cập.</td><td class="src"><span class="tag">1·Q23</span><span class="tag">2·Q42</span><span class="tag">3·Q7</span></td></tr>
+          <tr><td class="concept">Mâu thuẫn tiêu chí thành công</td><td class="usecase">Tổ chức buổi hòa giải thành tiêu chí chung đo được trước design.</td><td class="src"><span class="tag">1·Q24</span></td></tr>
+          <tr><td class="concept">Baseline</td><td class="usecase">Đo quy trình hiện tại trước khi đặt mục tiêu "tiết kiệm thời gian".</td><td class="src"><span class="tag">3·Q43</span></td></tr>
+          <tr><td class="concept">Business case</td><td class="usecase">Giá trị đo được so baseline trước pilot; chỉ số kỹ thuật không phải business case.</td><td class="src"><span class="tag">1·Q4</span></td></tr>
+          <tr><td class="concept">Business value pillar</td><td class="usecase">Cost, efficiency, productivity, transformation, SLA → ví dụ chi phí mỗi claim so baseline.</td><td class="src"><span class="tag">2·Q14</span></td></tr>
+          <tr><td class="concept">Transformation pillar</td><td class="usecase">Năng lực trước đây không khả thi; nhanh hơn = efficiency, rẻ hơn = cost.</td><td class="src"><span class="tag">3·Q34</span></td></tr>
+          <tr><td class="concept">SLA</td><td class="usecase">Latency percentile + ngưỡng accuracy đo dưới tải thực, có escalation; không hứa zero lỗi.</td><td class="src"><span class="tag">1·Q32</span><span class="tag">2·Q27</span></td></tr>
+          <tr><td class="concept">SLA đa chiều, theo workload</td><td class="usecase">Một metric thì mù chiều khác; tương tác cần latency, batch đêm cần throughput.</td><td class="src"><span class="tag">2·Q49</span><span class="tag">3·Q36</span></td></tr>
+          <tr><td class="concept">Giao tiếp theo người nghe</td><td class="usecase">Đổi cách trình bày theo khán giả, giữ nguyên dữ kiện; board nghe tiêu chí họ quan tâm.</td><td class="src"><span class="tag">1·Q36</span><span class="tag">2·Q61</span></td></tr>
+          <tr><td class="concept">Công khai điểm yếu</td><td class="usecase">Nêu tác động đo được + kế hoạch giảm thiểu khi xin sign-off, không che bằng số tổng.</td><td class="src"><span class="tag">2·Q19</span></td></tr>
+          <tr><td class="concept">Bằng chứng mới</td><td class="usecase">Kiến trúc sai thì báo sponsor ngay: bằng chứng, đề xuất, chi phí, tiến độ.</td><td class="src"><span class="tag">3·Q1</span></td></tr>
+          <tr><td class="concept">Decision package</td><td class="usecase">So phương án theo tiêu chí đã thống nhất, nêu khuyến nghị kèm trade-off.</td><td class="src"><span class="tag">3·Q4</span></td></tr>
+          <tr><td class="concept">Decision record (ADR)</td><td class="usecase">Bối cảnh, phương án đã xét, trade-off → đề "kỹ sư mới hỏi vì sao mãi".</td><td class="src"><span class="tag">1·Q52,Q61</span></td></tr>
+          <tr><td class="concept">Kết thúc design</td><td class="usecase">Chốt pattern kiến trúc + cách đánh giá; runbook, nhãn production thuộc pha sau.</td><td class="src"><span class="tag">3·Q51</span></td></tr>
+          <tr><td class="concept">Giữ kỳ vọng</td><td class="usecase">Báo cáo đều theo SLA đã thống nhất + đưa feedback vào eval set.</td><td class="src"><span class="tag">1·Q49</span></td></tr>
+          <tr><td class="concept">Sau go-live</td><td class="usecase">Giai đoạn monitoring &amp; iteration có owner, so baseline, ưu tiên theo lỗi production.</td><td class="src"><span class="tag">1·Q54,Q60</span></td></tr>
+          <tr><td class="concept">Use case mới lộ ra</td><td class="usecase">Chạy discovery có phạm vi, không vá prompt hay cấm vĩnh viễn.</td><td class="src"><span class="tag">2·Q31</span></td></tr>
+          <tr><td class="concept">Dashboard xanh, khiếu nại tăng</td><td class="usecase">Phân tích khiếu nại tìm chiều chất lượng thiếu, re-baseline với sponsor.</td><td class="src"><span class="tag">3·Q15</span></td></tr>
+          <tr><td class="concept">Handoff có giới hạn</td><td class="usecase">Mốc chuyển trách nhiệm + exit criteria; khách tự xử lý incident, tư vấn shadow.</td><td class="src"><span class="tag">2·Q36</span></td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <!-- ============ TRAPS ============ -->
+    <section class="mod" id="traps">
+      <div class="mod-head"><span class="n">⚠</span><h2>Kiến thức bẫy</h2></div>
+      <p class="mod-desc">Bẫy gộp từ 3 quiz, đã khử trùng lặp — đọc lại trước khi thi.</p>
+      <div class="traps">
+
+        <div class="trap"><div class="t-body"><b>Token cache vẫn chiếm context window</b><p>Caching chỉ giảm chi phí, độ trễ; attention và dung lượng như cũ.</p></div><div class="src"><span class="tag">1·Q13,Q14,Q46</span><span class="tag">2·Q41,Q51,Q56</span><span class="tag">3·Q8,Q16</span></div></div>
+
+        <div class="trap"><div class="t-body"><b>System prompt và tool definitions cũng tính vào window</b><p>Không phần nào được miễn khỏi giới hạn context.</p></div><div class="src"><span class="tag">1·Q13</span><span class="tag">2·Q23,Q48</span></div></div>
+
+        <div class="trap"><div class="t-body"><b>"IMPORTANT", viết hoa, lặp rule không đảm bảo</b><p>Chỉ tăng xác suất làm theo; bất biến cần hook, permission, code.</p></div><div class="src"><span class="tag">1·Q2,Q9,Q31</span></div></div>
+
+        <div class="trap"><div class="t-body"><b>Temperature 0 không làm output chính xác</b><p>Chỉ giúp lặp lại được.</p></div><div class="src"><span class="tag">2·Q8,Q45,Q50</span></div></div>
+
+        <div class="trap"><div class="t-body"><b>Hạ temperature không bỏ bias nhóm</b><p>Bias xử lý bằng prompt, ví dụ, đo lại gap.</p></div><div class="src"><span class="tag">3·Q29</span></div></div>
+
+        <div class="trap"><div class="t-body"><b>Discovery không phải mặc định cho mọi agent</b><p>Ít tool, dùng mọi request thì nạp hết từ đầu.</p></div><div class="src"><span class="tag">1·Q10</span></div></div>
+
+        <div class="trap"><div class="t-body"><b>ZDR của org không phủ mọi tính năng</b><p>Batch, Agent Skills, schema cache của structured outputs nằm ngoài ZDR.</p></div><div class="src"><span class="tag">1·Q57</span><span class="tag">2·Q4</span></div></div>
+
+        <div class="trap"><div class="t-body"><b>Mã hóa, xoay vòng, obfuscate key vẫn là secret tĩnh</b><p>Dùng credential ngắn hạn: WIF, App Attest.</p></div><div class="src"><span class="tag">1·Q15,Q48</span></div></div>
+
+        <div class="trap"><div class="t-body"><b>Mã hóa không cấp phép cho môi trường</b><p>Authorization như FedRAMP gắn với nơi hosting.</p></div><div class="src"><span class="tag">2·Q28</span></div></div>
+
+        <div class="trap"><div class="t-body"><b>Mã hóa at rest không chặn prompt leak</b><p>Bí mật để sau tool/server, không nằm trong prompt.</p></div><div class="src"><span class="tag">3·Q11</span></div></div>
+
+        <div class="trap"><div class="t-body"><b>Bỏ CoT để sửa parser là mất độ chính xác</b><p>Tách reasoning và verdict vào hai thẻ.</p></div><div class="src"><span class="tag">1·Q35</span></div></div>
+
+        <div class="trap"><div class="t-body"><b>Thêm ví dụ định dạng khi model bịa</b><p>Model chỉ bịa khéo hơn; cần grounding.</p></div><div class="src"><span class="tag">1·Q58</span></div></div>
+
+        <div class="trap"><div class="t-body"><b>Benchmark model không thay tiêu chí của hệ thống</b><p>Hệ thống lắp ráp cần tiêu chí, baseline riêng.</p></div><div class="src"><span class="tag">1·Q4,Q16</span></div></div>
+
+        <div class="trap"><div class="t-body"><b>Email suy luận không đầu độc training data</b><p>Rủi ro thật là indirect prompt injection lúc chạy.</p></div><div class="src"><span class="tag">1·Q63</span></div></div>
+
+        <div class="trap"><div class="t-body"><b>HTTP 200 không có nghĩa output đủ</b><p>Kiểm <code>stop_reason</code> trước khi forward.</p></div><div class="src"><span class="tag">2·Q33</span><span class="tag">3·Q50</span></div></div>
+
+        <div class="trap"><div class="t-body"><b><code>max_tokens</code> không cứu output cụt do context</b><p>Trần response không mở rộng window.</p></div><div class="src"><span class="tag">2·Q23,Q33</span></div></div>
+
+        <div class="trap"><div class="t-body"><b>Retry backoff chỉ cho lỗi tạm thời</b><p>Không cho HTTP 200 bị cụt.</p></div><div class="src"><span class="tag">2·Q33</span></div></div>
+
+        <div class="trap"><div class="t-body"><b>API không tự cắt input dài</b><p>Vượt context window là 400.</p></div><div class="src"><span class="tag">3·Q42</span></div></div>
+
+        <div class="trap"><div class="t-body"><b>Thêm breakpoint không chặn cache invalidation</b><p>Sửa tool definitions vẫn làm miss mọi segment sau.</p></div><div class="src"><span class="tag">2·Q18</span></div></div>
+
+        <div class="trap"><div class="t-body"><b>Import trong CLAUDE.md không phải lazy loading</b><p>Vẫn nạp đầu session; nạp on demand dùng skill.</p></div><div class="src"><span class="tag">3·Q22</span></div></div>
+
+        <div class="trap"><div class="t-body"><b>Model ID không bị cập nhật ngầm</b><p>Re-validate hàng tuần để bắt drift weights là sai tiền đề.</p></div><div class="src"><span class="tag">3·Q20</span></div></div>
+
+        <div class="trap"><div class="t-body"><b>Vision không chỉ có ở tier cao</b><p>Mọi tier đều có vision và tool use.</p></div><div class="src"><span class="tag">3·Q56</span></div></div>
+
+        <div class="trap"><div class="t-body"><b>Key đã xóa không khôi phục được</b><p>Expiration cũng không sửa được sau khi tạo; triage thì disable.</p></div><div class="src"><span class="tag">3·Q33</span></div></div>
+
+        <div class="trap"><div class="t-body"><b>Một service-account key cho nhiều app phá cô lập</b><p>Mỗi app một workspace, key riêng.</p></div><div class="src"><span class="tag">2·Q58</span></div></div>
+
+        <div class="trap"><div class="t-body"><b>Tự chấm trong cùng request thiếu độc lập</b><p>Evaluator cần call hoặc model riêng.</p></div><div class="src"><span class="tag">2·Q40</span></div></div>
+
+        <div class="trap"><div class="t-body"><b>Toxicity rate không đo prompt injection</b><p>Security đo tỷ lệ injection thành công trên bộ adversarial.</p></div><div class="src"><span class="tag">2·Q37</span></div></div>
+
+        <div class="trap"><div class="t-body"><b>Model thứ hai duyệt không phải human oversight</b><p>Oversight cần người thật.</p></div><div class="src"><span class="tag">3·Q14</span></div></div>
+
+        <div class="trap"><div class="t-body"><b>Audit log không phải accountability</b><p>Cần người có tên duyệt quyết định.</p></div><div class="src"><span class="tag">3·Q37</span></div></div>
+
+        <div class="trap"><div class="t-body"><b>Lưu log 7 năm không đáp ứng quyền GDPR</b><p>Article 22 cần thông báo, khiếu nại, người xem xét.</p></div><div class="src"><span class="tag">3·Q39</span></div></div>
+
+      </div>
+    </section>
+
+    <!-- ============ REMEMBER & TIPS ============ -->
+    <section class="mod" id="remember">
+      <div class="mod-head"><span class="n">★</span><h2>Cần nhớ &amp; mẹo để học</h2></div>
+      <p class="mod-desc">Con số hay hỏi thẳng, từ khóa đề → đáp án, cách đọc đề.</p>
+
+      <div class="tips-grid">
+        <div>
+          <h3 style="font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin-bottom:10px">Con số &amp; tham số hay hỏi thẳng</h3>
+          <div class="wrap-tbl"><table class="ref kw-table">
+            <tbody>
+              <tr><td>3–5 ví dụ</td><td>Khuyến nghị few-shot; có cache thì 20+ có thể tốt hơn</td></tr>
+              <tr><td>50% / 24 giờ</td><td>Giảm giá và cửa sổ xử lý Message Batches API; cộng dồn với caching</td></tr>
+              <tr><td>29 ngày</td><td>Kết quả batch còn truy cập được sau khi tạo</td></tr>
+              <tr><td>24 giờ</td><td>Schema structured outputs đã compile được cache sau lần dùng cuối</td></tr>
+              <tr><td>5 phút / 1 giờ</td><td>TTL cache mặc định / mở rộng</td></tr>
+              <tr><td>tools → system → messages</td><td>Thứ tự prefix cố định của prompt caching</td></tr>
+              <tr><td>100% giống tới breakpoint</td><td>Điều kiện cache hit</td></tr>
+              <tr><td>150.000 token cache</td><td>Vẫn tính đủ vào context window</td></tr>
+              <tr><td>Vài trăm trang</td><td>Knowledge base nhỏ, đưa nguyên vào prompt được</td></tr>
+              <tr><td>50–100 token</td><td>Ngữ cảnh thêm vào mỗi chunk (Contextual Retrieval)</td></tr>
+              <tr><td>35% / 49% / 67%</td><td>Giảm lỗi top-20: contextual embeddings / + BM25 / + reranking</td></tr>
+              <tr><td>20 → top 5</td><td>Reranker chấm lại ứng viên rồi chọn</td></tr>
+              <tr><td><code>voyage-law-2</code></td><td>Embedding chuyên luật của Voyage AI</td></tr>
+              <tr><td>~4 ký tự/token</td><td>Ước lượng thô, sai gần ngưỡng → dùng token counting API</td></tr>
+              <tr><td>400 <code>invalid_request_error</code></td><td>Prefill trên 4.6+; input vượt context window</td></tr>
+              <tr><td>HTTP 403</td><td>Token inference scope gọi endpoint admin</td></tr>
+              <tr><td><code>end_turn</code> / <code>max_tokens</code> / <code>model_context_window_exceeded</code></td><td>Các <code>stop_reason</code> khi output dừng</td></tr>
+              <tr><td>2 lần + <code>retry-after</code></td><td>SDK mặc định retry với exponential backoff, tôn trọng header</td></tr>
+              <tr><td>Haiku 4.5</td><td>Không hỗ trợ effort parameter</td></tr>
+              <tr><td>&lt; 0,1%</td><td>Ví dụ ngưỡng an toàn đo được trên tập test</td></tr>
+              <tr><td>1.500 vs 50 case</td><td>Ưu tiên số lượng case tự động</td></tr>
+              <tr><td>F1 ≥ 0,9; 95% response &lt; 200ms</td><td>Ví dụ tiêu chí đa chiều</td></tr>
+              <tr><td>p95 &lt; 2 giây</td><td>Ví dụ metric latency trên query đại diện</td></tr>
+              <tr><td>p95, p99</td><td>Tail latency; mean che phần chậm</td></tr>
+              <tr><td>94% agreement</td><td>Khớp quyết định lịch sử, không chứng minh công bằng</td></tr>
+              <tr><td><code>PostToolUse</code> + <code>Edit|Write</code></td><td>Hook chạy sau edit thành công</td></tr>
+              <tr><td>Deny trước allow</td><td>Thứ tự đánh giá permission rule</td></tr>
+              <tr><td><code>/etc/claude-code/CLAUDE.md</code></td><td>Managed CLAUDE.md trên Linux</td></tr>
+              <tr><td><code>.mcp.json</code>, <code>${VAR:-default}</code></td><td>MCP project scope, mở rộng biến môi trường</td></tr>
+              <tr><td><code>CLAUDE_CODE_ENABLE_TELEMETRY=1</code></td><td>Bật export telemetry (opt-in)</td></tr>
+              <tr><td><code>OTEL_METRICS_EXPORTER</code> / <code>OTEL_LOGS_EXPORTER</code></td><td>Exporter metric / log-event, cấu hình riêng</td></tr>
+              <tr><td><code>parent_tool_use_id</code></td><td>Gắn message với subagent tạo ra nó</td></tr>
+              <tr><td>GDPR Article 22</td><td>Quyền với quyết định hoàn toàn tự động</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+
+        <div>
+          <h3 style="font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin-bottom:10px">Từ khóa trong đề → hướng đáp án</h3>
+          <div class="wrap-tbl"><table class="ref kw-table">
+            <tbody>
+              <tr><td>"thỉnh thoảng bỏ qua" rule mỗi lần</td><td>Hook / permission rule</td></tr>
+              <tr><td>chỉ dẫn trong tin nhắn khách ghi đè</td><td>Thẻ phân tách + đánh dấu là data</td></tr>
+              <tr><td>text trong ví dụ bị làm theo</td><td>XML tag tách từng loại nội dung</td></tr>
+              <tr><td>chỉ dẫn gắn trong tool output</td><td>Chuyển vào system prompt</td></tr>
+              <tr><td>tool không trả kết quả, model bịa</td><td>Chỉ dựa tool result, cho phép "not found"</td></tr>
+              <tr><td>rubric rõ, revise theo critique tốt hơn</td><td>Evaluator-optimizer</td></tr>
+              <tr><td>category rõ, tune một loại hỏng loại khác</td><td>Routing</td></tr>
+              <tr><td>subtask chỉ rõ sau khi đọc input</td><td>Orchestrator-workers</td></tr>
+              <tr><td>đang đạt target, đề xuất tách 5 call</td><td>Giữ một call</td></tr>
+              <tr><td>hụt sát target, frontier đắt gấp đôi</td><td>Tăng effort, chạy lại eval</td></tr>
+              <tr><td>vài đoạn giải thích trước label</td><td>Chỉ trả label</td></tr>
+              <tr><td>nightly report / 250.000 tài liệu, không ai chờ</td><td>Message Batches API</td></tr>
+              <tr><td>cache mà vẫn prompt too long</td><td>Retrieval / compaction, giảm token</td></tr>
+              <tr><td>context gần đầy, đề xuất cache cả prefix</td><td>On-demand loading</td></tr>
+              <tr><td>sửa tool làm miss mọi cache</td><td>Chốt tool definitions trước</td></tr>
+              <tr><td>cache hết hạn sau quãng nghỉ</td><td>Warm-up request</td></tr>
+              <tr><td>prompt too long, phát hiện trước</td><td>Token counting API</td></tr>
+              <tr><td>tool result cũ đầy window</td><td>Context editing</td></tr>
+              <tr><td>60 tool, chỉ vài cái liên quan</td><td>Progressive discovery</td></tr>
+              <tr><td>4 tool, dùng mọi request</td><td>Nạp hết từ đầu</td></tr>
+              <tr><td>5 tool dùng nhiều, phần còn lại hiếm</td><td>Nạp sẵn core, discover phần đuôi</td></tr>
+              <tr><td>tài liệu gần giống, khác mẫu/loại</td><td>Metadata filter</td></tr>
+              <tr><td>chunk không biết công ty, kỳ báo cáo</td><td>Contextual Retrieval</td></tr>
+              <tr><td>chunk cắt giữa điều khoản</td><td>Chunk overlap</td></tr>
+              <tr><td>tìm đúng đoạn nhưng trả lời nông</td><td>Small-to-big / parent section</td></tr>
+              <tr><td>thuật ngữ chuyên ngành bị bỏ sót</td><td>Embedding chuyên ngành + re-index</td></tr>
+              <tr><td>tài liệu cũ tụt sau nâng embedding model</td><td>Re-embed toàn bộ</td></tr>
+              <tr><td>job tất định, một consumer</td><td>Gọi API trực tiếp, không MCP</td></tr>
+              <tr><td>MCP server stdio, mạng nội bộ</td><td>MCP client trong app</td></tr>
+              <tr><td>mọi máy, không opt-out</td><td>Managed CLAUDE.md</td></tr>
+              <tr><td>CLAUDE.md dài, rule bị lờ</td><td>Cắt gọn + skill</td></tr>
+              <tr><td>Skill hiếm được gọi tự động</td><td>Description nêu "khi nào dùng"</td></tr>
+              <tr><td>cụt giữa câu, HTTP 200, không lỗi</td><td>Đọc <code>stop_reason</code> trước</td></tr>
+              <tr><td>dashboard 200 OK, user thấy cắt ngang</td><td>Log error event trong stream</td></tr>
+              <tr><td>traffic tăng gấp nhiều lần khi overload</td><td>Bỏ retry tầng app, giữ SDK backoff</td></tr>
+              <tr><td>iOS app gọi thẳng API</td><td>App Attest</td></tr>
+              <tr><td>Kubernetes, key dùng chung</td><td>Workload identity federation</td></tr>
+              <tr><td>organization-admin scope, chỉ gọi Messages</td><td>Thu hẹp federation rule</td></tr>
+              <tr><td>PHI, structured outputs</td><td>PHI ngoài schema</td></tr>
+              <tr><td>"never" + filter timeout</td><td>Inline gate, fail closed</td></tr>
+              <tr><td>không có reviewer ban đêm</td><td>Fail closed, coi như từ chối</td></tr>
+              <tr><td>cap từng giao dịch, hàng nghìn lần</td><td>Aggregate/rate limit ngoài model</td></tr>
+              <tr><td>email từ người gửi bên ngoài</td><td>Indirect prompt injection</td></tr>
+              <tr><td>con người có tên chịu trách nhiệm</td><td>Draft-and-review</td></tr>
+              <tr><td>khớp quyết định lịch sử, "fair"</td><td>Audit bias, tiêu chí độc lập</td></tr>
+              <tr><td>điểm eval ~100%, production thấp</td><td>Held-out set, kiểm leakage</td></tr>
+              <tr><td>grader cùng model</td><td>Đổi model chấm</td></tr>
+              <tr><td>hồi quy chất lượng 3 tuần không ai biết</td><td>Eval tự động trên mẫu production</td></tr>
+              <tr><td>dashboard tổng ổn, một workflow hỏng</td><td>Metric theo workflow/tool</td></tr>
+              <tr><td>mean đẹp, user báo chậm</td><td>p95/p99 theo loại request</td></tr>
+              <tr><td>không biết bước nào gây lỗi</td><td>Correlation ID, trace liên kết</td></tr>
+              <tr><td>bằng chứng mới, sponsor, chi phí tăng</td><td>Báo ngay kèm tác động</td></tr>
+              <tr><td>kỹ sư mới hỏi "vì sao" mãi</td><td>Decision record</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+      </div>
+
+      <h3 style="font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:34px 0 10px">Cách đọc đề — theo đúng thứ tự nên làm</h3>
+      <ol class="examtips">
+        <li><span><b>"Luôn luôn / không bao giờ" = cơ chế tất định.</b> Chọn hook, permission, limit, gate ngoài model; loại phương án sửa wording.</span></li>
+        <li><span><b>Phòng ngừa thắng phát hiện.</b> Đề nói "trước khi", "never", "contain" → loại log, audit hàng tuần, review sau, rotate.</span></li>
+        <li><span><b>Mỗi cơ chế giải một việc.</b> Caching = chi phí, window = sức chứa, temperature = ngẫu nhiên, batch = giá, streaming = perceived latency.</span></li>
+        <li><span><b>Lỗi ở tầng nào?</b> Input, index, retrieval, prompt, model, context hay giao hàng — đáp án đúng sửa đúng tầng.</span></li>
+        <li><span><b>Đo trước, đổi sau.</b> Đọc <code>stop_reason</code>, phân loại mẫu lỗi, baseline, eval set, A/B đồng thời; loại "launch rồi đo".</span></li>
+        <li><span><b>Mẫu đơn giản nhất đủ dùng.</b> Một call → chaining → routing → orchestrator-workers → agent; mỗi bậc phải có lý do trong đề.</span></li>
+        <li><span><b>Đòn rẻ trước.</b> Effort trước tier, rút output trước đổi model, batch cho tải không gấp; đổi model là phương án cuối.</span></li>
+        <li><span><b>Đọc ràng buộc thật của workload.</b> Không ai chờ thì latency không quan trọng → batch, tier mạnh hơn.</span></li>
+        <li><span><b>Temperature và "nâng tier mạnh nhất" hầu như luôn sai.</b> Không sửa trust model, vòng lặp, context thiếu, jailbreak hay format.</span></li>
+        <li><span><b>Bảo model "bỏ qua" không gỡ token.</b> Loại phương án dùng lời dặn thay cho cấu hình nạp context.</span></li>
+        <li><span><b>"Select two" là hai mặt bổ trợ.</b> Gate + sandbox, inline + fail closed, sampling + error-triggered, chuẩn hóa + validate, báo cáo + feedback.</span></li>
+        <li><span><b>Câu stakeholder.</b> Chọn minh bạch, kịp thời, đo được, có baseline, khuyến nghị kèm trade-off, ghi thành tài liệu; loại giấu điểm yếu, hứa tuyệt đối.</span></li>
+      </ol>
+    </section>
+
+    <!-- ============ GLOSSARY ============ -->
+    <section class="mod" id="gloss">
+      <div class="mod-head"><span class="n">§</span><h2>Viết tắt &amp; thuật ngữ</h2></div>
+      <p class="mod-desc">Tra nhanh viết tắt và thuật ngữ, gộp từ 3 quiz.</p>
+
+      <details class="gloss">
+        <summary>Kiến trúc, agent &amp; tool (14 mục)</summary>
+        <div class="gloss-body"><div class="gloss-grid">
+          <div class="gloss-item"><b>MCP</b> — Model Context Protocol. <span>Chuẩn mở nối app AI với hệ thống ngoài.</span></div>
+          <div class="gloss-item"><b>A2A</b> — Agent-to-Agent. <span>Agent tự chủ của các tổ chức phối hợp.</span></div>
+          <div class="gloss-item"><b>SDK</b> — Software Development Kit. <span>Thư viện chính thức, có retry backoff.</span></div>
+          <div class="gloss-item"><b>Augmented LLM</b> — <span>Một call kèm retrieval, tool, memory.</span></div>
+          <div class="gloss-item"><b>Prompt chaining</b> — <span>Chuỗi bước cố định, output nối tiếp.</span></div>
+          <div class="gloss-item"><b>Routing</b> — <span>Phân loại input, gửi tới nhánh riêng.</span></div>
+          <div class="gloss-item"><b>Sectioning / voting</b> — <span>Hai biến thể của parallelization.</span></div>
+          <div class="gloss-item"><b>Orchestrator-workers</b> — <span>Phân rã động, giao worker, tổng hợp.</span></div>
+          <div class="gloss-item"><b>Evaluator-optimizer</b> — <span>Vòng viết – chấm – sửa.</span></div>
+          <div class="gloss-item"><b>Subagent</b> — <span>Agent con với context riêng, trả tóm tắt.</span></div>
+          <div class="gloss-item"><b>Tool search</b> — <span>Nạp tool definition khi cần.</span></div>
+          <div class="gloss-item"><b>Server tool</b> — <span>Tool chạy ở Anthropic: web search, code execution.</span></div>
+          <div class="gloss-item"><b>Capability bloat</b> — <span>Quá nhiều tool trùng lặp, không dùng.</span></div>
+          <div class="gloss-item"><b>MDM</b> — Mobile Device Management. <span>Phân phối cấu hình xuống máy.</span></div>
+        </div></div>
+      </details>
+
+      <details class="gloss">
+        <summary>Prompt, context &amp; model (10 mục)</summary>
+        <div class="gloss-body"><div class="gloss-grid">
+          <div class="gloss-item"><b>CoT</b> — Chain-of-Thought. <span>Suy luận từng bước trước kết luận.</span></div>
+          <div class="gloss-item"><b>TTS</b> — Text-to-Speech. <span>Engine đọc văn bản thành giọng nói.</span></div>
+          <div class="gloss-item"><b>TTFT</b> — Time To First Token. <span>Độ trễ tới token đầu tiên.</span></div>
+          <div class="gloss-item"><b>TTL</b> — Time To Live. <span>Thời gian cache entry tồn tại.</span></div>
+          <div class="gloss-item"><b>Breakpoint</b> — Cache breakpoint. <span>Điểm đánh dấu cuối prefix được cache.</span></div>
+          <div class="gloss-item"><b>Effort</b> — <span>Mức thinking, tool call, tự kiểm.</span></div>
+          <div class="gloss-item"><b>Context rot</b> — <span>Context càng dài, độ chính xác càng giảm.</span></div>
+          <div class="gloss-item"><b>Compaction</b> — <span>Server tóm tắt lượt hội thoại cũ.</span></div>
+          <div class="gloss-item"><b>Context editing</b> — <span>Server xóa tool result cũ khỏi context.</span></div>
+          <div class="gloss-item"><b>Progressive discovery / disclosure</b> — <span>Chỉ nạp metadata, nội dung khi cần.</span></div>
+        </div></div>
+      </details>
+
+      <details class="gloss">
+        <summary>RAG &amp; truy xuất (7 mục)</summary>
+        <div class="gloss-body"><div class="gloss-grid">
+          <div class="gloss-item"><b>RAG</b> — Retrieval-Augmented Generation. <span>Truy xuất tài liệu rồi sinh câu trả lời.</span></div>
+          <div class="gloss-item"><b>BM25</b> — Best Matching 25. <span>Xếp hạng theo từ khóa (lexical).</span></div>
+          <div class="gloss-item"><b>Embedding</b> — <span>Vector biểu diễn nghĩa của đoạn văn.</span></div>
+          <div class="gloss-item"><b>Reranker</b> — <span>Model chấm lại độ liên quan ứng viên.</span></div>
+          <div class="gloss-item"><b>Chunk overlap</b> — <span>Chunk kề nhau chia sẻ phần lề.</span></div>
+          <div class="gloss-item"><b>Small-to-big</b> — Parent document retrieval. <span>Khớp chunk nhỏ, trả section cha.</span></div>
+          <div class="gloss-item"><b>OCR</b> — Optical Character Recognition. <span>Nhận dạng chữ từ ảnh scan.</span></div>
+        </div></div>
+      </details>
+
+      <details class="gloss">
+        <summary>Bảo mật &amp; tuân thủ (14 mục)</summary>
+        <div class="gloss-body"><div class="gloss-grid">
+          <div class="gloss-item"><b>WIF</b> — Workload Identity Federation. <span>Đổi identity workload lấy token ngắn hạn.</span></div>
+          <div class="gloss-item"><b>App Attest</b> — <span>Xác thực app iOS/macOS thật, cấp token.</span></div>
+          <div class="gloss-item"><b>Indirect prompt injection</b> — <span>Chỉ dẫn độc trong nội dung bên thứ ba.</span></div>
+          <div class="gloss-item"><b>Fail closed / fail open</b> — <span>Lỗi thì chặn / lỗi thì cho qua.</span></div>
+          <div class="gloss-item"><b>Circuit breaker</b> — <span>Ngắt khi vượt ngưỡng tổng.</span></div>
+          <div class="gloss-item"><b>HITL</b> — Human-in-the-loop. <span>Người duyệt trong luồng quyết định.</span></div>
+          <div class="gloss-item"><b>ZDR</b> — Zero Data Retention. <span>Không lưu dữ liệu, xét theo từng tính năng.</span></div>
+          <div class="gloss-item"><b>GDPR</b> — General Data Protection Regulation. <span>Luật dữ liệu EU, có quyền xóa.</span></div>
+          <div class="gloss-item"><b>PHI</b> — Protected Health Information. <span>Thông tin sức khỏe được bảo vệ.</span></div>
+          <div class="gloss-item"><b>HIPAA</b> — Health Insurance Portability and Accountability Act. <span>Luật Mỹ bảo vệ dữ liệu y tế.</span></div>
+          <div class="gloss-item"><b>FedRAMP</b> — Federal Risk and Authorization Management Program. <span>Cấp phép cloud cho cơ quan liên bang Mỹ.</span></div>
+          <div class="gloss-item"><b>TLS</b> — Transport Layer Security. <span>Mã hóa đường truyền.</span></div>
+          <div class="gloss-item"><b>Data lineage</b> — <span>Truy dấu nơi dữ liệu cá nhân đi tới.</span></div>
+          <div class="gloss-item"><b>Proxy variable</b> — <span>Trường gián tiếp mang tín hiệu nhân khẩu.</span></div>
+        </div></div>
+      </details>
+
+      <details class="gloss">
+        <summary>Đánh giá, vận hành &amp; dự án (11 mục)</summary>
+        <div class="gloss-body"><div class="gloss-grid">
+          <div class="gloss-item"><b>SLA</b> — Service-Level Agreement. <span>Cam kết mức dịch vụ có chỉ tiêu đo được.</span></div>
+          <div class="gloss-item"><b>p95 / p99</b> — 95th / 99th percentile. <span>Độ trễ của 5% / 1% chậm nhất.</span></div>
+          <div class="gloss-item"><b>F1</b> — F1 score. <span>Trung bình điều hòa precision, recall.</span></div>
+          <div class="gloss-item"><b>LLM-as-judge</b> — <span>Model chấm theo rubric, hiệu chuẩn với người.</span></div>
+          <div class="gloss-item"><b>A/B test</b> — <span>Hai biến thể chạy đồng thời, chia ngẫu nhiên.</span></div>
+          <div class="gloss-item"><b>Guardrail metric</b> — <span>Metric không được xấu đi khi thử nghiệm.</span></div>
+          <div class="gloss-item"><b>Data leakage</b> — <span>Test set trùng dữ liệu model đã thấy.</span></div>
+          <div class="gloss-item"><b>OTEL</b> — OpenTelemetry. <span>Chuẩn xuất metric, log, trace.</span></div>
+          <div class="gloss-item"><b>Correlation ID</b> — <span>Mã nối mọi bước của một request.</span></div>
+          <div class="gloss-item"><b>ADR</b> — Architecture Decision Record. <span>Ghi quyết định, phương án, trade-off.</span></div>
+          <div class="gloss-item"><b>Runbook</b> — <span>Hướng dẫn vận hành hệ thống đã xây.</span></div>
+        </div></div>
+      </details>
+    </section>
+
+    <footer class="page-foot">
+      Tổng hợp từ panel "Kiến thức cần nhớ" của claude-architect/quizzes/quiz-1.html → quiz-3.html (khóa Claude Certified Architect – Professional). Mỗi thẻ nguồn dạng <span class="mono">quiz·Qn</span> trỏ về đúng câu hỏi gốc trong app — mở quiz tương ứng và tìm mã tham chiếu Q đó để xem lại nguyên văn câu hỏi và giải thích.
+    </footer>
+  </main>
+</div>
+
+<button type="button" class="scroll-bottom-btn" id="scrollBottomBtn" aria-label="Xuống cuối trang" title="Xuống cuối trang">↓</button>
+
+<script>
+(function(){
+  var filter = document.getElementById('filter');
+  var status = document.getElementById('filterStatus');
+  var rows = Array.prototype.slice.call(document.querySelectorAll('table.ref tbody tr'));
+  var traps = Array.prototype.slice.call(document.querySelectorAll('.trap'));
+  var allItems = rows.map(function(r){ return {el:r, text:r.textContent.toLowerCase(), type:'row'}; })
+    .concat(traps.map(function(t){ return {el:t, text:t.textContent.toLowerCase(), type:'trap'}; }));
+
+  function clearMarks(el){
+    var marks = el.querySelectorAll('mark');
+    marks.forEach(function(m){
+      var parent = m.parentNode;
+      parent.replaceChild(document.createTextNode(m.textContent), m);
+      parent.normalize();
+    });
+  }
+
+  function run(){
+    var q = filter.value.trim().toLowerCase();
+    if(!q){
+      allItems.forEach(function(it){
+        it.el.classList.remove('hidden');
+        it.el.style.display = '';
+      });
+      status.textContent = '';
+      return;
+    }
+    var shown = 0;
+    allItems.forEach(function(it){
+      var match = it.text.indexOf(q) !== -1;
+      it.el.style.display = match ? '' : 'none';
+      if(match) shown++;
+    });
+    status.textContent = shown + ' kết quả cho "' + filter.value.trim() + '"';
+  }
+
+  var debounceTimer;
+  filter.addEventListener('input', function(){
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(run, 90);
+  });
+
+  // mobile TOC toggle
+  var rail = document.getElementById('rail');
+  var railToggle = document.getElementById('railToggle');
+  railToggle.addEventListener('click', function(){
+    var open = rail.classList.toggle('open');
+    railToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+
+  // active section highlight in TOC (desktop)
+  var navLinks = Array.prototype.slice.call(document.querySelectorAll('#tocNav a'));
+  var sections = navLinks.map(function(a){ return document.getElementById(a.getAttribute('href').slice(1)); }).filter(Boolean);
+  if('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        var id = entry.target.id;
+        var link = document.querySelector('#tocNav a[href="#' + id + '"]');
+        if(!link) return;
+        if(entry.isIntersecting){
+          navLinks.forEach(function(l){ l.classList.remove('active'); });
+          link.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-10% 0px -75% 0px' });
+    sections.forEach(function(s){ io.observe(s); });
+  }
+
+  // scroll-to-bottom button: appears once scrolled down, hides once already near the end
+  var scrollBtn = document.getElementById('scrollBottomBtn');
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function updateScrollBtn(){
+    var pastTop = window.scrollY > 300;
+    var nearBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 80;
+    scrollBtn.classList.toggle('visible', pastTop && !nearBottom);
+  }
+  var coarsePointer = window.matchMedia('(pointer: coarse)').matches;
+  scrollBtn.addEventListener('click', function(){
+    var target = document.documentElement.scrollHeight - window.innerHeight;
+    window.scrollTo({ top: target, behavior: (reduceMotion || coarsePointer) ? 'instant' : 'smooth' });
+  });
+  window.addEventListener('scroll', updateScrollBtn, { passive: true });
+  window.addEventListener('resize', updateScrollBtn);
+  updateScrollBtn();
+})();
+</script>
+</body>
+</html>
