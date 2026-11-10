@@ -26,11 +26,20 @@ const COURSES = [
   },
   {
     id: 'ccar',
-    label: 'Claude Architect',
+    label: 'Architect Pro',
     title: 'Claude Architect Pro Practice',
     tabs: [
       ...quizTabs('claude-architect/', 3),
       { id: 'ref', label: '📘 Tài liệu', src: 'claude-architect/reference.html' },
+    ],
+  },
+  {
+    id: 'ccarf',
+    label: 'Architect Foundations',
+    title: 'Claude Architect Foundations Practice',
+    tabs: [
+      ...quizTabs('claude-architect-foundations/'),
+      { id: 'ref', label: '📘 Tài liệu', src: 'claude-architect-foundations/reference.html' },
     ],
   },
 ]
@@ -45,7 +54,7 @@ const TAB_STATE_KEY = 'practice-app-tabs'
 // Only the Claude courses' pages read this key (they share one theme); writing
 // it from here reaches their already-open frames through the storage event.
 const THEME_KEY = 'claude-dev-theme'
-const THEMED_COURSES = new Set(['claude', 'ccar'])
+const THEMED_COURSES = new Set(['claude', 'ccar', 'ccarf'])
 
 function readSavedTheme() {
   try {
@@ -104,6 +113,14 @@ export default function App() {
   useEffect(() => {
     document.title = course.title
   }, [course])
+
+  // On narrow screens the tab rows scroll sideways; keep the selected course
+  // and tab in view (e.g. after a reload restores a course near the end).
+  useEffect(() => {
+    for (const selector of ['.tab-course-active', '.tab-active']) {
+      document.querySelector(selector)?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+    }
+  }, [courseId, activeKey])
 
   // Match the tab bar's background (--bg-card) for each shell theme.
   const shellTheme = themed ? theme : 'dark'

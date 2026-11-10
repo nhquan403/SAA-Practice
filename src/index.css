@@ -55,6 +55,8 @@ body {
   display: flex;
   gap: 6px;
   padding: 8px 12px;
+  /* Keeps the row's side margin when a tab is scrolled into view. */
+  scroll-padding-inline: 12px;
   background: var(--bg-card);
   border-bottom: 1px solid var(--border);
   overflow-x: auto;
