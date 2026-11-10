@@ -114,6 +114,14 @@ export default function App() {
     document.title = course.title
   }, [course])
 
+  // On narrow screens the tab rows scroll sideways; keep the selected course
+  // and tab in view (e.g. after a reload restores a course near the end).
+  useEffect(() => {
+    for (const selector of ['.tab-course-active', '.tab-active']) {
+      document.querySelector(selector)?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+    }
+  }, [courseId, activeKey])
+
   // Match the tab bar's background (--bg-card) for each shell theme.
   const shellTheme = themed ? theme : 'dark'
   useEffect(() => {
