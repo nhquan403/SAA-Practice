@@ -46,7 +46,7 @@ const COURSES = [
     id: 'ccao',
     label: 'Claude Associate',
     title: 'Claude Associate Practice',
-    tabs: quizTabs('claude-associate/', 4),
+    tabs: quizTabs('claude-associate/', 6),
   },
 ]
 
